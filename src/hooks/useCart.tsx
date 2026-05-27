@@ -33,14 +33,14 @@ export function useCart() {
         .eq("user_id", user.id);
       if (error) throw error;
       return (data ?? [])
-        .filter((row) => row.products)
-        .map((row) => ({
+        .filter((row: any) => row.products)
+        .map((row: any) => ({
           id: row.id,
           product_id: row.product_id,
           quantity: row.quantity,
-          // @ts-expect-error supabase relation typed loose
           product: row.products,
         }));
+
     },
     enabled: !!user,
   });
