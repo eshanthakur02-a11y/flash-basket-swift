@@ -559,8 +559,6 @@ export type Database = {
         Returns: boolean
       }
       restore_order_stock: { Args: { _order_id: string }; Returns: undefined }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       address_type: "home" | "work" | "other"
