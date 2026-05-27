@@ -15,7 +15,7 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
-const ACTIVE_STATUSES = ["placed", "payment_confirmed", "packing", "out_for_delivery"];
+const ACTIVE_STATUSES = ["placed", "payment_confirmed", "packing", "out_for_delivery"] as const;
 
 function DashboardPage() {
   const { user, loading, isAdmin } = useAuth();
@@ -39,10 +39,10 @@ function DashboardPage() {
       if (!user) return null;
       const { data } = await supabase
         .from("orders")
-        .select("id, status, total, created_at, payment_method")
+        .select("id, status, total, placed_at, payment_method")
         .eq("user_id", user.id)
-        .in("status", ACTIVE_STATUSES)
-        .order("created_at", { ascending: false })
+        .in("status", [...ACTIVE_STATUSES])
+        .order("placed_at", { ascending: false })
         .limit(1);
       return data?.[0] ?? null;
     },
@@ -56,9 +56,9 @@ function DashboardPage() {
       if (!user) return [];
       const { data } = await supabase
         .from("orders")
-        .select("id, status, total, created_at")
+        .select("id, status, total, placed_at")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
+        .order("placed_at", { ascending: false })
         .limit(5);
       return data ?? [];
     },
@@ -179,7 +179,7 @@ function DashboardPage() {
                       <div>
                         <div className="font-semibold text-sm">#{o.id.slice(0, 8).toUpperCase()}</div>
                         <div className="text-xs text-muted-foreground">
-                          {new Date(o.created_at).toLocaleString()}
+                          {new Date(o.placed_at).toLocaleString()}
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
