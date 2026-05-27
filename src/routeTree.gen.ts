@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProductsRouteImport } from './routes/products'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
@@ -22,9 +24,19 @@ import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsRoute = ProductsRouteImport.update({
   id: '/products',
   path: '/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -91,7 +103,9 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/signup': typeof SignupRoute
   '/category/$slug': typeof CategorySlugRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -105,7 +119,9 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/signup': typeof SignupRoute
   '/category/$slug': typeof CategorySlugRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -120,7 +136,9 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/signup': typeof SignupRoute
   '/category/$slug': typeof CategorySlugRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -136,7 +154,9 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/dashboard'
+    | '/login'
     | '/products'
+    | '/signup'
     | '/category/$slug'
     | '/orders/$id'
     | '/product/$slug'
@@ -150,7 +170,9 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/dashboard'
+    | '/login'
     | '/products'
+    | '/signup'
     | '/category/$slug'
     | '/orders/$id'
     | '/product/$slug'
@@ -164,7 +186,9 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/dashboard'
+    | '/login'
     | '/products'
+    | '/signup'
     | '/category/$slug'
     | '/orders/$id'
     | '/product/$slug'
@@ -179,7 +203,9 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
+  SignupRoute: typeof SignupRoute
   CategorySlugRoute: typeof CategorySlugRoute
   OrdersIdRoute: typeof OrdersIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -188,11 +214,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products': {
       id: '/products'
       path: '/products'
       fullPath: '/products'
       preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -283,7 +323,9 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
+  SignupRoute: SignupRoute,
   CategorySlugRoute: CategorySlugRoute,
   OrdersIdRoute: OrdersIdRoute,
   ProductSlugRoute: ProductSlugRoute,
