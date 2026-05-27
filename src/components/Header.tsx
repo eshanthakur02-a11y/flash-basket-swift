@@ -66,6 +66,9 @@ export function Header() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>
+                  Dashboard
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/orders" })}>
                   My Orders
                 </DropdownMenuItem>
@@ -85,7 +88,10 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <Link to="/auth">
-              <Button variant="ghost" className="rounded-xl">Login</Button>
+              <Button className="rounded-xl bg-foreground text-background hover:bg-foreground/90 font-bold shadow-card">
+                <User className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Login</span>
+              </Button>
             </Link>
           )}
 
