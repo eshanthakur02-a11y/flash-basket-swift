@@ -39,7 +39,7 @@ function CheckoutPage() {
   });
   const [coupon, setCoupon] = useState("");
   const [instruction, setInstruction] = useState("");
-  const [method, setMethod] = useState<"cod" | "online">("cod");
+  const [method, setMethod] = useState<"cod" | "razorpay">("cod");
   const [placing, setPlacing] = useState(false);
 
   if (!user) {
@@ -91,9 +91,10 @@ function CheckoutPage() {
     const { data, error } = await supabase.rpc("place_order", {
       _address: addr as any,
       _payment_method: method,
-      _coupon_code: coupon || null,
-      _delivery_instruction: instruction || null,
+      _coupon_code: coupon || undefined,
+      _delivery_instruction: instruction || undefined,
     });
+
     setPlacing(false);
     if (error) return toast.error(error.message);
 
