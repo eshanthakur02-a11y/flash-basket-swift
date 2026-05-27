@@ -551,12 +551,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_update_order_status: {
+        Args: {
+          _order_id: string
+          _status: Database["public"]["Enums"]["order_status"]
+        }
+        Returns: undefined
+      }
+      cancel_order: {
+        Args: { _order_id: string; _reason: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      place_order: {
+        Args: {
+          _address: Json
+          _coupon_code?: string
+          _delivery_instruction?: string
+          _payment_method: Database["public"]["Enums"]["payment_method"]
+        }
+        Returns: string
       }
       restore_order_stock: { Args: { _order_id: string }; Returns: undefined }
     }
