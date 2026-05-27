@@ -5,6 +5,7 @@ import { Zap, Clock, Truck, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Hero3D } from "@/components/Hero3D";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -98,7 +99,7 @@ function HomePage() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="relative aspect-square"
           >
-            <FloatingBasket />
+            <Hero3D />
           </motion.div>
         </div>
       </section>

@@ -24,7 +24,7 @@ function AuthPage() {
   const [su, setSu] = useState({ name: "", email: "", password: "" });
 
   if (user) {
-    navigate({ to: "/" });
+    navigate({ to: "/dashboard" });
   }
 
   const onLogin = async (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ function AuthPage() {
     if (error) toast.error(error.message);
     else {
       toast.success("Welcome back!");
-      navigate({ to: "/" });
+      navigate({ to: "/dashboard" });
     }
   };
 
