@@ -16,8 +16,8 @@ export const Route = createFileRoute("/orders/$id")({
 
 const STEPS = [
   { key: "placed", label: "Placed", icon: Check },
-  { key: "confirmed", label: "Confirmed", icon: Check },
-  { key: "packed", label: "Packed", icon: Package },
+  { key: "payment_confirmed", label: "Confirmed", icon: Check },
+  { key: "packing", label: "Packed", icon: Package },
   { key: "out_for_delivery", label: "Out for delivery", icon: Truck },
   { key: "delivered", label: "Delivered", icon: Home },
 ];
@@ -44,7 +44,7 @@ function OrderPage() {
   const o = order.data;
   const currentIdx = STEPS.findIndex((s) => s.key === o.status);
   const isCancelled = o.status === "cancelled";
-  const canCancel = o.status === "placed" || o.status === "confirmed";
+  const canCancel = o.status === "placed" || o.status === "payment_confirmed";
 
   const cancel = async () => {
     if (!confirm("Cancel this order? Stock will be restored.")) return;

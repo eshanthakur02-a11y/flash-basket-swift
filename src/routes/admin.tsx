@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const STATUSES = ["placed", "confirmed", "packed", "out_for_delivery", "delivered", "cancelled"] as const;
+const STATUSES = ["placed", "payment_confirmed", "packing", "out_for_delivery", "delivered", "cancelled"] as const;
 
 function AdminPage() {
   const { user, isAdmin, loading } = useAuth();
@@ -44,7 +44,7 @@ function AdminPage() {
   const stats = {
     orders: orders.data?.length ?? 0,
     revenue: orders.data?.reduce((s, o) => s + Number(o.total), 0) ?? 0,
-    pending: orders.data?.filter((o) => ["placed", "confirmed", "packed"].includes(o.status)).length ?? 0,
+    pending: orders.data?.filter((o) => ["placed", "payment_confirmed", "packing"].includes(o.status)).length ?? 0,
     products: products.data?.length ?? 0,
   };
 

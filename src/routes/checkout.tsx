@@ -189,8 +189,8 @@ function CheckoutPage() {
                 <div className="text-xs text-muted-foreground">Pay when your order arrives</div>
               </div>
             </label>
-            <label className={`flex items-center gap-3 rounded-2xl border-2 p-4 cursor-pointer ${method === "online" ? "border-primary bg-primary/5" : "border-border"}`}>
-              <input type="radio" checked={method === "online"} onChange={() => setMethod("online")} />
+            <label className={`flex items-center gap-3 rounded-2xl border-2 p-4 cursor-pointer ${method === "razorpay" ? "border-primary bg-primary/5" : "border-border"}`}>
+              <input type="radio" checked={method === "razorpay"} onChange={() => setMethod("razorpay")} />
               <CreditCard className="h-5 w-5 text-primary" />
               <div>
                 <div className="font-bold">Online (Razorpay)</div>
@@ -198,7 +198,7 @@ function CheckoutPage() {
               </div>
             </label>
           </div>
-          {method === "online" && (
+          {method === "razorpay" && (
             <div className="mt-3 rounded-xl bg-warning/15 border border-warning/40 p-3 text-xs">
               Razorpay test integration: order will be marked as <strong>pending payment</strong>. Add your Razorpay
               keys in project secrets to enable real payments.
