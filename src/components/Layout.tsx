@@ -1,8 +1,22 @@
-import { Outlet } from "@tanstack/react-router";
+import { Outlet, useRouterState } from "@tanstack/react-router";
 import { Header } from "./Header";
 import { Toaster } from "./ui/sonner";
 
+const DEMO_PREFIXES = ["/customer", "/shopkeeper", "/delivery", "/admin", "/login", "/signup"];
+
 export function Layout() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isDemo = DEMO_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/") || pathname === p);
+
+  if (isDemo) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Outlet />
+        <Toaster richColors closeButton position="top-center" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
