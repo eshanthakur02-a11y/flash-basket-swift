@@ -10,9 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ShopkeeperRouteImport } from './routes/shopkeeper'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CustomerRouteImport } from './routes/customer'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -29,6 +32,11 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopkeeperRoute = ShopkeeperRouteImport.update({
+  id: '/shopkeeper',
+  path: '/shopkeeper',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsRoute = ProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -39,9 +47,19 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeliveryRoute = DeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerRoute = CustomerRouteImport.update({
+  id: '/customer',
+  path: '/customer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -102,9 +120,12 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/customer': typeof CustomerRoute
   '/dashboard': typeof DashboardRoute
+  '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/shopkeeper': typeof ShopkeeperRoute
   '/signup': typeof SignupRoute
   '/category/$slug': typeof CategorySlugRoute
   '/orders/$id': typeof OrdersIdRoute
@@ -118,9 +139,12 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/customer': typeof CustomerRoute
   '/dashboard': typeof DashboardRoute
+  '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/shopkeeper': typeof ShopkeeperRoute
   '/signup': typeof SignupRoute
   '/category/$slug': typeof CategorySlugRoute
   '/orders/$id': typeof OrdersIdRoute
@@ -135,9 +159,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
+  '/customer': typeof CustomerRoute
   '/dashboard': typeof DashboardRoute
+  '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/shopkeeper': typeof ShopkeeperRoute
   '/signup': typeof SignupRoute
   '/category/$slug': typeof CategorySlugRoute
   '/orders/$id': typeof OrdersIdRoute
@@ -153,9 +180,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/checkout'
+    | '/customer'
     | '/dashboard'
+    | '/delivery'
     | '/login'
     | '/products'
+    | '/shopkeeper'
     | '/signup'
     | '/category/$slug'
     | '/orders/$id'
@@ -169,9 +199,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/checkout'
+    | '/customer'
     | '/dashboard'
+    | '/delivery'
     | '/login'
     | '/products'
+    | '/shopkeeper'
     | '/signup'
     | '/category/$slug'
     | '/orders/$id'
@@ -185,9 +218,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/checkout'
+    | '/customer'
     | '/dashboard'
+    | '/delivery'
     | '/login'
     | '/products'
+    | '/shopkeeper'
     | '/signup'
     | '/category/$slug'
     | '/orders/$id'
@@ -202,9 +238,12 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
+  CustomerRoute: typeof CustomerRoute
   DashboardRoute: typeof DashboardRoute
+  DeliveryRoute: typeof DeliveryRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
+  ShopkeeperRoute: typeof ShopkeeperRoute
   SignupRoute: typeof SignupRoute
   CategorySlugRoute: typeof CategorySlugRoute
   OrdersIdRoute: typeof OrdersIdRoute
@@ -221,6 +260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shopkeeper': {
+      id: '/shopkeeper'
+      path: '/shopkeeper'
+      fullPath: '/shopkeeper'
+      preLoaderRoute: typeof ShopkeeperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products': {
       id: '/products'
       path: '/products'
@@ -235,11 +281,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/delivery': {
+      id: '/delivery'
+      path: '/delivery'
+      fullPath: '/delivery'
+      preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer': {
+      id: '/customer'
+      path: '/customer'
+      fullPath: '/customer'
+      preLoaderRoute: typeof CustomerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -322,9 +382,12 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
+  CustomerRoute: CustomerRoute,
   DashboardRoute: DashboardRoute,
+  DeliveryRoute: DeliveryRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
+  ShopkeeperRoute: ShopkeeperRoute,
   SignupRoute: SignupRoute,
   CategorySlugRoute: CategorySlugRoute,
   OrdersIdRoute: OrdersIdRoute,
@@ -334,13 +397,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
