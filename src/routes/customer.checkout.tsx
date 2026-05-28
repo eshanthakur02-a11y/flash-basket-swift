@@ -9,7 +9,7 @@ import { rupees } from "@/lib/format";
 import { Banknote, CreditCard, MapPin, Smartphone, Wallet } from "lucide-react";
 import { useMemo, useState } from "react";
 import { COUPONS, findUser } from "@/lib/demo/seed";
-import { toast } from "sonner";
+import { COUPONS, PRODUCTS, findUser } from "@/lib/demo/seed";
 import type { Order } from "@/lib/demo/types";
 
 export const Route = createFileRoute("/customer/checkout")({
@@ -39,7 +39,7 @@ function CheckoutPage() {
   const discount = coupon?.discount ?? 0;
   const total = subtotal + deliveryFee + platformFee - discount;
   const storeId = state.cart[0] ? (require_store(state.cart[0].productId) ?? "store1") : "store1";
-
+  const storeId = state.cart[0] ? (PRODUCTS.find(p => p.id === state.cart[0].productId)?.storeId ?? "store1") : "store1";
   function applyCoupon() {
     const c = COUPONS.find(x => x.code.toLowerCase() === code.toLowerCase());
     if (!c) { toast.error("Invalid coupon"); return; }
@@ -117,10 +117,7 @@ function CheckoutPage() {
             <hr className="my-3 border-border" />
             <Row label="Subtotal" value={rupees(subtotal)} />
             <Row label="Delivery" value={rupees(deliveryFee)} />
-            <Row label="Platform fee" value={rupees(platformFee)} />
-            {discount > 0 && <Row label="Discount" value={`- ${rupees(discount)}`} />}
-            <Row label="Total payable" value={rupees(total)} bold />
-            <Button onClick={place} className="w-full mt-4 h-11 rounded-xl gradient-primary text-primary-foreground font-bold">Place order · {rupees(total)}</Button>
+function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
           </aside>
         </div>
       </div>
