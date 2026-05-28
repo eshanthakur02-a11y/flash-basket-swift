@@ -4,12 +4,11 @@ import { CUSTOMER_NAV } from "@/lib/demo/nav";
 import { useDemo } from "@/lib/demo/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { rupees } from "@/lib/format";
 import { Banknote, CreditCard, MapPin, Smartphone, Wallet } from "lucide-react";
-import { useMemo, useState } from "react";
-import { COUPONS, findUser } from "@/lib/demo/seed";
+import { useState } from "react";
 import { COUPONS, PRODUCTS, findUser } from "@/lib/demo/seed";
+import { toast } from "sonner";
 import type { Order } from "@/lib/demo/types";
 
 export const Route = createFileRoute("/customer/checkout")({
@@ -38,17 +37,16 @@ function CheckoutPage() {
   const platformFee = 9;
   const discount = coupon?.discount ?? 0;
   const total = subtotal + deliveryFee + platformFee - discount;
-  const storeId = state.cart[0] ? (require_store(state.cart[0].productId) ?? "store1") : "store1";
   const storeId = state.cart[0] ? (PRODUCTS.find(p => p.id === state.cart[0].productId)?.storeId ?? "store1") : "store1";
+
   function applyCoupon() {
     const c = COUPONS.find(x => x.code.toLowerCase() === code.toLowerCase());
     if (!c) { toast.error("Invalid coupon"); return; }
     if (c.minOrder && subtotal < c.minOrder) { toast.error(`Min order ₹${c.minOrder} required`); return; }
-    let discount = 0;
-    if (c.type === "flat") discount = c.value;
-    else if (c.type === "percent") discount = Math.round((subtotal * c.value) / 100);
-    else if (c.type === "freedel") discount = 0;
-    setCoupon({ code: c.code, discount });
+    let d = 0;
+    if (c.type === "flat") d = c.value;
+    else if (c.type === "percent") d = Math.round((subtotal * c.value) / 100);
+    setCoupon({ code: c.code, discount: d });
     toast.success(`Coupon ${c.code} applied`);
   }
 
@@ -85,7 +83,7 @@ function CheckoutPage() {
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {COUPONS.map(c => (
-                  <button key={c.code} onClick={() => { setCode(c.code); }} className="text-[11px] rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-bold">{c.code}</button>
+                  <button key={c.code} onClick={() => setCode(c.code)} className="text-[11px] rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-bold">{c.code} · {c.desc}</button>
                 ))}
               </div>
               {coupon && <div className="mt-2 text-xs text-success font-bold">{coupon.code} applied · saved {rupees(discount)}</div>}
@@ -117,17 +115,15 @@ function CheckoutPage() {
             <hr className="my-3 border-border" />
             <Row label="Subtotal" value={rupees(subtotal)} />
             <Row label="Delivery" value={rupees(deliveryFee)} />
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+            <Row label="Platform fee" value={rupees(platformFee)} />
+            {discount > 0 && <Row label="Discount" value={`- ${rupees(discount)}`} />}
+            <Row label="Total payable" value={rupees(total)} bold />
+            <Button onClick={place} className="w-full mt-4 h-11 rounded-xl gradient-primary text-primary-foreground font-bold">Place order · {rupees(total)}</Button>
           </aside>
         </div>
       </div>
     </DemoShell>
   );
-}
-
-function require_store(productId: string) {
-  const { PRODUCTS } = require("@/lib/demo/seed");
-  return PRODUCTS.find((p: any) => p.id === productId)?.storeId;
 }
 
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
