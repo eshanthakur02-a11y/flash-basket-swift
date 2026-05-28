@@ -31,7 +31,7 @@ function Page() {
   const [otp, setOtp] = useState("");
 
   function verifyOtp() {
-    if (otp === DEMO_OTP) { completeDelivery(o.id); navigate({ to: "/delivery/dashboard" }); }
+    if (otp === DEMO_OTP) { completeDelivery(o!.id); navigate({ to: "/delivery/dashboard" }); }
     else toast.error("Wrong OTP. Hint: 4821");
   }
 
