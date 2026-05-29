@@ -2,7 +2,6 @@ import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-route
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { Logo } from "@/components/Logo";
-import { RoleSwitcher } from "./RoleSwitcher";
 import { NotificationBell } from "./NotificationBell";
 import { useDemo } from "@/lib/demo/store";
 import type { Role } from "@/lib/demo/types";
@@ -63,7 +62,6 @@ export function DemoShell({
             <Logo />
           </Link>
           <div className="flex-1" />
-          <RoleSwitcher />
           <NotificationBell role={role} />
           <Avatar className="h-9 w-9 border border-border">
             <AvatarFallback className="bg-primary/20 text-foreground text-xs font-bold">
