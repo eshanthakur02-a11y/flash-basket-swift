@@ -582,7 +582,7 @@ export type Database = {
     }
     Enums: {
       address_type: "home" | "work" | "other"
-      app_role: "admin" | "customer"
+      app_role: "admin" | "customer" | "shopkeeper" | "delivery"
       coupon_type: "percent" | "flat"
       order_status:
         | "placed"
@@ -591,6 +591,10 @@ export type Database = {
         | "out_for_delivery"
         | "delivered"
         | "cancelled"
+        | "awaiting_shop"
+        | "accepted_by_shop"
+        | "packed"
+        | "no_shop_available"
       payment_method: "razorpay" | "cod"
       payment_status:
         | "pending"
@@ -727,7 +731,7 @@ export const Constants = {
   public: {
     Enums: {
       address_type: ["home", "work", "other"],
-      app_role: ["admin", "customer"],
+      app_role: ["admin", "customer", "shopkeeper", "delivery"],
       coupon_type: ["percent", "flat"],
       order_status: [
         "placed",
@@ -736,6 +740,10 @@ export const Constants = {
         "out_for_delivery",
         "delivered",
         "cancelled",
+        "awaiting_shop",
+        "accepted_by_shop",
+        "packed",
+        "no_shop_available",
       ],
       payment_method: ["razorpay", "cod"],
       payment_status: [
