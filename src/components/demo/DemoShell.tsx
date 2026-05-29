@@ -27,18 +27,20 @@ export function DemoShell({
   mobileNav?: NavItem[];
   children?: ReactNode;
 }) {
-  const { state, switchRole } = useDemo();
+  const { state, switchRole, hydrated } = useDemo();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const user = findUser(state.currentUserId);
 
-  // Auto-pick a user matching role if mismatch
+  // Auto-pick a user matching role if mismatch — but only AFTER localStorage has hydrated,
+  // otherwise we clobber the signed-in user during the first render.
   useEffect(() => {
+    if (!hydrated) return;
     if (state.role !== role) {
       switchRole(role);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role]);
+  }, [role, hydrated]);
 
   const useSidebar = role === "shopkeeper" || role === "admin";
   const bottomNav = mobileNav ?? nav;
