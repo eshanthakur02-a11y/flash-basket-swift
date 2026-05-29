@@ -52,6 +52,7 @@ const NEXT_AFTER: Partial<Record<OrderStatus, OrderStatus>> = {
 
 interface DemoContextValue {
   state: DemoState;
+  hydrated: boolean;
   // role & user
   switchRole: (r: Role, userId?: string) => void;
   logout: () => void;
