@@ -23,26 +23,35 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as ShopkeeperSettingsRouteImport } from './routes/shopkeeper.settings'
+import { Route as ShopkeeperReviewsRouteImport } from './routes/shopkeeper.reviews'
 import { Route as ShopkeeperProductsRouteImport } from './routes/shopkeeper.products'
 import { Route as ShopkeeperOrdersRouteImport } from './routes/shopkeeper.orders'
+import { Route as ShopkeeperNotificationsRouteImport } from './routes/shopkeeper.notifications'
 import { Route as ShopkeeperEarningsRouteImport } from './routes/shopkeeper.earnings'
 import { Route as ShopkeeperDashboardRouteImport } from './routes/shopkeeper.dashboard'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
+import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
+import { Route as DeliveryNotificationsRouteImport } from './routes/delivery.notifications'
 import { Route as DeliveryHistoryRouteImport } from './routes/delivery.history'
 import { Route as DeliveryEarningsRouteImport } from './routes/delivery.earnings'
 import { Route as DeliveryDashboardRouteImport } from './routes/delivery.dashboard'
 import { Route as DeliveryAvailableOrdersRouteImport } from './routes/delivery.available-orders'
+import { Route as CustomerWishlistRouteImport } from './routes/customer.wishlist'
 import { Route as CustomerShopRouteImport } from './routes/customer.shop'
 import { Route as CustomerProfileRouteImport } from './routes/customer.profile'
 import { Route as CustomerOrdersRouteImport } from './routes/customer.orders'
+import { Route as CustomerNotificationsRouteImport } from './routes/customer.notifications'
 import { Route as CustomerHomeRouteImport } from './routes/customer.home'
 import { Route as CustomerCheckoutRouteImport } from './routes/customer.checkout'
 import { Route as CustomerCartRouteImport } from './routes/customer.cart'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminShopsRouteImport } from './routes/admin.shops'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminDeliveryPartnersRouteImport } from './routes/admin.delivery-partners'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
@@ -123,6 +132,16 @@ const OrdersIndexRoute = OrdersIndexRouteImport.update({
   path: '/orders/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopkeeperSettingsRoute = ShopkeeperSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ShopkeeperRoute,
+} as any)
+const ShopkeeperReviewsRoute = ShopkeeperReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => ShopkeeperRoute,
+} as any)
 const ShopkeeperProductsRoute = ShopkeeperProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -131,6 +150,11 @@ const ShopkeeperProductsRoute = ShopkeeperProductsRouteImport.update({
 const ShopkeeperOrdersRoute = ShopkeeperOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => ShopkeeperRoute,
+} as any)
+const ShopkeeperNotificationsRoute = ShopkeeperNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => ShopkeeperRoute,
 } as any)
 const ShopkeeperEarningsRoute = ShopkeeperEarningsRouteImport.update({
@@ -153,6 +177,16 @@ const OrdersIdRoute = OrdersIdRouteImport.update({
   path: '/orders/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeliveryProfileRoute = DeliveryProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DeliveryRoute,
+} as any)
+const DeliveryNotificationsRoute = DeliveryNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => DeliveryRoute,
+} as any)
 const DeliveryHistoryRoute = DeliveryHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -173,6 +207,11 @@ const DeliveryAvailableOrdersRoute = DeliveryAvailableOrdersRouteImport.update({
   path: '/available-orders',
   getParentRoute: () => DeliveryRoute,
 } as any)
+const CustomerWishlistRoute = CustomerWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => CustomerRoute,
+} as any)
 const CustomerShopRoute = CustomerShopRouteImport.update({
   id: '/shop',
   path: '/shop',
@@ -186,6 +225,11 @@ const CustomerProfileRoute = CustomerProfileRouteImport.update({
 const CustomerOrdersRoute = CustomerOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => CustomerRoute,
+} as any)
+const CustomerNotificationsRoute = CustomerNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => CustomerRoute,
 } as any)
 const CustomerHomeRoute = CustomerHomeRouteImport.update({
@@ -213,6 +257,11 @@ const AdminShopsRoute = AdminShopsRouteImport.update({
   path: '/shops',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -221,6 +270,11 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDeliveryPartnersRoute = AdminDeliveryPartnersRouteImport.update({
@@ -287,26 +341,35 @@ export interface FileRoutesByFullPath {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
   '/customer/home': typeof CustomerHomeRoute
+  '/customer/notifications': typeof CustomerNotificationsRoute
   '/customer/orders': typeof CustomerOrdersRouteWithChildren
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
+  '/customer/wishlist': typeof CustomerWishlistRoute
   '/delivery/available-orders': typeof DeliveryAvailableOrdersRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/history': typeof DeliveryHistoryRoute
+  '/delivery/notifications': typeof DeliveryNotificationsRoute
+  '/delivery/profile': typeof DeliveryProfileRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
+  '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
+  '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
+  '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/orders/': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
@@ -332,26 +395,35 @@ export interface FileRoutesByTo {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
   '/customer/home': typeof CustomerHomeRoute
+  '/customer/notifications': typeof CustomerNotificationsRoute
   '/customer/orders': typeof CustomerOrdersRouteWithChildren
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
+  '/customer/wishlist': typeof CustomerWishlistRoute
   '/delivery/available-orders': typeof DeliveryAvailableOrdersRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/history': typeof DeliveryHistoryRoute
+  '/delivery/notifications': typeof DeliveryNotificationsRoute
+  '/delivery/profile': typeof DeliveryProfileRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
+  '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
+  '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
+  '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/orders': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
@@ -378,26 +450,35 @@ export interface FileRoutesById {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
   '/customer/home': typeof CustomerHomeRoute
+  '/customer/notifications': typeof CustomerNotificationsRoute
   '/customer/orders': typeof CustomerOrdersRouteWithChildren
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
+  '/customer/wishlist': typeof CustomerWishlistRoute
   '/delivery/available-orders': typeof DeliveryAvailableOrdersRoute
   '/delivery/dashboard': typeof DeliveryDashboardRoute
   '/delivery/earnings': typeof DeliveryEarningsRoute
   '/delivery/history': typeof DeliveryHistoryRoute
+  '/delivery/notifications': typeof DeliveryNotificationsRoute
+  '/delivery/profile': typeof DeliveryProfileRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
+  '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
+  '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
+  '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/orders/': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
@@ -425,26 +506,35 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
+    | '/admin/notifications'
     | '/admin/orders'
     | '/admin/reports'
+    | '/admin/settings'
     | '/admin/shops'
     | '/category/$slug'
     | '/customer/cart'
     | '/customer/checkout'
     | '/customer/home'
+    | '/customer/notifications'
     | '/customer/orders'
     | '/customer/profile'
     | '/customer/shop'
+    | '/customer/wishlist'
     | '/delivery/available-orders'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/history'
+    | '/delivery/notifications'
+    | '/delivery/profile'
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/earnings'
+    | '/shopkeeper/notifications'
     | '/shopkeeper/orders'
     | '/shopkeeper/products'
+    | '/shopkeeper/reviews'
+    | '/shopkeeper/settings'
     | '/orders/'
     | '/admin/orders/$id'
     | '/customer/orders/$id'
@@ -470,26 +560,35 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
+    | '/admin/notifications'
     | '/admin/orders'
     | '/admin/reports'
+    | '/admin/settings'
     | '/admin/shops'
     | '/category/$slug'
     | '/customer/cart'
     | '/customer/checkout'
     | '/customer/home'
+    | '/customer/notifications'
     | '/customer/orders'
     | '/customer/profile'
     | '/customer/shop'
+    | '/customer/wishlist'
     | '/delivery/available-orders'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/history'
+    | '/delivery/notifications'
+    | '/delivery/profile'
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/earnings'
+    | '/shopkeeper/notifications'
     | '/shopkeeper/orders'
     | '/shopkeeper/products'
+    | '/shopkeeper/reviews'
+    | '/shopkeeper/settings'
     | '/orders'
     | '/admin/orders/$id'
     | '/customer/orders/$id'
@@ -515,26 +614,35 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
+    | '/admin/notifications'
     | '/admin/orders'
     | '/admin/reports'
+    | '/admin/settings'
     | '/admin/shops'
     | '/category/$slug'
     | '/customer/cart'
     | '/customer/checkout'
     | '/customer/home'
+    | '/customer/notifications'
     | '/customer/orders'
     | '/customer/profile'
     | '/customer/shop'
+    | '/customer/wishlist'
     | '/delivery/available-orders'
     | '/delivery/dashboard'
     | '/delivery/earnings'
     | '/delivery/history'
+    | '/delivery/notifications'
+    | '/delivery/profile'
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/earnings'
+    | '/shopkeeper/notifications'
     | '/shopkeeper/orders'
     | '/shopkeeper/products'
+    | '/shopkeeper/reviews'
+    | '/shopkeeper/settings'
     | '/orders/'
     | '/admin/orders/$id'
     | '/customer/orders/$id'
@@ -663,6 +771,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrdersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shopkeeper/settings': {
+      id: '/shopkeeper/settings'
+      path: '/settings'
+      fullPath: '/shopkeeper/settings'
+      preLoaderRoute: typeof ShopkeeperSettingsRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
+    '/shopkeeper/reviews': {
+      id: '/shopkeeper/reviews'
+      path: '/reviews'
+      fullPath: '/shopkeeper/reviews'
+      preLoaderRoute: typeof ShopkeeperReviewsRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
     '/shopkeeper/products': {
       id: '/shopkeeper/products'
       path: '/products'
@@ -675,6 +797,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/shopkeeper/orders'
       preLoaderRoute: typeof ShopkeeperOrdersRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
+    '/shopkeeper/notifications': {
+      id: '/shopkeeper/notifications'
+      path: '/notifications'
+      fullPath: '/shopkeeper/notifications'
+      preLoaderRoute: typeof ShopkeeperNotificationsRouteImport
       parentRoute: typeof ShopkeeperRoute
     }
     '/shopkeeper/earnings': {
@@ -705,6 +834,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrdersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/delivery/profile': {
+      id: '/delivery/profile'
+      path: '/profile'
+      fullPath: '/delivery/profile'
+      preLoaderRoute: typeof DeliveryProfileRouteImport
+      parentRoute: typeof DeliveryRoute
+    }
+    '/delivery/notifications': {
+      id: '/delivery/notifications'
+      path: '/notifications'
+      fullPath: '/delivery/notifications'
+      preLoaderRoute: typeof DeliveryNotificationsRouteImport
+      parentRoute: typeof DeliveryRoute
+    }
     '/delivery/history': {
       id: '/delivery/history'
       path: '/history'
@@ -733,6 +876,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliveryAvailableOrdersRouteImport
       parentRoute: typeof DeliveryRoute
     }
+    '/customer/wishlist': {
+      id: '/customer/wishlist'
+      path: '/wishlist'
+      fullPath: '/customer/wishlist'
+      preLoaderRoute: typeof CustomerWishlistRouteImport
+      parentRoute: typeof CustomerRoute
+    }
     '/customer/shop': {
       id: '/customer/shop'
       path: '/shop'
@@ -752,6 +902,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/customer/orders'
       preLoaderRoute: typeof CustomerOrdersRouteImport
+      parentRoute: typeof CustomerRoute
+    }
+    '/customer/notifications': {
+      id: '/customer/notifications'
+      path: '/notifications'
+      fullPath: '/customer/notifications'
+      preLoaderRoute: typeof CustomerNotificationsRouteImport
       parentRoute: typeof CustomerRoute
     }
     '/customer/home': {
@@ -789,6 +946,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminShopsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/reports': {
       id: '/admin/reports'
       path: '/reports'
@@ -801,6 +965,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/admin/orders'
       preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/delivery-partners': {
@@ -886,8 +1057,10 @@ interface AdminRouteChildren {
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDeliveryPartnersRoute: typeof AdminDeliveryPartnersRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
   AdminReportsRoute: typeof AdminReportsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminShopsRoute: typeof AdminShopsRoute
 }
 
@@ -896,8 +1069,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCustomersRoute: AdminCustomersRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDeliveryPartnersRoute: AdminDeliveryPartnersRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
   AdminOrdersRoute: AdminOrdersRouteWithChildren,
   AdminReportsRoute: AdminReportsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminShopsRoute: AdminShopsRoute,
 }
 
@@ -919,9 +1094,11 @@ interface CustomerRouteChildren {
   CustomerCartRoute: typeof CustomerCartRoute
   CustomerCheckoutRoute: typeof CustomerCheckoutRoute
   CustomerHomeRoute: typeof CustomerHomeRoute
+  CustomerNotificationsRoute: typeof CustomerNotificationsRoute
   CustomerOrdersRoute: typeof CustomerOrdersRouteWithChildren
   CustomerProfileRoute: typeof CustomerProfileRoute
   CustomerShopRoute: typeof CustomerShopRoute
+  CustomerWishlistRoute: typeof CustomerWishlistRoute
   CustomerProductIdRoute: typeof CustomerProductIdRoute
 }
 
@@ -929,9 +1106,11 @@ const CustomerRouteChildren: CustomerRouteChildren = {
   CustomerCartRoute: CustomerCartRoute,
   CustomerCheckoutRoute: CustomerCheckoutRoute,
   CustomerHomeRoute: CustomerHomeRoute,
+  CustomerNotificationsRoute: CustomerNotificationsRoute,
   CustomerOrdersRoute: CustomerOrdersRouteWithChildren,
   CustomerProfileRoute: CustomerProfileRoute,
   CustomerShopRoute: CustomerShopRoute,
+  CustomerWishlistRoute: CustomerWishlistRoute,
   CustomerProductIdRoute: CustomerProductIdRoute,
 }
 
@@ -944,6 +1123,8 @@ interface DeliveryRouteChildren {
   DeliveryDashboardRoute: typeof DeliveryDashboardRoute
   DeliveryEarningsRoute: typeof DeliveryEarningsRoute
   DeliveryHistoryRoute: typeof DeliveryHistoryRoute
+  DeliveryNotificationsRoute: typeof DeliveryNotificationsRoute
+  DeliveryProfileRoute: typeof DeliveryProfileRoute
   DeliveryTaskIdRoute: typeof DeliveryTaskIdRoute
 }
 
@@ -952,6 +1133,8 @@ const DeliveryRouteChildren: DeliveryRouteChildren = {
   DeliveryDashboardRoute: DeliveryDashboardRoute,
   DeliveryEarningsRoute: DeliveryEarningsRoute,
   DeliveryHistoryRoute: DeliveryHistoryRoute,
+  DeliveryNotificationsRoute: DeliveryNotificationsRoute,
+  DeliveryProfileRoute: DeliveryProfileRoute,
   DeliveryTaskIdRoute: DeliveryTaskIdRoute,
 }
 
@@ -973,15 +1156,21 @@ const ShopkeeperOrdersRouteWithChildren =
 interface ShopkeeperRouteChildren {
   ShopkeeperDashboardRoute: typeof ShopkeeperDashboardRoute
   ShopkeeperEarningsRoute: typeof ShopkeeperEarningsRoute
+  ShopkeeperNotificationsRoute: typeof ShopkeeperNotificationsRoute
   ShopkeeperOrdersRoute: typeof ShopkeeperOrdersRouteWithChildren
   ShopkeeperProductsRoute: typeof ShopkeeperProductsRoute
+  ShopkeeperReviewsRoute: typeof ShopkeeperReviewsRoute
+  ShopkeeperSettingsRoute: typeof ShopkeeperSettingsRoute
 }
 
 const ShopkeeperRouteChildren: ShopkeeperRouteChildren = {
   ShopkeeperDashboardRoute: ShopkeeperDashboardRoute,
   ShopkeeperEarningsRoute: ShopkeeperEarningsRoute,
+  ShopkeeperNotificationsRoute: ShopkeeperNotificationsRoute,
   ShopkeeperOrdersRoute: ShopkeeperOrdersRouteWithChildren,
   ShopkeeperProductsRoute: ShopkeeperProductsRoute,
+  ShopkeeperReviewsRoute: ShopkeeperReviewsRoute,
+  ShopkeeperSettingsRoute: ShopkeeperSettingsRoute,
 }
 
 const ShopkeeperRouteWithChildren = ShopkeeperRoute._addFileChildren(
@@ -1010,13 +1199,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

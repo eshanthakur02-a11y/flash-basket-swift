@@ -15,7 +15,7 @@ export const Route = createFileRoute("/shopkeeper/settings")({
 function Page() {
   const { state, toggleStoreOpen } = useDemo();
   const user = findUser(state.currentUserId);
-  const store = findStore(user?.storeId);
+  const store = findStore(user?.storeId ?? "");
   if (!store) return null;
   const open = state.storeOpen[store.id] ?? store.isOpen;
   return (
