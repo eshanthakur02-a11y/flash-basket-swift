@@ -156,6 +156,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   // ---- API ----
   const value: DemoContextValue = {
     state,
+    hydrated: mounted,
     switchRole(role, userId) {
       const fallback = USERS.find((u) => u.role === role)?.id ?? null;
       setState((s) => ({ ...s, role, currentUserId: userId ?? fallback }));
