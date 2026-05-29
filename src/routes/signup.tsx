@@ -4,116 +4,89 @@ import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bike, ShoppingBag, Store, Upload } from "lucide-react";
-import { useDemo } from "@/lib/demo/store";
-import { USERS } from "@/lib/demo/seed";
+import { useAuth } from "@/hooks/useAuth";
+import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/signup")({
-  head: () => ({ meta: [{ title: "Create account — FlashBasket Demo" }] }),
+  head: () => ({ meta: [{ title: "Create account — FlashBasket" }] }),
   component: SignupPage,
 });
 
 function SignupPage() {
-  const [tab, setTab] = useState("customer");
-  const { switchRole } = useDemo();
+  const { signUp } = useAuth();
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function fakeSignup(role: "customer" | "shopkeeper" | "delivery") {
-    const u = USERS.find((x) => x.role === role);
-    switchRole(role, u?.id);
-    toast.success("Account created (demo). Signed in!");
-    navigate({ to: role === "customer" ? "/customer/home" : role === "shopkeeper" ? "/shopkeeper/dashboard" : "/delivery/dashboard" });
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    const { error } = await signUp(email, password, fullName);
+    setSubmitting(false);
+    if (error) {
+      toast.error(error.message || "Signup failed");
+      return;
+    }
+    toast.success("Account created. Check your email to verify, then sign in.");
+    navigate({ to: "/login" });
+  }
+
+  async function handleGoogle() {
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/login",
+    });
+    if (result.error) {
+      toast.error(result.error.message || "Google sign-in failed");
+      return;
+    }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-background">
-      <div className="w-full max-w-xl">
+      <div className="w-full max-w-md">
         <Link to="/" className="flex justify-center mb-6"><Logo /></Link>
         <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-card">
           <h1 className="font-display text-3xl font-extrabold">Join FlashBasket</h1>
-          <p className="text-sm text-muted-foreground mt-1">Create a demo account — no real data stored.</p>
+          <p className="text-sm text-muted-foreground mt-1">Create your account to start ordering.</p>
 
-          <Tabs value={tab} onValueChange={setTab} className="mt-6">
-            <TabsList className="grid grid-cols-3 rounded-xl w-full">
-              <TabsTrigger value="customer" className="rounded-lg gap-1"><ShoppingBag className="h-4 w-4" />Customer</TabsTrigger>
-              <TabsTrigger value="shopkeeper" className="rounded-lg gap-1"><Store className="h-4 w-4" />Shopkeeper</TabsTrigger>
-              <TabsTrigger value="delivery" className="rounded-lg gap-1"><Bike className="h-4 w-4" />Delivery</TabsTrigger>
-            </TabsList>
+          <Button type="button" variant="outline" onClick={handleGoogle} className="w-full h-11 rounded-xl font-bold gap-2 mt-5">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden>
+              <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.4 14.6 2.4 12 2.4 6.7 2.4 2.5 6.6 2.5 12s4.2 9.6 9.5 9.6c5.5 0 9.1-3.8 9.1-9.3 0-.6-.1-1.1-.2-1.6H12z" />
+            </svg>
+            Continue with Google
+          </Button>
 
-            <TabsContent value="customer" className="mt-5">
-              <form onSubmit={(e) => { e.preventDefault(); fakeSignup("customer"); }} className="grid sm:grid-cols-2 gap-3">
-                <Field label="Full name" placeholder="Aarav Sharma" />
-                <Field label="Mobile" placeholder="+91 98765 43210" />
-                <Field label="Email" type="email" placeholder="you@email.com" />
-                <Field label="Password" type="password" />
-                <Field label="Confirm Password" type="password" />
-                <Field label="Primary delivery address" placeholder="Saket, New Delhi" className="sm:col-span-2" />
-                <Button type="submit" className="sm:col-span-2 h-11 rounded-xl gradient-primary text-primary-foreground font-bold">Create customer account</Button>
-              </form>
-            </TabsContent>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+            <div className="relative flex justify-center text-[10px] uppercase tracking-wider"><span className="bg-card px-2 text-muted-foreground">or</span></div>
+          </div>
 
-            <TabsContent value="shopkeeper" className="mt-5">
-              <form onSubmit={(e) => { e.preventDefault(); fakeSignup("shopkeeper"); }} className="grid sm:grid-cols-2 gap-3">
-                <Field label="Owner name" />
-                <Field label="Store name" placeholder="Sweet Crumbs Bakery" />
-                <Field label="Store category" placeholder="Cakes and Bakery" />
-                <Field label="Email" type="email" />
-                <Field label="Mobile" />
-                <Field label="City / service area" />
-                <Field label="Store address" className="sm:col-span-2" />
-                <Field label="Password" type="password" />
-                <Field label="Confirm Password" type="password" />
-                <FileUpload label="Business licence" />
-                <FileUpload label="Food licence" />
-                <label className="sm:col-span-2 text-xs flex items-center gap-2"><input type="checkbox" defaultChecked /> I accept the seller terms</label>
-                <Button type="submit" className="sm:col-span-2 h-11 rounded-xl gradient-primary text-primary-foreground font-bold">Create shopkeeper account</Button>
-              </form>
-            </TabsContent>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <Label>Full name</Label>
+              <Input required value={fullName} onChange={(e) => setFullName(e.target.value)} className="h-11 rounded-xl mt-1" />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 rounded-xl mt-1" />
+            </div>
+            <div>
+              <Label>Password</Label>
+              <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl mt-1" />
+            </div>
+            <Button type="submit" disabled={submitting} className="w-full h-11 rounded-xl gradient-primary text-primary-foreground font-bold">
+              {submitting ? "Creating account…" : "Create account"}
+            </Button>
+          </form>
 
-            <TabsContent value="delivery" className="mt-5">
-              <form onSubmit={(e) => { e.preventDefault(); fakeSignup("delivery"); }} className="grid sm:grid-cols-2 gap-3">
-                <Field label="Full name" />
-                <Field label="Mobile" />
-                <Field label="Email" type="email" />
-                <Field label="Vehicle type" placeholder="Bike / Scooter" />
-                <Field label="Vehicle number" placeholder="DL 03 AB 4321" />
-                <Field label="Preferred service area" placeholder="South Delhi" />
-                <Field label="Password" type="password" />
-                <Field label="Confirm Password" type="password" />
-                <FileUpload label="Driving licence" />
-                <FileUpload label="Identity proof" />
-                <label className="sm:col-span-2 text-xs flex items-center gap-2"><input type="checkbox" defaultChecked /> I accept the delivery partner terms</label>
-                <Button type="submit" className="sm:col-span-2 h-11 rounded-xl gradient-primary text-primary-foreground font-bold">Create delivery account</Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          <p className="text-xs text-muted-foreground mt-6 text-center">
+          <p className="text-xs text-muted-foreground mt-5 text-center">
             Already have an account? <Link to="/login" className="text-primary font-semibold">Sign in</Link>
           </p>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Field({ label, type = "text", placeholder, className }: { label: string; type?: string; placeholder?: string; className?: string }) {
-  return (
-    <div className={className}>
-      <Label className="text-xs">{label}</Label>
-      <Input type={type} placeholder={placeholder} required className="h-11 rounded-xl mt-1" />
-    </div>
-  );
-}
-function FileUpload({ label }: { label: string }) {
-  return (
-    <div>
-      <Label className="text-xs">{label}</Label>
-      <button type="button" className="mt-1 w-full h-11 rounded-xl border border-dashed border-border bg-secondary/30 text-muted-foreground text-xs flex items-center justify-center gap-2 hover:bg-secondary/60">
-        <Upload className="h-4 w-4" /> Upload document
-      </button>
     </div>
   );
 }
