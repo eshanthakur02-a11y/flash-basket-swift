@@ -175,6 +175,48 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_partners: {
+        Row: {
+          created_at: string
+          current_lat: number | null
+          current_lng: number | null
+          id: string
+          is_online: boolean
+          name: string
+          phone: string | null
+          rating: number
+          updated_at: string
+          user_id: string
+          vehicle: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          id?: string
+          is_online?: boolean
+          name: string
+          phone?: string | null
+          rating?: number
+          updated_at?: string
+          user_id: string
+          vehicle?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          id?: string
+          is_online?: boolean
+          name?: string
+          phone?: string | null
+          rating?: number
+          updated_at?: string
+          user_id?: string
+          vehicle?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -256,17 +298,24 @@ export type Database = {
       orders: {
         Row: {
           address: Json
+          assignment_attempts: number
+          assignment_expires_at: string | null
           cancel_reason: string | null
           coupon_code: string | null
           delivery_fee: number
           delivery_instruction: string | null
+          delivery_lat: number | null
+          delivery_lng: number | null
           discount: number
           handling_fee: number
           id: string
           order_number: string
+          partner_id: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           placed_at: string
+          rejected_shop_ids: string[]
+          shop_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
           tax: number
@@ -276,17 +325,24 @@ export type Database = {
         }
         Insert: {
           address: Json
+          assignment_attempts?: number
+          assignment_expires_at?: string | null
           cancel_reason?: string | null
           coupon_code?: string | null
           delivery_fee?: number
           delivery_instruction?: string | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           discount?: number
           handling_fee?: number
           id?: string
           order_number?: string
+          partner_id?: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           placed_at?: string
+          rejected_shop_ids?: string[]
+          shop_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal: number
           tax?: number
@@ -296,17 +352,24 @@ export type Database = {
         }
         Update: {
           address?: Json
+          assignment_attempts?: number
+          assignment_expires_at?: string | null
           cancel_reason?: string | null
           coupon_code?: string | null
           delivery_fee?: number
           delivery_instruction?: string | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           discount?: number
           handling_fee?: number
           id?: string
           order_number?: string
+          partner_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           placed_at?: string
+          rejected_shop_ids?: string[]
+          shop_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           tax?: number
@@ -314,7 +377,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
@@ -496,6 +574,102 @@ export type Database = {
           },
         ]
       }
+      shop_products: {
+        Row: {
+          created_at: string
+          id: string
+          is_available: boolean
+          price: number
+          product_id: string
+          shop_id: string
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          price: number
+          product_id: string
+          shop_id: string
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          price?: number
+          product_id?: string
+          shop_id?: string
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_products_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shops: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          id: string
+          is_open: boolean
+          latitude: number
+          longitude: number
+          name: string
+          owner_id: string
+          phone: string | null
+          pincode: string
+          service_radius_km: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          id?: string
+          is_open?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          owner_id: string
+          phone?: string | null
+          pincode: string
+          service_radius_km?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          id?: string
+          is_open?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          owner_id?: string
+          phone?: string | null
+          pincode?: string
+          service_radius_km?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -562,12 +736,34 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      find_nearest_shop_for_cart: {
+        Args: {
+          _exclude?: string[]
+          _lat: number
+          _lng: number
+          _user_id: string
+        }
+        Returns: string
+      }
+      find_nearest_shop_for_order: {
+        Args: { _order_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      haversine_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
+      partner_accept_order: { Args: { _order_id: string }; Returns: undefined }
+      partner_mark_delivered: {
+        Args: { _order_id: string }
+        Returns: undefined
       }
       place_order: {
         Args: {
@@ -578,11 +774,15 @@ export type Database = {
         }
         Returns: string
       }
+      reassign_stale_orders: { Args: never; Returns: number }
       restore_order_stock: { Args: { _order_id: string }; Returns: undefined }
+      shop_accept_order: { Args: { _order_id: string }; Returns: undefined }
+      shop_mark_packed: { Args: { _order_id: string }; Returns: undefined }
+      shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
     }
     Enums: {
       address_type: "home" | "work" | "other"
-      app_role: "admin" | "customer"
+      app_role: "admin" | "customer" | "shopkeeper" | "delivery"
       coupon_type: "percent" | "flat"
       order_status:
         | "placed"
@@ -591,6 +791,10 @@ export type Database = {
         | "out_for_delivery"
         | "delivered"
         | "cancelled"
+        | "awaiting_shop"
+        | "accepted_by_shop"
+        | "packed"
+        | "no_shop_available"
       payment_method: "razorpay" | "cod"
       payment_status:
         | "pending"
@@ -727,7 +931,7 @@ export const Constants = {
   public: {
     Enums: {
       address_type: ["home", "work", "other"],
-      app_role: ["admin", "customer"],
+      app_role: ["admin", "customer", "shopkeeper", "delivery"],
       coupon_type: ["percent", "flat"],
       order_status: [
         "placed",
@@ -736,6 +940,10 @@ export const Constants = {
         "out_for_delivery",
         "delivered",
         "cancelled",
+        "awaiting_shop",
+        "accepted_by_shop",
+        "packed",
+        "no_shop_available",
       ],
       payment_method: ["razorpay", "cod"],
       payment_status: [
