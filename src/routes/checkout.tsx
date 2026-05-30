@@ -87,9 +87,17 @@ function CheckoutPage() {
       selectedAddr && addresses.data?.find((a) => a.id === selectedAddr);
     if (!addr) return toast.error("Please add a delivery address");
 
+    // place_order RPC needs lat/lng for nearest-shop routing.
+    // Default to Bengaluru center if the saved address has none.
+    const addressWithCoords: any = {
+      ...addr,
+      lat: (addr as any).lat ?? 12.95,
+      lng: (addr as any).lng ?? 77.64,
+    };
+
     setPlacing(true);
     const { data, error } = await supabase.rpc("place_order", {
-      _address: addr as any,
+      _address: addressWithCoords,
       _payment_method: method,
       _coupon_code: coupon || undefined,
       _delivery_instruction: instruction || undefined,
