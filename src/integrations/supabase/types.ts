@@ -632,7 +632,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
-          owner_id: string
+          owner_id: string | null
           phone: string | null
           pincode: string
           service_radius_km: number
@@ -647,7 +647,7 @@ export type Database = {
           latitude: number
           longitude: number
           name: string
-          owner_id: string
+          owner_id?: string | null
           phone?: string | null
           pincode: string
           service_radius_km?: number
@@ -662,7 +662,7 @@ export type Database = {
           latitude?: number
           longitude?: number
           name?: string
-          owner_id?: string
+          owner_id?: string | null
           phone?: string | null
           pincode?: string
           service_radius_km?: number
