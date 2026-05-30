@@ -1,47 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DemoShell } from "@/components/demo/DemoShell";
-import { SHOPKEEPER_NAV } from "@/lib/demo/nav";
-import { useDemo } from "@/lib/demo/store";
-import { findStore, findUser } from "@/lib/demo/seed";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { RoleShell } from "@/components/RoleShell";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
-export const Route = createFileRoute("/shopkeeper/settings")({
-  head: () => ({ meta: [{ title: "Settings — Shopkeeper" }] }),
-  component: Page,
-});
+export const Route = createFileRoute("/shopkeeper/settings")({ component: Page });
 
 function Page() {
-  const { state, toggleStoreOpen } = useDemo();
-  const user = findUser(state.currentUserId);
-  const store = findStore(user?.storeId ?? "");
-  if (!store) return null;
-  const open = state.storeOpen[store.id] ?? store.isOpen;
+  const { user } = useAuth();
+  const [shop, setShop] = useState<any>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("shops").select("*").eq("owner_id", user.id).maybeSingle().then(({ data }) => setShop(data));
+  }, [user]);
+
+  const save = async () => {
+    const { error } = await supabase.from("shops").update({ name: shop.name, is_open: shop.is_open, phone: shop.phone }).eq("id", shop.id);
+    if (error) toast.error(error.message); else toast.success("Saved");
+  };
+
   return (
-    <DemoShell role="shopkeeper" nav={SHOPKEEPER_NAV}>
-      <div className="px-4 md:px-6 py-5 max-w-2xl space-y-6">
-        <h1 className="font-display text-3xl font-extrabold">Store Settings</h1>
-
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-sm font-bold">Store status</Label>
-              <p className="text-xs text-muted-foreground">When closed, customers can't place new orders.</p>
-            </div>
-            <Switch checked={open} onCheckedChange={() => toggleStoreOpen(store.id)} />
+    <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
+      <div className="p-6 max-w-xl">
+        <h1 className="font-display text-2xl font-bold">Shop settings</h1>
+        {!shop ? <p className="text-muted-foreground mt-2">No shop assigned.</p> : (
+          <div className="mt-5 space-y-4">
+            <div><label className="text-xs font-semibold">Name</label><Input value={shop.name} onChange={(e) => setShop({ ...shop, name: e.target.value })} /></div>
+            <div><label className="text-xs font-semibold">Phone</label><Input value={shop.phone ?? ""} onChange={(e) => setShop({ ...shop, phone: e.target.value })} /></div>
+            <div className="flex items-center gap-3"><Switch checked={shop.is_open} onCheckedChange={(v) => setShop({ ...shop, is_open: v })} /><span>Shop open</span></div>
+            <Button onClick={save} className="rounded-xl gradient-primary text-primary-foreground">Save</Button>
           </div>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
-          <h2 className="font-bold">Profile</h2>
-          <div className="grid gap-3">
-            <div><Label className="text-xs">Store name</Label><Input defaultValue={store.name} /></div>
-            <div><Label className="text-xs">Owner</Label><Input defaultValue={user?.name} /></div>
-            <div><Label className="text-xs">Address</Label><Input defaultValue={store.address} /></div>
-          </div>
-        </div>
+        )}
       </div>
-    </DemoShell>
+    </RoleShell>
   );
 }

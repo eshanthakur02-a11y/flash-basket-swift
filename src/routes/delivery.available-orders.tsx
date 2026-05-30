@@ -1,34 +1,68 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { DemoShell } from "@/components/demo/DemoShell";
-import { DELIVERY_NAV } from "@/lib/demo/nav";
-import { useDemo } from "@/lib/demo/store";
-import { findStore } from "@/lib/demo/seed";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { RoleShell } from "@/components/RoleShell";
 import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
+import { toast } from "sonner";
+import { Truck } from "lucide-react";
+import { DELIVERY_NAV } from "./delivery.dashboard";
 
 export const Route = createFileRoute("/delivery/available-orders")({
-  head: () => ({ meta: [{ title: "Available tasks" }] }),
+  head: () => ({ meta: [{ title: "Available Orders — Delivery" }] }),
   component: Page,
 });
+
 function Page() {
-  const { state, acceptDelivery } = useDemo();
-  const partnerId = state.currentUserId ?? "d1";
-  const list = state.orders.filter(o => !o.partnerId && ["ready", "finding_partner"].includes(o.status));
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("available-orders")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+        qc.invalidateQueries({ queryKey: ["available-orders"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
+
+  const orders = useQuery({
+    queryKey: ["available-orders"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_number, total, address")
+        .eq("status", "packed")
+        .is("partner_id", null)
+        .order("placed_at", { ascending: true });
+      return data ?? [];
+    },
+    refetchInterval: 5000,
+  });
+
+  const accept = async (id: string) => {
+    const { error } = await supabase.rpc("partner_accept_order", { _order_id: id });
+    if (error) toast.error(error.message); else toast.success("Accepted! Start delivery.");
+  };
+
   return (
-    <DemoShell role="delivery" nav={DELIVERY_NAV}>
-      <div className="px-4 py-5 max-w-2xl mx-auto">
-        <h1 className="font-display text-2xl font-extrabold">Available tasks</h1>
-        <div className="mt-4 space-y-3">
-          {list.length === 0 && <div className="text-sm text-muted-foreground text-center py-10">No tasks available.</div>}
-          {list.map(o => (
-            <div key={o.id} className="rounded-2xl border border-border bg-card p-4">
-              <div className="font-bold">{findStore(o.storeId).name}</div>
-              <div className="text-xs text-muted-foreground">{o.distanceKm} km · earn {rupees(o.partnerEarning)}</div>
-              <Button onClick={() => acceptDelivery(o.id, partnerId)} className="mt-2 rounded-xl gradient-primary text-primary-foreground">Accept</Button>
+    <RoleShell role="delivery" nav={DELIVERY_NAV} requireRoles={["delivery", "admin"]}>
+      <div className="p-4 md:p-6">
+        <h1 className="font-display text-3xl font-extrabold flex items-center gap-2"><Truck className="h-7 w-7 text-primary" />Available orders</h1>
+        <div className="mt-5 space-y-3">
+          {(orders.data ?? []).map(o => (
+            <div key={o.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap">
+              <div className="min-w-0">
+                <div className="font-bold">{o.order_number} • {rupees(o.total)}</div>
+                <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
+              </div>
+              <Button size="sm" onClick={() => accept(o.id)} className="rounded-xl gradient-primary text-primary-foreground">Accept</Button>
             </div>
           ))}
+          {(orders.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">No orders available right now.</div>}
         </div>
       </div>
-    </DemoShell>
+    </RoleShell>
   );
 }
