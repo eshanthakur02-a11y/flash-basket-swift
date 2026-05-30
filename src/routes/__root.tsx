@@ -11,7 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Layout } from "@/components/Layout";
-import { DemoProvider } from "@/lib/demo/store";
+
 
 function NotFoundComponent() {
   return (
@@ -105,9 +105,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <DemoProvider>
-          <Layout />
-        </DemoProvider>
+        <Layout />
       </AuthProvider>
     </QueryClientProvider>
   );
