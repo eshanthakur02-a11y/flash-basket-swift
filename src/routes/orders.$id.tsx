@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Check, Clock, Package, Truck, Home, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Clock, Package, Truck, Home, X, Store, Search, Radio } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
@@ -15,11 +15,11 @@ export const Route = createFileRoute("/orders/$id")({
 });
 
 const STEPS = [
-  { key: "placed", label: "Placed", icon: Check },
-  { key: "payment_confirmed", label: "Confirmed", icon: Check },
-  { key: "packing", label: "Packed", icon: Package },
-  { key: "out_for_delivery", label: "Out for delivery", icon: Truck },
-  { key: "delivered", label: "Delivered", icon: Home },
+  { key: "awaiting_shop", label: "Finding a shop", desc: "Looking for the nearest shop with your items", icon: Search },
+  { key: "accepted_by_shop", label: "Shop accepted", desc: "A shop confirmed and is preparing your order", icon: Store },
+  { key: "packed", label: "Packed", desc: "Your order is ready for pickup", icon: Package },
+  { key: "out_for_delivery", label: "Out for delivery", desc: "A partner is on the way to your door", icon: Truck },
+  { key: "delivered", label: "Delivered", desc: "Enjoy your order!", icon: Home },
 ];
 
 function OrderPage() {
@@ -27,6 +27,7 @@ function OrderPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [cancelling, setCancelling] = useState(false);
+  const [live, setLive] = useState(false);
 
   const order = useQuery({
     queryKey: ["order", id],
@@ -35,16 +36,34 @@ function OrderPage() {
       const { data: it } = await supabase.from("order_items").select("*").eq("order_id", id);
       return o ? { ...o, items: it ?? [] } : null;
     },
-    refetchInterval: 8000,
   });
+
+  // Realtime subscription — updates as the order moves through states.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`order-${id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` }, (payload) => {
+        const prev = (payload.old as any)?.status;
+        const next = (payload.new as any)?.status;
+        qc.invalidateQueries({ queryKey: ["order", id] });
+        if (prev !== next) {
+          const step = STEPS.find((s) => s.key === next);
+          if (step) toast.success(step.label, { description: step.desc });
+        }
+      })
+      .subscribe((status) => setLive(status === "SUBSCRIBED"));
+    return () => { supabase.removeChannel(channel); };
+  }, [id, qc]);
 
   if (order.isLoading) return <div className="mx-auto max-w-3xl px-4 py-10"><Skeleton className="h-96" /></div>;
   if (!order.data) return <div className="mx-auto max-w-3xl px-4 py-20 text-center">Order not found.</div>;
 
   const o = order.data;
-  const currentIdx = STEPS.findIndex((s) => s.key === o.status);
-  const isCancelled = o.status === "cancelled";
-  const canCancel = o.status === "placed" || o.status === "payment_confirmed";
+  const status = o.status as string;
+  const currentIdx = Math.max(0, STEPS.findIndex((s) => s.key === status));
+  const isCancelled = status === "cancelled";
+  const isFailed = status === "no_shop_available";
+  const canCancel = status === "awaiting_shop" || status === "placed" || status === "payment_confirmed";
 
   const cancel = async () => {
     if (!confirm("Cancel this order? Stock will be restored.")) return;
@@ -61,42 +80,87 @@ function OrderPage() {
     <div className="mx-auto max-w-3xl px-4 py-6">
       <Link to="/orders" className="text-sm text-muted-foreground hover:underline">← All orders</Link>
 
-      <div className="mt-4 rounded-3xl gradient-hero border border-border p-6 shadow-card">
+      <div className="mt-4 rounded-3xl gradient-hero border border-border p-6 shadow-card relative overflow-hidden">
         <div className="text-xs font-semibold text-muted-foreground">Order</div>
         <div className="font-display text-3xl font-extrabold">{o.order_number}</div>
         <div className="text-sm mt-1">Placed {new Date(o.placed_at).toLocaleString()}</div>
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-foreground text-background px-3 py-1 text-xs font-bold">
-          <Clock className="h-3 w-3" />
-          {isCancelled ? "Cancelled" : "Arriving in ~10 minutes"}
+        <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <div className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-3 py-1 text-xs font-bold">
+            <Clock className="h-3 w-3" />
+            {isCancelled ? "Cancelled" : isFailed ? "No shop available" : status === "delivered" ? "Delivered" : "Arriving in ~10 minutes"}
+          </div>
+          {live && !isCancelled && !isFailed && status !== "delivered" && (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 text-primary px-3 py-1 text-xs font-bold">
+              <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                <Radio className="h-3 w-3" />
+              </motion.span>
+              Live tracking
+            </div>
+          )}
         </div>
       </div>
 
-      {!isCancelled && (
-        <section className="mt-6 rounded-3xl border border-border bg-card p-5 shadow-card">
-          <h2 className="font-display text-lg font-bold mb-4">Track order</h2>
-          <div className="flex justify-between relative">
-            <div className="absolute top-5 left-5 right-5 h-1 bg-border rounded-full" />
-            <motion.div
-              className="absolute top-5 left-5 h-1 gradient-primary rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${(currentIdx / (STEPS.length - 1)) * 100}%` }}
-              transition={{ duration: 0.6 }}
-              style={{ right: `${100 - (currentIdx / (STEPS.length - 1)) * 100}%` }}
-            />
+      {!isCancelled && !isFailed && (
+        <section className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-6 shadow-card">
+          <h2 className="font-display text-lg font-bold mb-5">Track order</h2>
+          <ol className="relative">
             {STEPS.map((s, i) => {
               const Icon = s.icon;
-              const done = i <= currentIdx;
+              const done = i < currentIdx;
+              const current = i === currentIdx;
+              const isLast = i === STEPS.length - 1;
               return (
-                <div key={s.key} className="relative z-10 flex flex-col items-center gap-2 flex-1">
-                  <div className={`h-10 w-10 rounded-full grid place-items-center border-2 ${done ? "gradient-primary border-primary text-primary-foreground" : "bg-card border-border text-muted-foreground"}`}>
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className={`text-[10px] font-bold text-center ${done ? "" : "text-muted-foreground"}`}>{s.label}</div>
-                </div>
+                <li key={s.key} className="relative pl-14 pb-6 last:pb-0">
+                  {!isLast && (
+                    <span
+                      className={`absolute left-[19px] top-10 bottom-0 w-0.5 ${done ? "bg-primary" : "bg-border"}`}
+                      aria-hidden
+                    />
+                  )}
+                  <motion.div
+                    initial={false}
+                    animate={{ scale: current ? [1, 1.08, 1] : 1 }}
+                    transition={{ duration: 1.4, repeat: current ? Infinity : 0 }}
+                    className={`absolute left-0 top-0 h-10 w-10 rounded-full grid place-items-center border-2 ${
+                      done || current
+                        ? "gradient-primary border-primary text-primary-foreground shadow-glow"
+                        : "bg-card border-border text-muted-foreground"
+                    }`}
+                  >
+                    {done ? <Check className="h-5 w-5" /> : <Icon className="h-4 w-4" />}
+                  </motion.div>
+                  <AnimatePresence>
+                    <motion.div
+                      key={`${s.key}-${current ? "c" : done ? "d" : "p"}`}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`pt-1 ${current ? "" : done ? "" : "opacity-60"}`}
+                    >
+                      <div className={`text-sm font-bold ${current ? "text-primary" : ""}`}>{s.label}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{s.desc}</div>
+                      {current && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="mt-1 text-[10px] font-bold uppercase tracking-wide text-primary inline-flex items-center gap-1"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> In progress
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </li>
               );
             })}
-          </div>
+          </ol>
         </section>
+      )}
+
+      {isFailed && (
+        <div className="mt-6 rounded-3xl border-2 border-destructive/30 bg-destructive/5 p-5">
+          <div className="flex items-center gap-2 font-bold text-destructive"><X className="h-4 w-4" /> No shop available</div>
+          <div className="text-sm text-muted-foreground mt-1">We couldn't find a shop near your location with all items in stock. Your stock has been restored — please try again with a different address.</div>
+        </div>
       )}
 
       {isCancelled && (
