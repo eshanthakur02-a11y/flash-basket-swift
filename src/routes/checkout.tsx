@@ -37,10 +37,19 @@ function CheckoutPage() {
     name: "", phone: "", line1: "", line2: "", landmark: "", city: "", state: "", pincode: "",
     type: "home" as "home" | "work" | "other",
   });
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [coupon, setCoupon] = useState("");
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
   const [placing, setPlacing] = useState(false);
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) return toast.error("Geolocation not available");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }); toast.success("Location captured"); },
+      () => toast.error("Could not get location — using default city center"),
+    );
+  };
 
   if (!user) {
     navigate({ to: "/auth" });
@@ -91,8 +100,8 @@ function CheckoutPage() {
     // Default to Bengaluru center if the saved address has none.
     const addressWithCoords: any = {
       ...addr,
-      lat: (addr as any).lat ?? 12.95,
-      lng: (addr as any).lng ?? 77.64,
+      lat: coords?.lat ?? (addr as any).lat ?? 12.95,
+      lng: coords?.lng ?? (addr as any).lng ?? 77.64,
     };
 
     setPlacing(true);
@@ -120,6 +129,9 @@ function CheckoutPage() {
           <h2 className="font-display text-xl font-bold flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" /> Delivery address
           </h2>
+          <button onClick={useMyLocation} className="mt-2 text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> {coords ? `Pinned: ${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)}` : "Use my current location for nearest-shop routing"}
+          </button>
           <div className="mt-3 space-y-2">
             {addresses.data?.map((a) => (
               <label
