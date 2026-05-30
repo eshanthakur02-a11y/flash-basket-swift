@@ -37,10 +37,19 @@ function CheckoutPage() {
     name: "", phone: "", line1: "", line2: "", landmark: "", city: "", state: "", pincode: "",
     type: "home" as "home" | "work" | "other",
   });
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [coupon, setCoupon] = useState("");
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
   const [placing, setPlacing] = useState(false);
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) return toast.error("Geolocation not available");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }); toast.success("Location captured"); },
+      () => toast.error("Could not get location — using default city center"),
+    );
+  };
 
   if (!user) {
     navigate({ to: "/auth" });
@@ -91,8 +100,8 @@ function CheckoutPage() {
     // Default to Bengaluru center if the saved address has none.
     const addressWithCoords: any = {
       ...addr,
-      lat: (addr as any).lat ?? 12.95,
-      lng: (addr as any).lng ?? 77.64,
+      lat: coords?.lat ?? (addr as any).lat ?? 12.95,
+      lng: coords?.lng ?? (addr as any).lng ?? 77.64,
     };
 
     setPlacing(true);
