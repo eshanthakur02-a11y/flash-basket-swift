@@ -129,6 +129,9 @@ function CheckoutPage() {
           <h2 className="font-display text-xl font-bold flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" /> Delivery address
           </h2>
+          <button onClick={useMyLocation} className="mt-2 text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> {coords ? `Pinned: ${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)}` : "Use my current location for nearest-shop routing"}
+          </button>
           <div className="mt-3 space-y-2">
             {addresses.data?.map((a) => (
               <label
