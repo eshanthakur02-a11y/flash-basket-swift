@@ -1,73 +1,103 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { DemoShell } from "@/components/demo/DemoShell";
-import { ADMIN_NAV } from "@/lib/demo/nav";
-import { useDemo } from "@/lib/demo/store";
-import { USERS, STORES, findUser, findStore } from "@/lib/demo/seed";
-import { StatusBadge } from "@/components/demo/StatusBadge";
-import { Button } from "@/components/ui/button";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { RoleShell } from "@/components/RoleShell";
 import { rupees } from "@/lib/format";
-import { Users, ShoppingBag, TrendingUp, Bike, RotateCcw, Store } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Store, Users, Truck, BarChart, Bell, Settings, AlertTriangle } from "lucide-react";
+
+const NAV = [
+  { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/orders", label: "Orders", icon: ListOrdered },
+  { to: "/admin/shops", label: "Shops", icon: Store },
+  { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/delivery-partners", label: "Partners", icon: Truck },
+  { to: "/admin/reports", label: "Reports", icon: BarChart },
+  { to: "/admin/complaints", label: "Complaints", icon: AlertTriangle },
+  { to: "/admin/notifications", label: "Notifications", icon: Bell },
+  { to: "/admin/settings", label: "Settings", icon: Settings },
+];
 
 export const Route = createFileRoute("/admin/dashboard")({
-  head: () => ({ meta: [{ title: "Admin — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Admin Dashboard — FlashBasket" }] }),
   component: Page,
 });
 
 function Page() {
-  const { state, resetScenario } = useDemo();
-  const customers = USERS.filter(u => u.role === "customer").length;
-  const partners = USERS.filter(u => u.role === "delivery").length;
-  const revenue = state.orders.filter(o => o.status === "delivered").reduce((a, b) => a + b.total, 0);
-  const active = state.orders.filter(o => !["delivered", "rejected_by_shop", "cancelled_by_customer", "refund_initiated"].includes(o.status));
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const ch = supabase.channel("admin-all").on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+      qc.invalidateQueries({ queryKey: ["admin-recent"] });
+    }).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
+
+  const stats = useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: async () => {
+      const [orders, shops, partners] = await Promise.all([
+        supabase.from("orders").select("status, total"),
+        supabase.from("shops").select("id"),
+        supabase.from("delivery_partners").select("id"),
+      ]);
+      const all = orders.data ?? [];
+      return {
+        total: all.length,
+        revenue: all.reduce((a, b) => a + Number(b.total ?? 0), 0),
+        awaiting: all.filter(o => o.status === "awaiting_shop").length,
+        shops: shops.data?.length ?? 0,
+        partners: partners.data?.length ?? 0,
+      };
+    },
+    refetchInterval: 10000,
+  });
+
+  const recent = useQuery({
+    queryKey: ["admin-recent"],
+    queryFn: async () => (await supabase.from("orders").select("id, order_number, status, total, placed_at").order("placed_at", { ascending: false }).limit(20)).data ?? [],
+    refetchInterval: 10000,
+  });
 
   return (
-    <DemoShell role="admin" nav={ADMIN_NAV}>
-      <div className="px-4 md:px-6 py-5 space-y-5">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div><h1 className="font-display text-3xl font-extrabold">Platform overview</h1><div className="text-sm text-muted-foreground">Realtime metrics across the FlashBasket network</div></div>
-          <Button variant="outline" onClick={resetScenario} className="rounded-xl"><RotateCcw className="h-4 w-4 mr-1" />Reset demo scenario</Button>
-        </div>
+    <RoleShell role="admin" nav={NAV} requireRoles={["admin"]}>
+      <div className="p-4 md:p-6">
+        <h1 className="font-display text-3xl font-extrabold">Admin overview</h1>
+        <section className="mt-5 grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Stat label="Orders" value={String(stats.data?.total ?? 0)} />
+          <Stat label="Revenue" value={rupees(stats.data?.revenue ?? 0)} />
+          <Stat label="Awaiting shop" value={String(stats.data?.awaiting ?? 0)} />
+          <Stat label="Shops" value={String(stats.data?.shops ?? 0)} />
+          <Stat label="Partners" value={String(stats.data?.partners ?? 0)} />
+        </section>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Stat icon={<TrendingUp />} label="Revenue" value={rupees(revenue)} />
-          <Stat icon={<ShoppingBag />} label="Orders" value={state.orders.length.toString()} />
-          <Stat icon={<Users />} label="Customers" value={customers.toString()} />
-          <Stat icon={<Bike />} label="Partners" value={partners.toString()} />
-        </div>
-
-        <section>
-          <h2 className="font-bold mb-3">Live orders ({active.length})</h2>
-          <div className="rounded-2xl border border-border bg-card overflow-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary/60 text-left"><tr><th className="px-3 py-2">Order</th><th className="px-3 py-2">Customer</th><th className="px-3 py-2">Shop</th><th className="px-3 py-2">Total</th><th className="px-3 py-2">Status</th><th className="px-3 py-2"></th></tr></thead>
-              <tbody>
-                {active.map(o => (
-                  <tr key={o.id} className="border-t border-border">
-                    <td className="px-3 py-2 font-bold">#{o.id}</td>
-                    <td className="px-3 py-2">{findUser(o.customerId)?.name}</td>
-                    <td className="px-3 py-2">{findStore(o.storeId).name}</td>
-                    <td className="px-3 py-2">{rupees(o.total)}</td>
-                    <td className="px-3 py-2"><StatusBadge status={o.status} /></td>
-                    <td className="px-3 py-2"><Link to="/admin/orders/$id" params={{ id: o.id }}><Button size="sm" variant="ghost">View</Button></Link></td>
-                  </tr>
-                ))}
-                {active.length === 0 && <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">No live orders.</td></tr>}
-              </tbody>
-            </table>
+        <section className="mt-6">
+          <h2 className="font-bold mb-3">Recent orders</h2>
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            {(recent.data ?? []).map(o => (
+              <div key={o.id} className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border last:border-0 text-sm">
+                <span className="font-semibold">{o.order_number}</span>
+                <span className="text-xs text-muted-foreground">{new Date(o.placed_at).toLocaleString()}</span>
+                <span className="text-xs uppercase rounded-full bg-secondary px-2 py-1 font-bold">{o.status.replace(/_/g, " ")}</span>
+                <span className="font-bold">{rupees(o.total)}</span>
+              </div>
+            ))}
+            {(recent.data?.length ?? 0) === 0 && <div className="p-6 text-sm text-muted-foreground">No orders yet.</div>}
           </div>
         </section>
-
-        <section>
-          <h2 className="font-bold mb-3">Activity feed</h2>
-          <ul className="rounded-2xl border border-border bg-card divide-y divide-border max-h-72 overflow-auto">
-            {state.activity.map(a => <li key={a.id} className="px-4 py-2 text-sm flex justify-between"><span>{a.text}</span><span className="text-xs text-muted-foreground">{new Date(a.at).toLocaleTimeString()}</span></li>)}
-          </ul>
-        </section>
       </div>
-    </DemoShell>
+    </RoleShell>
   );
 }
 
-function Stat({ icon, label, value }: { icon: any; label: string; value: string }) {
-  return <div className="rounded-2xl border border-border bg-card p-4"><div className="flex justify-between items-center text-xs uppercase font-bold text-muted-foreground"><span>{label}</span><span className="text-primary">{icon}</span></div><div className="font-display text-2xl font-extrabold mt-1">{value}</div></div>;
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="text-xs text-muted-foreground font-semibold">{label}</div>
+      <div className="font-display text-xl font-extrabold mt-1">{value}</div>
+    </div>
+  );
 }
+
+export { NAV as ADMIN_NAV };

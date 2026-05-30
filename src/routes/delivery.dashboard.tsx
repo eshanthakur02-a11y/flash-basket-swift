@@ -1,94 +1,112 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { DemoShell } from "@/components/demo/DemoShell";
-import { DELIVERY_NAV } from "@/lib/demo/nav";
-import { useDemo } from "@/lib/demo/store";
-import { findStore, findUser } from "@/lib/demo/seed";
-import { Switch } from "@/components/ui/switch";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { RoleShell } from "@/components/RoleShell";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/demo/StatusBadge";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { LayoutDashboard, PackageOpen, History, Wallet, Bell, User, Truck, Check } from "lucide-react";
 import { rupees } from "@/lib/format";
-import { Bike, MapPin, Wallet } from "lucide-react";
+
+const NAV = [
+  { to: "/delivery/dashboard", label: "Home", icon: LayoutDashboard },
+  { to: "/delivery/available-orders", label: "Available", icon: PackageOpen },
+  { to: "/delivery/history", label: "History", icon: History },
+  { to: "/delivery/earnings", label: "Earnings", icon: Wallet },
+  { to: "/delivery/profile", label: "Profile", icon: User },
+];
 
 export const Route = createFileRoute("/delivery/dashboard")({
-  head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Delivery Dashboard — FlashBasket" }] }),
   component: Page,
 });
 
 function Page() {
-  const { state, togglePartnerOnline } = useDemo();
-  const user = findUser(state.currentUserId);
-  const partnerId = user?.id ?? "d1";
-  const online = state.partnerOnline[partnerId];
-  const myTasks = state.orders.filter(o => o.partnerId === partnerId && ["partner_assigned", "partner_at_shop", "picked_up", "out_for_delivery"].includes(o.status));
-  const available = state.orders.filter(o => !o.partnerId && ["ready", "finding_partner"].includes(o.status));
-  const earnings = state.orders.filter(o => o.partnerId === partnerId && o.status === "delivered").reduce((a, b) => a + b.partnerEarning, 0);
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const [partner, setPartner] = useState<any>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("delivery_partners").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (data) setPartner(data);
+      else {
+        // auto-create a partner record
+        supabase.from("delivery_partners").insert({ user_id: user.id, name: user.email ?? "Partner", is_online: false }).select().single().then(({ data: created }) => setPartner(created));
+      }
+    });
+  }, [user]);
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("delivery-orders")
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+        qc.invalidateQueries({ queryKey: ["my-deliveries"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
+
+  const myDeliveries = useQuery({
+    queryKey: ["my-deliveries", partner?.id],
+    queryFn: async () => {
+      if (!partner) return [];
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_number, total, status, address")
+        .eq("partner_id", partner.id)
+        .in("status", ["out_for_delivery"])
+        .order("placed_at", { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!partner,
+    refetchInterval: 8000,
+  });
+
+  const toggleOnline = async (v: boolean) => {
+    const { error } = await supabase.from("delivery_partners").update({ is_online: v }).eq("id", partner.id);
+    if (error) toast.error(error.message);
+    else setPartner({ ...partner, is_online: v });
+  };
+
+  const markDelivered = async (id: string) => {
+    const { error } = await supabase.rpc("partner_mark_delivered", { _order_id: id });
+    if (error) toast.error(error.message); else toast.success("Delivered!");
+  };
 
   return (
-    <DemoShell role="delivery" nav={DELIVERY_NAV}>
-      <div className="px-4 py-5 max-w-3xl mx-auto space-y-5">
-        <div className="rounded-3xl gradient-hero p-5 flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-2xl font-extrabold">Hey {user?.name?.split(" ")[0]}</h1>
-            <div className="text-sm text-muted-foreground">{user?.vehicle}</div>
+    <RoleShell role="delivery" nav={NAV} requireRoles={["delivery", "admin"]}>
+      <div className="p-4 md:p-6 space-y-5">
+        <div className="rounded-3xl gradient-hero p-5 border border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs text-muted-foreground font-semibold">Status</div>
+              <div className="font-display text-2xl font-extrabold">{partner?.is_online ? "Online" : "Offline"}</div>
+            </div>
+            <Switch checked={partner?.is_online ?? false} onCheckedChange={toggleOnline} />
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <Switch checked={online} onCheckedChange={() => togglePartnerOnline(partnerId)} />
-            <span className="text-[11px] font-bold">{online ? "Online" : "Offline"}</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-3">
-          <Stat icon={<Bike />} label="Active" value={myTasks.length.toString()} />
-          <Stat icon={<MapPin />} label="Available" value={available.length.toString()} />
-          <Stat icon={<Wallet />} label="Today" value={rupees(earnings)} />
         </div>
 
         <section>
-          <h2 className="font-bold mb-3">Active tasks</h2>
-          {myTasks.length === 0 ? <div className="text-sm text-muted-foreground rounded-2xl border border-dashed border-border p-6 text-center">No active deliveries.</div> :
-            myTasks.map(o => (
-              <Link key={o.id} to="/delivery/task/$id" params={{ id: o.id }} className="block rounded-2xl border border-primary/40 bg-primary/5 p-4 mb-2">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div><div className="text-xs text-muted-foreground">#{o.id}</div><div className="font-bold">{findStore(o.storeId).name} → {findUser(o.customerId)?.name}</div></div>
-                  <StatusBadge status={o.status} />
+          <h2 className="font-bold mb-3">Active deliveries</h2>
+          <div className="space-y-3">
+            {(myDeliveries.data ?? []).map(o => (
+              <div key={o.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap">
+                <div className="min-w-0">
+                  <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+                  <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
                 </div>
-              </Link>
-            ))
-          }
-        </section>
-
-        <section>
-          <h2 className="font-bold mb-3">Available orders</h2>
-          {available.length === 0 ? <div className="text-sm text-muted-foreground rounded-2xl border border-dashed border-border p-6 text-center">Nothing nearby right now.</div> :
-            available.map(o => (
-              <AvailableCard key={o.id} o={o} partnerId={partnerId} />
-            ))
-          }
+                <Button size="sm" onClick={() => markDelivered(o.id)} className="rounded-xl"><Check className="h-3 w-3 mr-1" />Mark delivered</Button>
+              </div>
+            ))}
+            {(myDeliveries.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">No active deliveries. Check <a href="/delivery/available-orders" className="text-primary font-bold">available orders</a>.</div>}
+          </div>
         </section>
       </div>
-    </DemoShell>
+    </RoleShell>
   );
 }
 
-function AvailableCard({ o, partnerId }: { o: any; partnerId: string }) {
-  const { acceptDelivery, rejectDelivery } = useDemo();
-  return (
-    <div className="rounded-2xl border border-border bg-card p-4 mb-2">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <div className="text-xs text-muted-foreground">#{o.id} · {o.distanceKm} km · earn {rupees(o.partnerEarning)}</div>
-          <div className="font-bold">{findStore(o.storeId).name}</div>
-          <div className="text-xs text-muted-foreground">→ {o.address}</div>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => rejectDelivery(o.id, partnerId, "Too far")} variant="outline" className="rounded-xl">Skip</Button>
-          <Button onClick={() => acceptDelivery(o.id, partnerId)} className="rounded-xl gradient-primary text-primary-foreground">Accept</Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Stat({ icon, label, value }: { icon: any; label: string; value: string }) {
-  return <div className="rounded-2xl border border-border bg-card p-3"><div className="flex justify-between items-center text-[10px] uppercase font-bold text-muted-foreground"><span>{label}</span><span className="text-primary">{icon}</span></div><div className="font-display text-xl font-extrabold mt-1">{value}</div></div>;
-}
+export { NAV as DELIVERY_NAV };
