@@ -61,6 +61,9 @@ function OrderPage() {
           if (step) toast.success(step.label, { description: step.desc });
         }
       })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "delivery_partners" }, () => {
+        qc.invalidateQueries({ queryKey: ["order", id] });
+      })
       .subscribe((status) => setLive(status === "SUBSCRIBED"));
     return () => { supabase.removeChannel(channel); };
   }, [id, qc]);
