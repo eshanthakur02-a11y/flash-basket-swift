@@ -43,7 +43,7 @@ function Page() {
   const txns = useQuery({
     queryKey: ["admin-payments-list"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("admin_list_payments", { _status: null, _limit: 200 });
+      const { data, error } = await supabase.rpc("admin_list_payments", { _limit: 200 });
       if (error) throw error;
       return data ?? [];
     },
