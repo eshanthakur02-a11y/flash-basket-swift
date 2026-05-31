@@ -169,6 +169,26 @@ function OrderPage() {
         </section>
       )}
 
+      {!isCancelled && !isFailed && (o.shop || o.partner || o.delivery_lat) && (
+        <section className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-6 shadow-card">
+          <h2 className="font-display text-lg font-bold mb-3">Route</h2>
+          <RouteMap
+            height="h-64"
+            points={[
+              o.partner?.current_lat && o.partner?.current_lng
+                ? { lat: o.partner.current_lat, lng: o.partner.current_lng, label: `Partner: ${o.partner.name}` }
+                : null,
+              o.shop?.latitude && o.shop?.longitude
+                ? { lat: o.shop.latitude, lng: o.shop.longitude, label: `Shop: ${o.shop.name}` }
+                : null,
+              o.delivery_lat && o.delivery_lng
+                ? { lat: o.delivery_lat, lng: o.delivery_lng, label: "Delivery address" }
+                : null,
+            ].filter(Boolean) as { lat: number; lng: number; label: string }[]}
+          />
+        </section>
+      )}
+
       {isFailed && (
         <div className="mt-6 rounded-3xl border-2 border-destructive/30 bg-destructive/5 p-5">
           <div className="flex items-center gap-2 font-bold text-destructive"><X className="h-4 w-4" /> No shop available</div>
