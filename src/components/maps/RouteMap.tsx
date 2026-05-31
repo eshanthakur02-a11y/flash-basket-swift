@@ -44,7 +44,7 @@ export function RouteMap({
           const FitBounds = () => {
             const map = useMap();
             if (valid.length > 1) {
-              const bounds = valid.map((p) => [p.lat, p.lng]) as [number, number][];
+              const bounds: [number, number][] = valid.map((p) => [p.lat, p.lng]);
               map.fitBounds(bounds, { padding: [30, 30] });
             }
             return null;
@@ -54,7 +54,7 @@ export function RouteMap({
               <FitBounds />
               {valid.length > 1 && (
                 <Polyline
-                  positions={valid.map((p) => [p.lat, p.lng])}
+                  positions={valid.map((p) => [p.lat, p.lng] as [number, number])}
                   pathOptions={{ color: "hsl(var(--primary))", weight: 4, opacity: 0.8, dashArray: "8 8" }}
                 />
               )}
