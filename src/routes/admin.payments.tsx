@@ -49,7 +49,7 @@ function Page() {
   const s = summary.data ?? {};
 
   return (
-    <RoleShell role="admin" nav={NAV} requireRoles={["admin"]}>
+    <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}>
       <div className="p-4 md:p-6">
         <h1 className="font-display text-3xl font-extrabold">Payments</h1>
 
