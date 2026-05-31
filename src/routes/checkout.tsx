@@ -26,6 +26,9 @@ function CheckoutPage() {
   const { user } = useAuth();
   const { items, subtotal, clear } = useCart();
   const navigate = useNavigate();
+  const createRzpOrder = useServerFn(createRazorpayOrder);
+  const verifyRzp = useServerFn(verifyRazorpayPayment);
+  const recordFail = useServerFn(recordPaymentFailure);
 
   const addresses = useQuery({
     queryKey: ["addresses", user?.id],
