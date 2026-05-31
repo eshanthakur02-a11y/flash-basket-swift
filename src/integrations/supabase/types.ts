@@ -439,6 +439,7 @@ export type Database = {
           handling_fee: number
           id: string
           order_number: string
+          paid_at: string | null
           partner_id: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
@@ -466,6 +467,7 @@ export type Database = {
           handling_fee?: number
           id?: string
           order_number?: string
+          paid_at?: string | null
           partner_id?: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
@@ -493,6 +495,7 @@ export type Database = {
           handling_fee?: number
           id?: string
           order_number?: string
+          paid_at?: string | null
           partner_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
@@ -527,37 +530,58 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          error_code: string | null
+          error_description: string | null
           id: string
+          method: string | null
           order_id: string
           provider: string
           provider_order_id: string | null
           provider_payment_id: string | null
+          refund_amount: number | null
+          refund_id: string | null
+          refunded_at: string | null
           signature: string | null
           status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
           user_id: string
         }
         Insert: {
           amount: number
           created_at?: string
+          error_code?: string | null
+          error_description?: string | null
           id?: string
+          method?: string | null
           order_id: string
           provider: string
           provider_order_id?: string | null
           provider_payment_id?: string | null
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           signature?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
           user_id: string
         }
         Update: {
           amount?: number
           created_at?: string
+          error_code?: string | null
+          error_description?: string | null
           id?: string
+          method?: string | null
           order_id?: string
           provider?: string
           provider_order_id?: string | null
           provider_payment_id?: string | null
+          refund_amount?: number | null
+          refund_id?: string | null
+          refunded_at?: string | null
           signature?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -861,6 +885,26 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_list_payments: {
+        Args: {
+          _limit?: number
+          _status?: Database["public"]["Enums"]["payment_status"]
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          error_code: string
+          error_description: string
+          id: string
+          method: string
+          order_id: string
+          provider: string
+          provider_payment_id: string
+          refund_amount: number
+          status: Database["public"]["Enums"]["payment_status"]
+          user_id: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
@@ -870,6 +914,11 @@ export type Database = {
           phone: string
           roles: Database["public"]["Enums"]["app_role"][]
         }[]
+      }
+      admin_payments_summary: { Args: never; Returns: Json }
+      admin_record_refund: {
+        Args: { _amount: number; _payment_id: string; _refund_id: string }
+        Returns: undefined
       }
       admin_remove_role: {
         Args: {
