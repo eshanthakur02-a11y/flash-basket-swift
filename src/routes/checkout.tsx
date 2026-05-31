@@ -277,9 +277,8 @@ function CheckoutPage() {
             </label>
           </div>
           {method === "razorpay" && (
-            <div className="mt-3 rounded-xl bg-warning/15 border border-warning/40 p-3 text-xs">
-              Razorpay test integration: order will be marked as <strong>pending payment</strong>. Add your Razorpay
-              keys in project secrets to enable real payments.
+            <div className="mt-3 rounded-xl bg-primary/10 border border-primary/30 p-3 text-xs">
+              Pay with UPI, debit/credit card, netbanking or wallet via Razorpay (currently in test mode).
             </div>
           )}
         </section>
