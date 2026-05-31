@@ -102,8 +102,6 @@ function CheckoutPage() {
       selectedAddr && addresses.data?.find((a) => a.id === selectedAddr);
     if (!addr) return toast.error("Please add a delivery address");
 
-    // place_order RPC needs lat/lng for nearest-shop routing.
-    // Default to Bengaluru center if the saved address has none.
     const addressWithCoords: any = {
       ...addr,
       lat: coords?.lat ?? (addr as any).lat ?? 12.95,
@@ -118,13 +116,67 @@ function CheckoutPage() {
       _delivery_instruction: instruction || undefined,
     });
 
-    setPlacing(false);
-    if (error) return toast.error(error.message);
+    if (error) { setPlacing(false); return toast.error(error.message); }
+    const orderId = data as string;
 
-    confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-    toast.success("Order placed!");
-    clear();
-    navigate({ to: "/orders/$id", params: { id: data as string } });
+    if (method === "cod") {
+      setPlacing(false);
+      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+      toast.success("Order placed!");
+      clear();
+      navigate({ to: "/orders/$id", params: { id: orderId } });
+      return;
+    }
+
+    // Razorpay flow
+    try {
+      const rzp = await createRzpOrder({ data: { orderId } });
+      await openRazorpayCheckout({
+        keyId: rzp.keyId,
+        amount: rzp.amount,
+        currency: rzp.currency,
+        razorpayOrderId: rzp.razorpayOrderId,
+        orderNumber: rzp.orderNumber,
+        prefill: {
+          name: (addr as any).name,
+          contact: (addr as any).phone,
+          email: user.email ?? undefined,
+        },
+        onSuccess: async (resp) => {
+          try {
+            await verifyRzp({
+              data: {
+                orderId,
+                razorpayOrderId: resp.razorpay_order_id,
+                razorpayPaymentId: resp.razorpay_payment_id,
+                razorpaySignature: resp.razorpay_signature,
+              },
+            });
+            confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+            toast.success("Payment successful");
+            clear();
+            navigate({ to: "/orders/$id", params: { id: orderId } });
+          } catch (e: any) {
+            toast.error(e.message ?? "Payment verification failed");
+          } finally { setPlacing(false); }
+        },
+        onFailure: async (err) => {
+          await recordFail({
+            data: { razorpayOrderId: rzp.razorpayOrderId, code: err.code, description: err.description },
+          }).catch(() => {});
+          toast.error(err.description ?? "Payment failed");
+          setPlacing(false);
+        },
+        onDismiss: () => {
+          toast.info("Payment cancelled. You can pay from your orders page.");
+          setPlacing(false);
+          navigate({ to: "/orders/$id", params: { id: orderId } });
+        },
+      });
+    } catch (e: any) {
+      setPlacing(false);
+      toast.error(e.message ?? "Could not start payment");
+    }
   };
 
   return (
