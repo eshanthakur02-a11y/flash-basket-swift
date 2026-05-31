@@ -16,6 +16,7 @@ import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { openRazorpayCheckout } from "@/integrations/razorpay/checkout";
 import { createRazorpayOrder, verifyRazorpayPayment, recordPaymentFailure } from "@/lib/razorpay.functions";
+import { LocationPicker } from "@/components/maps/LocationPicker";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — FlashBasket" }] }),
@@ -187,9 +188,10 @@ function CheckoutPage() {
           <h2 className="font-display text-xl font-bold flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" /> Delivery address
           </h2>
-          <button onClick={useMyLocation} className="mt-2 text-xs font-bold text-primary hover:underline inline-flex items-center gap-1">
-            <MapPin className="h-3 w-3" /> {coords ? `Pinned: ${coords.lat.toFixed(3)}, ${coords.lng.toFixed(3)}` : "Use my current location for nearest-shop routing"}
-          </button>
+          <p className="mt-1 text-xs text-muted-foreground">Pin your exact spot on the map for the nearest shop and the fastest delivery.</p>
+          <div className="mt-3">
+            <LocationPicker value={coords} onChange={setCoords} />
+          </div>
           <div className="mt-3 space-y-2">
             {addresses.data?.map((a) => (
               <label

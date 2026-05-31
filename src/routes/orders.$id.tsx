@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RouteMap } from "@/components/maps/RouteMap";
 
 export const Route = createFileRoute("/orders/$id")({
   head: ({ params }) => ({ meta: [{ title: `Order #${params.id.slice(0, 8)} — FlashBasket` }] }),
@@ -34,7 +35,16 @@ function OrderPage() {
     queryFn: async () => {
       const { data: o } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
       const { data: it } = await supabase.from("order_items").select("*").eq("order_id", id);
-      return o ? { ...o, items: it ?? [] } : null;
+      let shop: any = null, partner: any = null;
+      if (o?.shop_id) {
+        const { data } = await supabase.from("shops").select("id,name,latitude,longitude,address,city").eq("id", o.shop_id).maybeSingle();
+        shop = data;
+      }
+      if (o?.partner_id) {
+        const { data } = await supabase.from("delivery_partners").select("id,name,current_lat,current_lng").eq("id", o.partner_id).maybeSingle();
+        partner = data;
+      }
+      return o ? { ...o, items: it ?? [], shop, partner } : null;
     },
   });
 
@@ -50,6 +60,9 @@ function OrderPage() {
           const step = STEPS.find((s) => s.key === next);
           if (step) toast.success(step.label, { description: step.desc });
         }
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "delivery_partners" }, () => {
+        qc.invalidateQueries({ queryKey: ["order", id] });
       })
       .subscribe((status) => setLive(status === "SUBSCRIBED"));
     return () => { supabase.removeChannel(channel); };
@@ -153,6 +166,26 @@ function OrderPage() {
               );
             })}
           </ol>
+        </section>
+      )}
+
+      {!isCancelled && !isFailed && (o.shop || o.partner || o.delivery_lat) && (
+        <section className="mt-6 rounded-3xl border border-border bg-card p-5 md:p-6 shadow-card">
+          <h2 className="font-display text-lg font-bold mb-3">Route</h2>
+          <RouteMap
+            height="h-64"
+            points={[
+              o.partner?.current_lat && o.partner?.current_lng
+                ? { lat: o.partner.current_lat, lng: o.partner.current_lng, label: `Partner: ${o.partner.name}` }
+                : null,
+              o.shop?.latitude && o.shop?.longitude
+                ? { lat: o.shop.latitude, lng: o.shop.longitude, label: `Shop: ${o.shop.name}` }
+                : null,
+              o.delivery_lat && o.delivery_lng
+                ? { lat: o.delivery_lat, lng: o.delivery_lng, label: "Delivery address" }
+                : null,
+            ].filter(Boolean) as { lat: number; lng: number; label: string }[]}
+          />
         </section>
       )}
 
