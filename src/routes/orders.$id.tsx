@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RouteMap } from "@/components/maps/RouteMap";
 
 export const Route = createFileRoute("/orders/$id")({
   head: ({ params }) => ({ meta: [{ title: `Order #${params.id.slice(0, 8)} — FlashBasket` }] }),
@@ -34,7 +35,16 @@ function OrderPage() {
     queryFn: async () => {
       const { data: o } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
       const { data: it } = await supabase.from("order_items").select("*").eq("order_id", id);
-      return o ? { ...o, items: it ?? [] } : null;
+      let shop: any = null, partner: any = null;
+      if (o?.shop_id) {
+        const { data } = await supabase.from("shops").select("id,name,latitude,longitude,address,city").eq("id", o.shop_id).maybeSingle();
+        shop = data;
+      }
+      if (o?.partner_id) {
+        const { data } = await supabase.from("delivery_partners").select("id,name,current_lat,current_lng").eq("id", o.partner_id).maybeSingle();
+        partner = data;
+      }
+      return o ? { ...o, items: it ?? [], shop, partner } : null;
     },
   });
 
