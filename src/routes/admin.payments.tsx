@@ -6,21 +6,8 @@ import { RoleShell } from "@/components/RoleShell";
 import { rupees } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LayoutDashboard, ListOrdered, Store, Users, Truck, BarChart, Bell, Settings, AlertTriangle, Wallet } from "lucide-react";
 import { refundPayment } from "@/lib/razorpay.functions";
-
-const NAV = [
-  { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/admin/orders", label: "Orders", icon: ListOrdered },
-  { to: "/admin/payments", label: "Payments", icon: Wallet },
-  { to: "/admin/shops", label: "Shops", icon: Store },
-  { to: "/admin/customers", label: "Customers", icon: Users },
-  { to: "/admin/delivery-partners", label: "Partners", icon: Truck },
-  { to: "/admin/reports", label: "Reports", icon: BarChart },
-  { to: "/admin/complaints", label: "Complaints", icon: AlertTriangle },
-  { to: "/admin/notifications", label: "Notifications", icon: Bell },
-  { to: "/admin/settings", label: "Settings", icon: Settings },
-];
+import { ADMIN_NAV } from "./admin.dashboard";
 
 export const Route = createFileRoute("/admin/payments")({
   head: () => ({ meta: [{ title: "Payments — Admin" }] }),
