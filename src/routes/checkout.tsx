@@ -16,6 +16,7 @@ import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { openRazorpayCheckout } from "@/integrations/razorpay/checkout";
 import { createRazorpayOrder, verifyRazorpayPayment, recordPaymentFailure } from "@/lib/razorpay.functions";
+import { LocationPicker } from "@/components/maps/LocationPicker";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — FlashBasket" }] }),
