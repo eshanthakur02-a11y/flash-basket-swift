@@ -7,6 +7,7 @@ const DEMO_PREFIXES = ["/customer", "/shopkeeper", "/delivery", "/admin", "/logi
 
 export function Layout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useNotifications();
   const isDemo = DEMO_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/") || pathname === p);
 
   if (isDemo) {
