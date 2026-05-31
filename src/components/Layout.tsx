@@ -1,11 +1,13 @@
 import { Outlet, useRouterState } from "@tanstack/react-router";
 import { Header } from "./Header";
 import { Toaster } from "./ui/sonner";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const DEMO_PREFIXES = ["/customer", "/shopkeeper", "/delivery", "/admin", "/login", "/signup"];
 
 export function Layout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useNotifications();
   const isDemo = DEMO_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/") || pathname === p);
 
   if (isDemo) {

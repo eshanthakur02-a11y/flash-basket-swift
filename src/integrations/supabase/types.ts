@@ -65,6 +65,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_config: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -217,10 +235,87 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_dispatch_log: {
+        Row: {
+          attempts: number
+          created_at: string
+          error: string | null
+          id: string
+          notification_id: string | null
+          request_id: number | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          notification_id?: string | null
+          request_id?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          notification_id?: string | null
+          request_id?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_enabled: boolean
+          in_app_enabled: boolean
+          inventory_alerts: boolean
+          order_updates: boolean
+          promotions: boolean
+          push_enabled: boolean
+          system_alerts: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_enabled?: boolean
+          in_app_enabled?: boolean
+          inventory_alerts?: boolean
+          order_updates?: boolean
+          promotions?: boolean
+          push_enabled?: boolean
+          system_alerts?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_enabled?: boolean
+          in_app_enabled?: boolean
+          inventory_alerts?: boolean
+          order_updates?: boolean
+          promotions?: boolean
+          push_enabled?: boolean
+          system_alerts?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
+          category: string
           created_at: string
+          data: Json
           id: string
           read: boolean
           title: string
@@ -228,7 +323,9 @@ export type Database = {
         }
         Insert: {
           body?: string | null
+          category?: string
           created_at?: string
+          data?: Json
           id?: string
           read?: boolean
           title: string
@@ -236,10 +333,42 @@ export type Database = {
         }
         Update: {
           body?: string | null
+          category?: string
           created_at?: string
+          data?: Json
           id?: string
           read?: boolean
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      onesignal_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen_at: string
+          platform: string
+          player_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          player_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          player_id?: string
+          user_agent?: string | null
           user_id?: string
         }
         Relationships: []
@@ -784,6 +913,26 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      notify_role: {
+        Args: {
+          _body: string
+          _category?: string
+          _data?: Json
+          _role: Database["public"]["Enums"]["app_role"]
+          _title: string
+        }
+        Returns: number
+      }
+      notify_user: {
+        Args: {
+          _body: string
+          _category?: string
+          _data?: Json
+          _title: string
+          _user_id: string
+        }
+        Returns: string
+      }
       partner_accept_order: { Args: { _order_id: string }; Returns: undefined }
       partner_mark_delivered: {
         Args: { _order_id: string }
@@ -800,6 +949,10 @@ export type Database = {
       }
       reassign_stale_orders: { Args: never; Returns: number }
       restore_order_stock: { Args: { _order_id: string }; Returns: undefined }
+      send_onesignal_push: {
+        Args: { _notification_id: string }
+        Returns: undefined
+      }
       shop_accept_order: { Args: { _order_id: string }; Returns: undefined }
       shop_mark_packed: { Args: { _order_id: string }; Returns: undefined }
       shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
