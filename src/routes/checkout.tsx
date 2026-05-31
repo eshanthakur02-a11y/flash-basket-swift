@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
@@ -13,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
+import { openRazorpayCheckout } from "@/integrations/razorpay/checkout";
+import { createRazorpayOrder, verifyRazorpayPayment, recordPaymentFailure } from "@/lib/razorpay.functions";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — FlashBasket" }] }),
@@ -23,6 +26,9 @@ function CheckoutPage() {
   const { user } = useAuth();
   const { items, subtotal, clear } = useCart();
   const navigate = useNavigate();
+  const createRzpOrder = useServerFn(createRazorpayOrder);
+  const verifyRzp = useServerFn(verifyRazorpayPayment);
+  const recordFail = useServerFn(recordPaymentFailure);
 
   const addresses = useQuery({
     queryKey: ["addresses", user?.id],
@@ -96,8 +102,6 @@ function CheckoutPage() {
       selectedAddr && addresses.data?.find((a) => a.id === selectedAddr);
     if (!addr) return toast.error("Please add a delivery address");
 
-    // place_order RPC needs lat/lng for nearest-shop routing.
-    // Default to Bengaluru center if the saved address has none.
     const addressWithCoords: any = {
       ...addr,
       lat: coords?.lat ?? (addr as any).lat ?? 12.95,
@@ -112,13 +116,67 @@ function CheckoutPage() {
       _delivery_instruction: instruction || undefined,
     });
 
-    setPlacing(false);
-    if (error) return toast.error(error.message);
+    if (error) { setPlacing(false); return toast.error(error.message); }
+    const orderId = data as string;
 
-    confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-    toast.success("Order placed!");
-    clear();
-    navigate({ to: "/orders/$id", params: { id: data as string } });
+    if (method === "cod") {
+      setPlacing(false);
+      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+      toast.success("Order placed!");
+      clear();
+      navigate({ to: "/orders/$id", params: { id: orderId } });
+      return;
+    }
+
+    // Razorpay flow
+    try {
+      const rzp = await createRzpOrder({ data: { orderId } });
+      await openRazorpayCheckout({
+        keyId: rzp.keyId,
+        amount: rzp.amount,
+        currency: rzp.currency,
+        razorpayOrderId: rzp.razorpayOrderId,
+        orderNumber: rzp.orderNumber,
+        prefill: {
+          name: (addr as any).name,
+          contact: (addr as any).phone,
+          email: user.email ?? undefined,
+        },
+        onSuccess: async (resp) => {
+          try {
+            await verifyRzp({
+              data: {
+                orderId,
+                razorpayOrderId: resp.razorpay_order_id,
+                razorpayPaymentId: resp.razorpay_payment_id,
+                razorpaySignature: resp.razorpay_signature,
+              },
+            });
+            confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+            toast.success("Payment successful");
+            clear();
+            navigate({ to: "/orders/$id", params: { id: orderId } });
+          } catch (e: any) {
+            toast.error(e.message ?? "Payment verification failed");
+          } finally { setPlacing(false); }
+        },
+        onFailure: async (err) => {
+          await recordFail({
+            data: { razorpayOrderId: rzp.razorpayOrderId, code: err.code, description: err.description },
+          }).catch(() => {});
+          toast.error(err.description ?? "Payment failed");
+          setPlacing(false);
+        },
+        onDismiss: () => {
+          toast.info("Payment cancelled. You can pay from your orders page.");
+          setPlacing(false);
+          navigate({ to: "/orders/$id", params: { id: orderId } });
+        },
+      });
+    } catch (e: any) {
+      setPlacing(false);
+      toast.error(e.message ?? "Could not start payment");
+    }
   };
 
   return (
@@ -219,9 +277,8 @@ function CheckoutPage() {
             </label>
           </div>
           {method === "razorpay" && (
-            <div className="mt-3 rounded-xl bg-warning/15 border border-warning/40 p-3 text-xs">
-              Razorpay test integration: order will be marked as <strong>pending payment</strong>. Add your Razorpay
-              keys in project secrets to enable real payments.
+            <div className="mt-3 rounded-xl bg-primary/10 border border-primary/30 p-3 text-xs">
+              Pay with UPI, debit/credit card, netbanking or wallet via Razorpay (currently in test mode).
             </div>
           )}
         </section>
