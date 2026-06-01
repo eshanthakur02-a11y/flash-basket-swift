@@ -50,6 +50,14 @@ function OrderPage() {
 
   // Realtime subscription — updates as the order moves through states.
   useEffect(() => {
+    let partnerInvalidateTimer: ReturnType<typeof setTimeout> | null = null;
+    const schedulePartnerInvalidate = () => {
+      if (partnerInvalidateTimer) return;
+      partnerInvalidateTimer = setTimeout(() => {
+        partnerInvalidateTimer = null;
+        qc.invalidateQueries({ queryKey: ["order", id] });
+      }, 8000);
+    };
     const channel = supabase
       .channel(`order-${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` }, (payload) => {
@@ -62,11 +70,16 @@ function OrderPage() {
         }
       })
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "delivery_partners" }, () => {
-        qc.invalidateQueries({ queryKey: ["order", id] });
+        // Throttle: partner pings every ~8s; coalesce bursts to avoid map churn.
+        schedulePartnerInvalidate();
       })
       .subscribe((status) => setLive(status === "SUBSCRIBED"));
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (partnerInvalidateTimer) clearTimeout(partnerInvalidateTimer);
+      supabase.removeChannel(channel);
+    };
   }, [id, qc]);
+
 
   if (order.isLoading) return <div className="mx-auto max-w-3xl px-4 py-10"><Skeleton className="h-96" /></div>;
   if (!order.data) return <div className="mx-auto max-w-3xl px-4 py-20 text-center">Order not found.</div>;

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { LeafletMap, haversineKm } from "./LeafletMap";
 
 export type MapPoint = { lat: number; lng: number; label?: string; color?: string };
@@ -6,6 +6,13 @@ export type MapPoint = { lat: number; lng: number; label?: string; color?: strin
 /**
  * Renders 2+ points and a polyline connecting them in order.
  * Distance shown is the cumulative haversine distance.
+ *
+ * Mobile perf:
+ *  - Memoize valid points by a coarse coordinate signature so tiny GPS jitter
+ *    doesn't trigger marker/polyline reconciliation in react-leaflet.
+ *  - Fit bounds only when the set of points changes shape (count or first/last
+ *    coords), not on every position tick.
+ *  - Stable React keys per marker so Leaflet reuses the same layer instance.
  */
 export function RouteMap({
   points,
@@ -16,7 +23,25 @@ export function RouteMap({
   height?: string;
   className?: string;
 }) {
-  const valid = points.filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+  // Round to ~11m precision (4 decimals). Anything finer is noise on a phone
+  // and forces unnecessary marker redraws.
+  const valid = useMemo(
+    () =>
+      points
+        .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
+        .map((p) => ({
+          ...p,
+          lat: Math.round(p.lat * 1e4) / 1e4,
+          lng: Math.round(p.lng * 1e4) / 1e4,
+        })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      points
+        .map((p) => `${p.label ?? ""}:${p.lat?.toFixed(4)},${p.lng?.toFixed(4)}`)
+        .join("|"),
+    ],
+  );
+
   const center = useMemo<[number, number]>(() => {
     if (valid.length === 0) return [12.9716, 77.5946];
     const lat = valid.reduce((a, p) => a + p.lat, 0) / valid.length;
@@ -32,21 +57,42 @@ export function RouteMap({
     return d;
   }, [valid]);
 
+  // Signature used to decide when to re-fit bounds. Avoids re-fit on every
+  // small GPS update; only re-fits when the route shape meaningfully changes.
+  const shapeSig = useMemo(
+    () =>
+      valid.length +
+      "|" +
+      valid.map((p) => `${p.lat.toFixed(3)},${p.lng.toFixed(3)}`).join("/"),
+    [valid],
+  );
+
   if (valid.length === 0) {
     return <div className={`${height} w-full rounded-2xl border border-dashed border-border grid place-items-center text-sm text-muted-foreground ${className ?? ""}`}>No coordinates available</div>;
   }
+
+  const positions = valid.map((p) => [p.lat, p.lng] as [number, number]);
 
   return (
     <div className={className}>
       <LeafletMap center={center} zoom={13} className={`${height} w-full rounded-2xl overflow-hidden border border-border`}>
         {(RL) => {
-          const { Marker, Polyline, Popup, useMap } = RL;
+          const { CircleMarker, Polyline, Popup, useMap } = RL;
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const lastSig = useRef<string | null>(null);
           const FitBounds = () => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const map = useMap();
-            if (valid.length > 1) {
-              const bounds: [number, number][] = valid.map((p) => [p.lat, p.lng]);
-              map.fitBounds(bounds, { padding: [30, 30] });
-            }
+            // eslint-disable-next-line react-hooks/rules-of-hooks
+            useEffect(() => {
+              if (lastSig.current === shapeSig) return;
+              lastSig.current = shapeSig;
+              if (valid.length > 1) {
+                map.fitBounds(positions, { padding: [30, 30], animate: false });
+              } else {
+                map.setView(positions[0], map.getZoom(), { animate: false });
+              }
+            }, [map]);
             return null;
           };
           return (
@@ -54,14 +100,24 @@ export function RouteMap({
               <FitBounds />
               {valid.length > 1 && (
                 <Polyline
-                  positions={valid.map((p) => [p.lat, p.lng] as [number, number])}
+                  positions={positions}
                   pathOptions={{ color: "hsl(var(--primary))", weight: 4, opacity: 0.8, dashArray: "8 8" }}
                 />
               )}
-              {valid.map((p, i) => (
-                <Marker key={i} position={[p.lat, p.lng]}>
+              {valid.map((p) => (
+                <CircleMarker
+                  key={`${p.label ?? "pt"}:${p.lat.toFixed(4)},${p.lng.toFixed(4)}`}
+                  center={[p.lat, p.lng]}
+                  radius={8}
+                  pathOptions={{
+                    color: p.color ?? "hsl(var(--primary))",
+                    fillColor: p.color ?? "hsl(var(--primary))",
+                    fillOpacity: 0.9,
+                    weight: 2,
+                  }}
+                >
                   {p.label && <Popup>{p.label}</Popup>}
-                </Marker>
+                </CircleMarker>
               ))}
             </>
           );

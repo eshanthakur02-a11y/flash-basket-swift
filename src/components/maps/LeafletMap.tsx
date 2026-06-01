@@ -1,9 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import "leaflet/dist/leaflet.css";
 
 /**
  * Client-only wrapper for react-leaflet. Leaflet touches `window` at import
  * time, so we lazy-load it after mount to keep SSR happy.
+ *
+ * Mobile perf: uses Canvas renderer (one <canvas> instead of one SVG/DOM node
+ * per marker/poly), disables fadeAnimation, and lowers zoomAnimationThreshold.
  */
 export function LeafletMap({
   children,
@@ -19,6 +22,7 @@ export function LeafletMap({
   scrollWheelZoom?: boolean;
 }) {
   const [mods, setMods] = useState<typeof import("react-leaflet") | null>(null);
+  const [leaflet, setLeaflet] = useState<typeof import("leaflet") | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -27,15 +31,18 @@ export function LeafletMap({
         import("react-leaflet"),
         import("leaflet"),
       ]);
-      // Fix default marker icons (Vite asset URLs).
       const iconUrl = (await import("leaflet/dist/images/marker-icon.png")).default;
       const iconRetinaUrl = (await import("leaflet/dist/images/marker-icon-2x.png")).default;
       const shadowUrl = (await import("leaflet/dist/images/marker-shadow.png")).default;
       L.Icon.Default.mergeOptions({ iconUrl, iconRetinaUrl, shadowUrl });
-      if (mounted) setMods(RL);
+      if (mounted) { setLeaflet(L); setMods(RL); }
     })();
     return () => { mounted = false; };
   }, []);
+
+  // Stable canvas renderer instance — reused across re-renders so children
+  // don't trigger fresh renderer allocation.
+  const renderer = useMemo(() => (leaflet ? leaflet.canvas({ padding: 0.5 }) : undefined), [leaflet]);
 
   if (!mods) {
     return <div className={`${className} bg-secondary animate-pulse`} aria-label="Loading map" />;
@@ -43,10 +50,21 @@ export function LeafletMap({
   const { MapContainer, TileLayer } = mods;
   return (
     <div className={className}>
-      <MapContainer center={center} zoom={zoom} scrollWheelZoom={scrollWheelZoom} style={{ height: "100%", width: "100%" }}>
+      <MapContainer
+        center={center}
+        zoom={zoom}
+        scrollWheelZoom={scrollWheelZoom}
+        style={{ height: "100%", width: "100%" }}
+        preferCanvas
+        renderer={renderer}
+        fadeAnimation={false}
+        zoomAnimationThreshold={2}
+      >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          updateWhenIdle
+          keepBuffer={2}
         />
         {typeof children === "function" ? children(mods) : children}
       </MapContainer>
