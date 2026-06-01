@@ -63,11 +63,23 @@ function Page() {
       return;
     }
     let lastPush = 0;
+    let lastUiUpdate = 0;
+    let lastLat = myPos?.lat ?? null;
+    let lastLng = myPos?.lng ?? null;
     watchRef.current = navigator.geolocation.watchPosition(
       async (pos) => {
         const lat = pos.coords.latitude, lng = pos.coords.longitude;
-        setMyPos({ lat, lng });
         const now = Date.now();
+        // Throttle UI updates: only re-render if moved >~15m or 4s elapsed.
+        const moved =
+          lastLat == null || lastLng == null
+            ? Infinity
+            : Math.hypot(lat - lastLat, lng - lastLng) * 111000; // deg→m approx
+        if (moved > 15 || now - lastUiUpdate > 4000) {
+          lastUiUpdate = now;
+          lastLat = lat; lastLng = lng;
+          setMyPos({ lat, lng });
+        }
         if (now - lastPush > 8000) {
           lastPush = now;
           await supabase.from("delivery_partners").update({ current_lat: lat, current_lng: lng }).eq("id", partner.id);
@@ -76,6 +88,7 @@ function Page() {
       (err) => console.warn("geolocation:", err.message),
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
     );
+
     return () => {
       if (watchRef.current != null) navigator.geolocation.clearWatch(watchRef.current);
       watchRef.current = null;
