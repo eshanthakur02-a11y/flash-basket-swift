@@ -18,13 +18,27 @@ export const Route = createFileRoute("/dashboard")({
 const ACTIVE_STATUSES = ["placed", "payment_confirmed", "packing", "out_for_delivery"] as const;
 
 function DashboardPage() {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, roles } = useAuth();
   const navigate = useNavigate();
 
   if (!loading && !user) {
     navigate({ to: "/auth" });
     return null;
   }
+
+  // Customers land on the storefront, not the dashboard.
+  // Admins, shopkeepers, and delivery partners keep their dashboards.
+  const isCustomerOnly =
+    !loading &&
+    !!user &&
+    !isAdmin &&
+    !roles.includes("shopkeeper" as any) &&
+    !roles.includes("delivery" as any);
+  if (isCustomerOnly) {
+    navigate({ to: "/products", replace: true });
+    return null;
+  }
+
 
   const profile = useQuery({
     queryKey: ["dashboard-profile", user?.id],
