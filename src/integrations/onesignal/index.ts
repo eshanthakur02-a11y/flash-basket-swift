@@ -45,8 +45,8 @@ export async function initOneSignal(): Promise<void> {
             allowLocalhostAsSecureOrigin: true,
             notifyButton: { enable: false },
             serviceWorkerParam: { scope: "/" },
-            serviceWorkerPath: "OneSignalSDKWorker.js",
-            serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
+            serviceWorkerPath: "api/public/OneSignalSDKWorker.js",
+            serviceWorkerUpdaterPath: "api/public/OneSignalSDKUpdaterWorker.js",
           });
           console.log("[OneSignal] init complete", {
             permission: OneSignal.Notifications?.permission,
