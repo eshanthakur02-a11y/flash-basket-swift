@@ -174,6 +174,24 @@ function Page() {
         </div>
 
         <section>
+          <h2 className="font-bold mb-3">Available orders {((available.data?.length ?? 0) > 0) && <span className="ml-2 rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[10px] font-bold">{available.data!.length} new</span>}</h2>
+          <div className="space-y-3">
+            {(available.data ?? []).map((o: any) => (
+              <div key={o.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap">
+                <div className="min-w-0">
+                  <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+                  <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
+                </div>
+                <Button size="sm" onClick={() => acceptAvailable(o.id)} className="rounded-xl gradient-primary text-primary-foreground" disabled={!partner?.is_online}>
+                  {partner?.is_online ? "Accept" : "Go online to accept"}
+                </Button>
+              </div>
+            ))}
+            {(available.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">No available orders right now.</div>}
+          </div>
+        </section>
+
+        <section>
           <h2 className="font-bold mb-3">Active deliveries</h2>
           <div className="space-y-4">
             {(myDeliveries.data ?? []).map((o: any) => {
