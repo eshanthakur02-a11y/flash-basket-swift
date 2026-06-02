@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
 
 const search = z.object({ q: z.string().optional(), cat: z.string().optional() });
 
@@ -17,6 +18,18 @@ export const Route = createFileRoute("/products")({
 function ProductsPage() {
   const { q, cat } = Route.useSearch();
   const [sort, setSort] = useState<"relevance" | "price-asc" | "price-desc" | "rating">("relevance");
+  const { user, loading, roles } = useAuth() as any;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading || !user) return;
+    const allowed = roles?.length === 0 || roles?.includes("customer") || roles?.includes("admin");
+    if (!allowed) {
+      if (roles?.includes("shopkeeper")) navigate({ to: "/shopkeeper/dashboard" });
+      else if (roles?.includes("delivery")) navigate({ to: "/delivery/dashboard" });
+      else navigate({ to: "/dashboard" });
+    }
+  }, [loading, user, roles, navigate]);
 
   const categories = useQuery({
     queryKey: ["categories"],
