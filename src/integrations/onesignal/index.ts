@@ -43,6 +43,9 @@ export async function initOneSignal(): Promise<void> {
             appId: APP_ID,
             allowLocalhostAsSecureOrigin: true,
             notifyButton: { enable: false },
+            serviceWorkerParam: { scope: "/" },
+            serviceWorkerPath: "OneSignalSDKWorker.js",
+            serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
           });
         } catch (e) {
           console.warn("[OneSignal] init error", e);
