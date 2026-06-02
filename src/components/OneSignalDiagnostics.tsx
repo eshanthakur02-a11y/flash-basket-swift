@@ -69,10 +69,10 @@ export function OneSignalDiagnostics() {
     let oneSignalSWReachable: boolean | null = null;
     let oneSignalSWStatus: number | null = null;
     try {
-      const res = await fetch("/OneSignalSDKWorker.js", { cache: "no-store" });
+      const res = await fetch("/api/public/OneSignalSDKWorker.js", { cache: "no-store" });
       oneSignalSWStatus = res.status;
       oneSignalSWReachable = res.ok;
-      addLog(`/OneSignalSDKWorker.js -> HTTP ${res.status}`);
+      addLog(`/api/public/OneSignalSDKWorker.js -> HTTP ${res.status}`);
     } catch (e: any) {
       oneSignalSWReachable = false;
       addLog("worker fetch failed: " + String(e?.message ?? e));
