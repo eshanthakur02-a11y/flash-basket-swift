@@ -26,17 +26,17 @@ function DashboardPage() {
     return null;
   }
 
-  // Customers land on the storefront, not the dashboard.
-  // Admins, shopkeepers, and delivery partners keep their dashboards.
-  const isCustomerOnly =
-    !loading &&
-    !!user &&
-    !isAdmin &&
-    !roles.includes("shopkeeper" as any) &&
-    !roles.includes("delivery" as any);
-  if (isCustomerOnly) {
-    navigate({ to: "/products", replace: true });
-    return null;
+  // Only customers and admins see this dashboard.
+  // Shopkeepers and delivery partners go to their role dashboards.
+  if (!loading && !!user) {
+    if (roles.includes("shopkeeper" as any)) {
+      navigate({ to: "/shopkeeper/dashboard", replace: true });
+      return null;
+    }
+    if (roles.includes("delivery" as any)) {
+      navigate({ to: "/delivery/dashboard", replace: true });
+      return null;
+    }
   }
 
 
