@@ -72,18 +72,15 @@ export function RouteMap({
   }
 
   const positions = valid.map((p) => [p.lat, p.lng] as [number, number]);
+  const lastSig = useRef<string | null>(null);
 
   return (
     <div className={className}>
       <LeafletMap center={center} zoom={13} className={`${height} w-full rounded-2xl overflow-hidden border border-border`}>
         {(RL) => {
           const { CircleMarker, Polyline, Popup, useMap } = RL;
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const lastSig = useRef<string | null>(null);
           const FitBounds = () => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
             const map = useMap();
-            // eslint-disable-next-line react-hooks/rules-of-hooks
             useEffect(() => {
               if (lastSig.current === shapeSig) return;
               lastSig.current = shapeSig;
