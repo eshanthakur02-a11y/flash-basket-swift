@@ -129,6 +129,31 @@ function Page() {
     if (error) toast.error(error.message); else toast.success("Delivered!");
   };
 
+  const available = useQuery({
+    queryKey: ["dashboard-available-orders"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_number, total, address")
+        .eq("status", "packed")
+        .is("partner_id", null)
+        .order("placed_at", { ascending: true })
+        .limit(10);
+      return data ?? [];
+    },
+    refetchInterval: 5000,
+  });
+
+  const acceptAvailable = async (id: string) => {
+    const { error } = await supabase.rpc("partner_accept_order", { _order_id: id });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Accepted! Start delivery.");
+      qc.invalidateQueries({ queryKey: ["dashboard-available-orders"] });
+      qc.invalidateQueries({ queryKey: ["my-deliveries"] });
+    }
+  };
+
   return (
     <RoleShell role="delivery" nav={NAV} requireRoles={["delivery", "admin"]}>
       <div className="p-4 md:p-6 space-y-5">
