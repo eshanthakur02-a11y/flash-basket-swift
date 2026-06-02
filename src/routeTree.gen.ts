@@ -62,6 +62,7 @@ import { Route as DeliveryTaskIdRouteImport } from './routes/delivery.task.$id'
 import { Route as CustomerProductIdRouteImport } from './routes/customer.product.$id'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
 import { Route as ApiPublicOneSignalSDKWorkerDotjsRouteImport } from './routes/api/public/OneSignalSDKWorker[.]js'
+import { Route as ApiPublicOneSignalSDKUpdaterWorkerDotjsRouteImport } from './routes/api/public/OneSignalSDKUpdaterWorker[.]js'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
 
 const SignupRoute = SignupRouteImport.update({
@@ -330,6 +331,12 @@ const ApiPublicOneSignalSDKWorkerDotjsRoute =
     path: '/api/public/OneSignalSDKWorker.js',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute =
+  ApiPublicOneSignalSDKUpdaterWorkerDotjsRouteImport.update({
+    id: '/api/public/OneSignalSDKUpdaterWorker.js',
+    path: '/api/public/OneSignalSDKUpdaterWorker.js',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminOrdersIdRoute = AdminOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -386,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/orders/': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
   '/api/public/OneSignalSDKWorker.js': typeof ApiPublicOneSignalSDKWorkerDotjsRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
   '/customer/product/$id': typeof CustomerProductIdRoute
@@ -442,6 +450,7 @@ export interface FileRoutesByTo {
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/orders': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
   '/api/public/OneSignalSDKWorker.js': typeof ApiPublicOneSignalSDKWorkerDotjsRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
   '/customer/product/$id': typeof CustomerProductIdRoute
@@ -499,6 +508,7 @@ export interface FileRoutesById {
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/orders/': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
   '/api/public/OneSignalSDKWorker.js': typeof ApiPublicOneSignalSDKWorkerDotjsRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
   '/customer/product/$id': typeof CustomerProductIdRoute
@@ -557,6 +567,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/settings'
     | '/orders/'
     | '/admin/orders/$id'
+    | '/api/public/OneSignalSDKUpdaterWorker.js'
     | '/api/public/OneSignalSDKWorker.js'
     | '/customer/orders/$id'
     | '/customer/product/$id'
@@ -613,6 +624,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/settings'
     | '/orders'
     | '/admin/orders/$id'
+    | '/api/public/OneSignalSDKUpdaterWorker.js'
     | '/api/public/OneSignalSDKWorker.js'
     | '/customer/orders/$id'
     | '/customer/product/$id'
@@ -669,6 +681,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/settings'
     | '/orders/'
     | '/admin/orders/$id'
+    | '/api/public/OneSignalSDKUpdaterWorker.js'
     | '/api/public/OneSignalSDKWorker.js'
     | '/customer/orders/$id'
     | '/customer/product/$id'
@@ -694,6 +707,7 @@ export interface RootRouteChildren {
   OrdersIdRoute: typeof OrdersIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
+  ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute: typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
   ApiPublicOneSignalSDKWorkerDotjsRoute: typeof ApiPublicOneSignalSDKWorkerDotjsRoute
 }
 
@@ -1070,6 +1084,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOneSignalSDKWorkerDotjsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/OneSignalSDKUpdaterWorker.js': {
+      id: '/api/public/OneSignalSDKUpdaterWorker.js'
+      path: '/api/public/OneSignalSDKUpdaterWorker.js'
+      fullPath: '/api/public/OneSignalSDKUpdaterWorker.js'
+      preLoaderRoute: typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/orders/$id': {
       id: '/admin/orders/$id'
       path: '/$id'
@@ -1237,6 +1258,8 @@ const rootRouteChildren: RootRouteChildren = {
   OrdersIdRoute: OrdersIdRoute,
   ProductSlugRoute: ProductSlugRoute,
   OrdersIndexRoute: OrdersIndexRoute,
+  ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute:
+    ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute,
   ApiPublicOneSignalSDKWorkerDotjsRoute: ApiPublicOneSignalSDKWorkerDotjsRoute,
 }
 export const routeTree = rootRouteImport
