@@ -39,6 +39,7 @@ export async function initOneSignal(): Promise<void> {
     await new Promise<void>((resolve) => {
       window.OneSignalDeferred!.push(async (OneSignal: any) => {
         try {
+          console.log("[OneSignal] init starting", { appId: APP_ID, origin: window.location.origin });
           await OneSignal.init({
             appId: APP_ID,
             allowLocalhostAsSecureOrigin: true,
@@ -47,8 +48,13 @@ export async function initOneSignal(): Promise<void> {
             serviceWorkerPath: "OneSignalSDKWorker.js",
             serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
           });
+          console.log("[OneSignal] init complete", {
+            permission: OneSignal.Notifications?.permission,
+            optedIn: OneSignal.User?.PushSubscription?.optedIn,
+            subscriptionId: OneSignal.User?.PushSubscription?.id,
+          });
         } catch (e) {
-          console.warn("[OneSignal] init error", e);
+          console.error("[OneSignal] init error", e);
         }
         resolve();
       });
