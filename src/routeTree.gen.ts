@@ -62,6 +62,7 @@ import { Route as DeliveryTaskIdRouteImport } from './routes/delivery.task.$id'
 import { Route as CustomerProductIdRouteImport } from './routes/customer.product.$id'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
+import { Route as ApiPublicOneSignalSDKWorkerJsRouteImport } from './routes/api/public/OneSignalSDKWorker.js'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -328,6 +329,12 @@ const AdminOrdersIdRoute = AdminOrdersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminOrdersRoute,
 } as any)
+const ApiPublicOneSignalSDKWorkerJsRoute =
+  ApiPublicOneSignalSDKWorkerJsRouteImport.update({
+    id: '/api/public/OneSignalSDKWorker/js',
+    path: '/api/public/OneSignalSDKWorker/js',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -383,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
+  '/api/public/OneSignalSDKWorker/js': typeof ApiPublicOneSignalSDKWorkerJsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -438,6 +446,7 @@ export interface FileRoutesByTo {
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
+  '/api/public/OneSignalSDKWorker/js': typeof ApiPublicOneSignalSDKWorkerJsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -494,6 +503,7 @@ export interface FileRoutesById {
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
+  '/api/public/OneSignalSDKWorker/js': typeof ApiPublicOneSignalSDKWorkerJsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -551,6 +561,7 @@ export interface FileRouteTypes {
     | '/customer/product/$id'
     | '/delivery/task/$id'
     | '/shopkeeper/orders/$id'
+    | '/api/public/OneSignalSDKWorker/js'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -606,6 +617,7 @@ export interface FileRouteTypes {
     | '/customer/product/$id'
     | '/delivery/task/$id'
     | '/shopkeeper/orders/$id'
+    | '/api/public/OneSignalSDKWorker/js'
   id:
     | '__root__'
     | '/'
@@ -661,6 +673,7 @@ export interface FileRouteTypes {
     | '/customer/product/$id'
     | '/delivery/task/$id'
     | '/shopkeeper/orders/$id'
+    | '/api/public/OneSignalSDKWorker/js'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -681,6 +694,7 @@ export interface RootRouteChildren {
   OrdersIdRoute: typeof OrdersIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
+  ApiPublicOneSignalSDKWorkerJsRoute: typeof ApiPublicOneSignalSDKWorkerJsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1056,6 +1070,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersIdRouteImport
       parentRoute: typeof AdminOrdersRoute
     }
+    '/api/public/OneSignalSDKWorker/js': {
+      id: '/api/public/OneSignalSDKWorker/js'
+      path: '/api/public/OneSignalSDKWorker/js'
+      fullPath: '/api/public/OneSignalSDKWorker/js'
+      preLoaderRoute: typeof ApiPublicOneSignalSDKWorkerJsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1216,6 +1237,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrdersIdRoute: OrdersIdRoute,
   ProductSlugRoute: ProductSlugRoute,
   OrdersIndexRoute: OrdersIndexRoute,
+  ApiPublicOneSignalSDKWorkerJsRoute: ApiPublicOneSignalSDKWorkerJsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
