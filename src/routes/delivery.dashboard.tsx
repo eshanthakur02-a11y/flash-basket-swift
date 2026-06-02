@@ -129,6 +129,31 @@ function Page() {
     if (error) toast.error(error.message); else toast.success("Delivered!");
   };
 
+  const available = useQuery({
+    queryKey: ["dashboard-available-orders"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_number, total, address")
+        .eq("status", "packed")
+        .is("partner_id", null)
+        .order("placed_at", { ascending: true })
+        .limit(10);
+      return data ?? [];
+    },
+    refetchInterval: 5000,
+  });
+
+  const acceptAvailable = async (id: string) => {
+    const { error } = await supabase.rpc("partner_accept_order", { _order_id: id });
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Accepted! Start delivery.");
+      qc.invalidateQueries({ queryKey: ["dashboard-available-orders"] });
+      qc.invalidateQueries({ queryKey: ["my-deliveries"] });
+    }
+  };
+
   return (
     <RoleShell role="delivery" nav={NAV} requireRoles={["delivery", "admin"]}>
       <div className="p-4 md:p-6 space-y-5">
@@ -147,6 +172,24 @@ function Page() {
             <Switch checked={partner?.is_online ?? false} onCheckedChange={toggleOnline} />
           </div>
         </div>
+
+        <section>
+          <h2 className="font-bold mb-3">Available orders {((available.data?.length ?? 0) > 0) && <span className="ml-2 rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[10px] font-bold">{available.data!.length} new</span>}</h2>
+          <div className="space-y-3">
+            {(available.data ?? []).map((o: any) => (
+              <div key={o.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap">
+                <div className="min-w-0">
+                  <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+                  <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
+                </div>
+                <Button size="sm" onClick={() => acceptAvailable(o.id)} className="rounded-xl gradient-primary text-primary-foreground" disabled={!partner?.is_online}>
+                  {partner?.is_online ? "Accept" : "Go online to accept"}
+                </Button>
+              </div>
+            ))}
+            {(available.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">No available orders right now.</div>}
+          </div>
+        </section>
 
         <section>
           <h2 className="font-bold mb-3">Active deliveries</h2>
