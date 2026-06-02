@@ -69,10 +69,10 @@ export function OneSignalDiagnostics() {
     let oneSignalSWReachable: boolean | null = null;
     let oneSignalSWStatus: number | null = null;
     try {
-      const res = await fetch("/OneSignalSDKWorker.js", { cache: "no-store" });
+      const res = await fetch("/api/public/OneSignalSDKWorker.js", { cache: "no-store" });
       oneSignalSWStatus = res.status;
       oneSignalSWReachable = res.ok;
-      addLog(`/OneSignalSDKWorker.js -> HTTP ${res.status}`);
+      addLog(`/api/public/OneSignalSDKWorker.js -> HTTP ${res.status}`);
     } catch (e: any) {
       oneSignalSWReachable = false;
       addLog("worker fetch failed: " + String(e?.message ?? e));
@@ -181,7 +181,7 @@ export function OneSignalDiagnostics() {
             <Row k="App ID" v={d.appId} />
             <Row k="init() OK" v={d.initOk ? "Yes" : "No"} ok={d.initOk} />
             <Row k="SW API supported" v={d.swSupported ? "Yes" : "No"} ok={d.swSupported} />
-            <Row k="/OneSignalSDKWorker.js" v={d.oneSignalSWStatus != null ? `HTTP ${d.oneSignalSWStatus}` : "—"} ok={d.oneSignalSWReachable ?? undefined} />
+            <Row k="/api/public/OneSignalSDKWorker.js" v={d.oneSignalSWStatus != null ? `HTTP ${d.oneSignalSWStatus}` : "—"} ok={d.oneSignalSWReachable ?? undefined} />
             <Row k="OneSignal SW registered" v={d.oneSignalSWFound ? "Yes" : "No"} ok={d.oneSignalSWFound} />
             <Row k="Total SW registrations" v={d.swRegistrations.length} />
             <Row k="Permission" v={d.permission} ok={d.permission === "granted"} />
