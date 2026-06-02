@@ -67,12 +67,13 @@ export function RouteMap({
     [valid],
   );
 
+  const lastSig = useRef<string | null>(null);
+
   if (valid.length === 0) {
     return <div className={`${height} w-full rounded-2xl border border-dashed border-border grid place-items-center text-sm text-muted-foreground ${className ?? ""}`}>No coordinates available</div>;
   }
 
   const positions = valid.map((p) => [p.lat, p.lng] as [number, number]);
-  const lastSig = useRef<string | null>(null);
 
   return (
     <div className={className}>
