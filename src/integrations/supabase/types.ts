@@ -938,6 +938,7 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      current_user_partner_id: { Args: never; Returns: string }
       find_nearest_shop_for_cart: {
         Args: {
           _exclude?: string[]
@@ -983,6 +984,7 @@ export type Database = {
         Returns: string
       }
       partner_accept_order: { Args: { _order_id: string }; Returns: undefined }
+      partner_is_on_order: { Args: { _partner_id: string }; Returns: boolean }
       partner_mark_delivered: {
         Args: { _order_id: string }
         Returns: undefined
@@ -1005,6 +1007,10 @@ export type Database = {
       shop_accept_order: { Args: { _order_id: string }; Returns: undefined }
       shop_mark_packed: { Args: { _order_id: string }; Returns: undefined }
       shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
+      user_owns_shop_for_order: {
+        Args: { _order_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       address_type: "home" | "work" | "other"
