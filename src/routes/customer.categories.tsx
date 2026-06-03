@@ -1,60 +1,103 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
 import { useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const search = z.object({ q: z.string().optional(), cat: z.string().optional() });
+
 export const Route = createFileRoute("/customer/categories")({
-  head: () => ({ meta: [{ title: "Categories — FlashBasket" }] }),
-  component: CategoriesPage,
+  validateSearch: search,
+  head: () => ({ meta: [{ title: "Shop — FlashBasket" }] }),
+  component: CategoryShop,
 });
 
-function CategoriesPage() {
-  const [q, setQ] = useState("");
+function CategoryShop() {
+  const { q, cat } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const [sort, setSort] = useState<"relevance" | "price-asc" | "price-desc" | "rating">("relevance");
+
   const categories = useQuery({
-    queryKey: ["app-all-categories"],
+    queryKey: ["app-cats"],
     queryFn: async () => (await supabase.from("categories").select("*").order("display_order")).data ?? [],
   });
 
-  const filtered = (categories.data ?? []).filter((c) =>
-    c.name.toLowerCase().includes(q.toLowerCase()),
-  );
+  const products = useQuery({
+    queryKey: ["app-products", q, cat, sort],
+    queryFn: async () => {
+      let qb = supabase
+        .from("products")
+        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock, rating, category_id");
+      if (q) qb = qb.ilike("name", `%${q}%`);
+      if (cat) {
+        const catRow = (await supabase.from("categories").select("id").eq("slug", cat).maybeSingle()).data;
+        if (catRow) qb = qb.eq("category_id", catRow.id);
+      }
+      if (sort === "price-asc") qb = qb.order("price", { ascending: true });
+      else if (sort === "price-desc") qb = qb.order("price", { ascending: false });
+      else if (sort === "rating") qb = qb.order("rating", { ascending: false });
+      const { data } = await qb.limit(80);
+      return (data ?? []) as ProductCardData[];
+    },
+  });
+
+  const activeName = cat ? categories.data?.find((c) => c.slug === cat)?.name : null;
 
   return (
-    <div className="px-4 py-4 space-y-4">
-      <h1 className="font-display text-2xl font-extrabold">Categories</h1>
-
-      <div className="flex items-center gap-2 rounded-2xl bg-card border border-border px-4 py-3 shadow-card">
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search categories"
-          className="flex-1 bg-transparent outline-none text-sm"
-        />
+    <div className="px-4 py-4">
+      {/* Category chips */}
+      <div className="-mx-4 px-4 overflow-x-auto pb-2 mb-3">
+        <div className="flex gap-2 w-max">
+          <button
+            onClick={() => navigate({ search: {} as any })}
+            className={`shrink-0 rounded-full border px-4 py-1.5 text-xs font-bold ${!cat ? "gradient-primary text-primary-foreground border-transparent shadow-glow" : "border-border bg-card"}`}
+          >
+            All
+          </button>
+          {categories.data?.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => navigate({ search: { cat: c.slug } as any })}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold inline-flex items-center gap-1.5 ${cat === c.slug ? "gradient-primary text-primary-foreground border-transparent shadow-glow" : "border-border bg-card"}`}
+            >
+              <span>{c.icon}</span>{c.name}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        {categories.isLoading
-          ? Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-square rounded-2xl" />)
-          : filtered.map((c) => (
-              <Link
-                key={c.id}
-                to="/category/$slug"
-                params={{ slug: c.slug }}
-                className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card hover:shadow-glow transition"
-              >
-                <div
-                  className="grid h-14 w-14 place-items-center rounded-2xl text-3xl"
-                  style={{ backgroundColor: (c.color ?? "#A3E635") + "55" }}
-                >
-                  {c.icon}
-                </div>
-                <div className="text-[11px] font-semibold text-center leading-tight">{c.name}</div>
-              </Link>
-            ))}
+      <div className="flex items-center justify-between mb-3 gap-2">
+        <h1 className="font-display text-2xl font-extrabold truncate">
+          {q ? `"${q}"` : activeName ?? "All products"}
+        </h1>
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as any)}
+          className="shrink-0 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold"
+        >
+          <option value="relevance">Sort: Relevance</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="rating">Top rated</option>
+        </select>
       </div>
+
+      {products.isLoading ? (
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />)}
+        </div>
+      ) : products.data?.length === 0 ? (
+        <div className="text-center py-20">
+          <div className="text-6xl">🛒</div>
+          <p className="mt-3 text-sm text-muted-foreground">No products match.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {products.data?.map((p) => <ProductCard key={p.id} product={p} />)}
+        </div>
+      )}
     </div>
   );
 }
