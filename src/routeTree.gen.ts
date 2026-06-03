@@ -46,6 +46,7 @@ import { Route as CustomerOrdersRouteImport } from './routes/customer.orders'
 import { Route as CustomerNotificationsRouteImport } from './routes/customer.notifications'
 import { Route as CustomerHomeRouteImport } from './routes/customer.home'
 import { Route as CustomerCheckoutRouteImport } from './routes/customer.checkout'
+import { Route as CustomerCategoriesRouteImport } from './routes/customer.categories'
 import { Route as CustomerCartRouteImport } from './routes/customer.cart'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminShopsRouteImport } from './routes/admin.shops'
@@ -251,6 +252,11 @@ const CustomerCheckoutRoute = CustomerCheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => CustomerRoute,
 } as any)
+const CustomerCategoriesRoute = CustomerCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => CustomerRoute,
+} as any)
 const CustomerCartRoute = CustomerCartRouteImport.update({
   id: '/cart',
   path: '/cart',
@@ -376,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/admin/shops': typeof AdminShopsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
+  '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
@@ -434,6 +441,7 @@ export interface FileRoutesByTo {
   '/admin/shops': typeof AdminShopsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
+  '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
@@ -493,6 +501,7 @@ export interface FileRoutesById {
   '/admin/shops': typeof AdminShopsRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
+  '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
@@ -553,6 +562,7 @@ export interface FileRouteTypes {
     | '/admin/shops'
     | '/category/$slug'
     | '/customer/cart'
+    | '/customer/categories'
     | '/customer/checkout'
     | '/customer/home'
     | '/customer/notifications'
@@ -611,6 +621,7 @@ export interface FileRouteTypes {
     | '/admin/shops'
     | '/category/$slug'
     | '/customer/cart'
+    | '/customer/categories'
     | '/customer/checkout'
     | '/customer/home'
     | '/customer/notifications'
@@ -669,6 +680,7 @@ export interface FileRouteTypes {
     | '/admin/shops'
     | '/category/$slug'
     | '/customer/cart'
+    | '/customer/categories'
     | '/customer/checkout'
     | '/customer/home'
     | '/customer/notifications'
@@ -985,6 +997,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerCheckoutRouteImport
       parentRoute: typeof CustomerRoute
     }
+    '/customer/categories': {
+      id: '/customer/categories'
+      path: '/categories'
+      fullPath: '/customer/categories'
+      preLoaderRoute: typeof CustomerCategoriesRouteImport
+      parentRoute: typeof CustomerRoute
+    }
     '/customer/cart': {
       id: '/customer/cart'
       path: '/cart'
@@ -1175,6 +1194,7 @@ const CustomerOrdersRouteWithChildren = CustomerOrdersRoute._addFileChildren(
 
 interface CustomerRouteChildren {
   CustomerCartRoute: typeof CustomerCartRoute
+  CustomerCategoriesRoute: typeof CustomerCategoriesRoute
   CustomerCheckoutRoute: typeof CustomerCheckoutRoute
   CustomerHomeRoute: typeof CustomerHomeRoute
   CustomerNotificationsRoute: typeof CustomerNotificationsRoute
@@ -1187,6 +1207,7 @@ interface CustomerRouteChildren {
 
 const CustomerRouteChildren: CustomerRouteChildren = {
   CustomerCartRoute: CustomerCartRoute,
+  CustomerCategoriesRoute: CustomerCategoriesRoute,
   CustomerCheckoutRoute: CustomerCheckoutRoute,
   CustomerHomeRoute: CustomerHomeRoute,
   CustomerNotificationsRoute: CustomerNotificationsRoute,
