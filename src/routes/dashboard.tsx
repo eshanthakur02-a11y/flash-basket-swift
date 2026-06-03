@@ -1,19 +1,39 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import {
-  Package, MapPin, Clock, Heart, Bell, Wallet, ShoppingBag, ArrowRight,
-  Truck, CheckCircle2, ChevronRight, Sparkles, Settings, Headphones, Shield,
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { rupees } from "@/lib/format";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — FlashBasket" }] }),
-  component: DashboardPage,
+  component: DashboardRedirect,
 });
+
+function DashboardRedirect() {
+  const { user, loading, roles } = useAuth() as any;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) { navigate({ to: "/login", replace: true }); return; }
+    const r: string[] = roles ?? [];
+    if (r.includes("shopkeeper")) navigate({ to: "/shopkeeper/dashboard", replace: true });
+    else if (r.includes("delivery")) navigate({ to: "/delivery/dashboard", replace: true });
+  }, [user, loading, roles, navigate]);
+
+  if (loading || !user) return null;
+  const r: string[] = roles ?? [];
+  if (r.includes("shopkeeper") || r.includes("delivery")) return null;
+  return <Navigate to="/customer/home" replace />;
+}
+
+function _UnusedLegacyDashboard() {
+  return null;
+}
+
+// Legacy dashboard kept below for reference but not exported.
+const _legacy = () => {
+  const useNav = useNavigate;
+  void useNav;
+};
 
 const ACTIVE_STATUSES = ["placed", "payment_confirmed", "packing", "out_for_delivery"] as const;
 
