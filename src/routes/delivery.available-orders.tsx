@@ -30,13 +30,8 @@ function Page() {
   const orders = useQuery({
     queryKey: ["available-orders"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("id, order_number, total, address")
-        .eq("status", "packed")
-        .is("partner_id", null)
-        .order("placed_at", { ascending: true });
-      return data ?? [];
+      const { data } = await supabase.rpc("partner_available_orders");
+      return (data ?? []) as Array<{ id: string; order_number: string; total: number; city: string | null; area_pincode: string | null; item_count: number }>;
     },
     refetchInterval: 5000,
   });
