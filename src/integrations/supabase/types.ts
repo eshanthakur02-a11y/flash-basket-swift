@@ -984,6 +984,18 @@ export type Database = {
         Returns: string
       }
       partner_accept_order: { Args: { _order_id: string }; Returns: undefined }
+      partner_available_orders: {
+        Args: never
+        Returns: {
+          area_pincode: string
+          city: string
+          id: string
+          item_count: number
+          order_number: string
+          placed_at: string
+          total: number
+        }[]
+      }
       partner_is_on_order: { Args: { _partner_id: string }; Returns: boolean }
       partner_mark_delivered: {
         Args: { _order_id: string }
