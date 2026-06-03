@@ -50,7 +50,7 @@ function Page() {
             <div key={o.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap">
               <div className="min-w-0">
                 <div className="font-bold">{o.order_number} • {rupees(o.total)}</div>
-                <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
+                <div className="text-xs text-muted-foreground">{[o.city, o.area_pincode].filter(Boolean).join(" • ")} · {o.item_count} item{o.item_count === 1 ? "" : "s"}</div>
               </div>
               <Button size="sm" onClick={() => accept(o.id)} className="rounded-xl gradient-primary text-primary-foreground">Accept</Button>
             </div>
