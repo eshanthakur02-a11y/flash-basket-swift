@@ -7,14 +7,13 @@ import { RoleShell } from "@/components/RoleShell";
 import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
-import { LayoutDashboard, ListOrdered, Package, Wallet, Bell, Star, Settings, Check, X, PackageCheck, Truck, Layers, Tag } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Package, Wallet, Bell, Star, Settings, Check, X, PackageCheck, Truck, Tag } from "lucide-react";
 
 const NAV = [
   { to: "/shopkeeper/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/shopkeeper/orders", label: "Orders", icon: ListOrdered },
   { to: "/shopkeeper/products", label: "Products", icon: Package },
   { to: "/shopkeeper/categories", label: "Categories", icon: Tag },
-  { to: "/shopkeeper/collections", label: "Collections", icon: Layers },
   { to: "/shopkeeper/delivery", label: "Delivery", icon: Truck },
   { to: "/shopkeeper/earnings", label: "Earnings", icon: Wallet },
   { to: "/shopkeeper/notifications", label: "Alerts", icon: Bell },
