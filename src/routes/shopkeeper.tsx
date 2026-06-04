@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Zap } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Zap, Megaphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/shopkeeper/dashboard", label: "Home", icon: LayoutDashboard },
   { to: "/shopkeeper/orders", label: "Orders", icon: ClipboardList },
   { to: "/shopkeeper/products", label: "Products", icon: Package },
+  { to: "/shopkeeper/offers", label: "Offers", icon: Megaphone },
   { to: "/shopkeeper/earnings", label: "Earnings", icon: Wallet },
   { to: "/shopkeeper/settings", label: "Account", icon: User },
 ] as const;
