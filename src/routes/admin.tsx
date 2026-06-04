@@ -70,7 +70,7 @@ function AdminShell() {
                 <Menu className="h-5 w-5" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
+            <SwipeableSheetContent onClose={() => setOpen(false)}>
               <SheetHeader className="p-4 border-b border-border">
                 <SheetTitle className="flex items-center gap-2 font-display font-extrabold">
                   <span className="grid h-7 w-7 place-items-center rounded-full gradient-primary text-primary-foreground">
