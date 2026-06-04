@@ -78,15 +78,35 @@ function Page() {
 
   const partnerById = (id: string | null) => (partners.data ?? []).find((p: any) => p.id === id);
 
+  const [addOpen, setAddOpen] = useState(false);
+  const [confirmDel, setConfirmDel] = useState<any | null>(null);
+
+  const deletePartner = async (id: string) => {
+    const { error } = await supabase.rpc("delete_delivery_partner", { _partner_id: id });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Partner removed");
+    setConfirmDel(null);
+    qc.invalidateQueries({ queryKey: ["online-partners"] });
+    qc.invalidateQueries({ queryKey: ["shop-perf", shopId] });
+  };
+
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
       <div className="p-4 md:p-6 space-y-6">
-        <header>
-          <h1 className="font-display text-3xl font-extrabold flex items-center gap-2">
-            <Truck className="h-7 w-7 text-primary" />
-            Delivery Management
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">Assign delivery partners, track active orders, view performance.</p>
+        <header className="flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="font-display text-3xl font-extrabold flex items-center gap-2">
+              <Truck className="h-7 w-7 text-primary" />
+              Delivery Management
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">Add or remove delivery boys, assign live orders, and track performance.</p>
+          </div>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogTrigger asChild>
+              <Button><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
+            </DialogTrigger>
+            <AddPartnerDialog onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["online-partners"] }); qc.invalidateQueries({ queryKey: ["shop-perf", shopId] }); }} />
+          </Dialog>
         </header>
 
         <section>
