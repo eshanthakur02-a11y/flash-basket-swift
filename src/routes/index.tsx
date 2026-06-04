@@ -111,7 +111,31 @@ function HomePage() {
       {/* CATEGORIES */}
       <section className="mx-auto max-w-7xl px-4 py-10">
         <h2 className="font-display text-2xl md:text-3xl font-bold mb-4">Shop by category</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-3">
+        <div className="md:hidden -mx-4 px-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
+          <div className="grid grid-rows-2 grid-flow-col auto-cols-[28%] gap-3 pb-2">
+            {categories.isLoading
+              ? Array.from({ length: 10 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-square rounded-2xl" />
+                ))
+              : categories.data?.map((c) => (
+                  <Link
+                    key={c.id}
+                    to="/category/$slug"
+                    params={{ slug: c.slug }}
+                    className="snap-start group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card transition-all"
+                  >
+                    <div
+                      className="grid h-12 w-12 place-items-center rounded-xl text-2xl"
+                      style={{ backgroundColor: (c.color ?? "#A3E635") + "55" }}
+                    >
+                      {c.icon}
+                    </div>
+                    <div className="text-[11px] text-center font-medium leading-tight line-clamp-2">{c.name}</div>
+                  </Link>
+                ))}
+          </div>
+        </div>
+        <div className="hidden md:grid grid-cols-5 lg:grid-cols-10 gap-3">
           {categories.isLoading
             ? Array.from({ length: 10 }).map((_, i) => (
                 <Skeleton key={i} className="aspect-square rounded-2xl" />
