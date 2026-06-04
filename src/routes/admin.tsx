@@ -99,7 +99,7 @@ function AdminShell() {
                   );
                 })}
               </nav>
-            </SheetContent>
+            </SwipeableSheetContent>
           </Sheet>
         }
         trailing={
