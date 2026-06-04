@@ -63,6 +63,17 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {discount}% OFF
         </div>
       )}
+      <button
+        onClick={toggleFav}
+        className="absolute top-2 right-2 z-10 h-8 w-8 grid place-items-center rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-sm"
+        aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+      >
+        <Heart
+          className={isFav ? "text-primary" : "text-muted-foreground"}
+          fill={isFav ? "currentColor" : "none"}
+          size={16}
+        />
+      </button>
       <Link to="/product/$slug" params={{ slug: product.slug }} className="block">
         <div className="aspect-square w-full overflow-hidden rounded-xl bg-secondary/40">
           {product.image_url ? (
