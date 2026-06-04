@@ -16,6 +16,7 @@ import {
 export function Header() {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
 
   return (
     <header className="sticky top-0 z-40 glass border-b border-border">
