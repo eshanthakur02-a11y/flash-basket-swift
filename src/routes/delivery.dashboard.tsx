@@ -200,6 +200,26 @@ function Page() {
         </div>
 
         <section>
+          <h2 className="font-bold mb-3">Assigned to you {((assigned.data?.length ?? 0) > 0) && <span className="ml-2 rounded-full bg-yellow-200 text-yellow-900 px-2 py-0.5 text-[10px] font-bold">{assigned.data!.length}</span>}</h2>
+          <div className="space-y-3">
+            {(assigned.data ?? []).map((o: any) => (
+              <div key={o.id} className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 space-y-2">
+                <div className="min-w-0">
+                  <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+                  <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => acceptAvailable(o.id)} className="flex-1 rounded-xl gradient-primary text-primary-foreground" disabled={!partner?.is_online}>Accept</Button>
+                  <Button size="sm" variant="outline" onClick={() => declineAssignment(o.id)} className="rounded-xl">Decline</Button>
+                </div>
+              </div>
+            ))}
+            {(assigned.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">Nothing assigned right now.</div>}
+          </div>
+        </section>
+
+        <section>
+
           <h2 className="font-bold mb-3">Available orders {((available.data?.length ?? 0) > 0) && <span className="ml-2 rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[10px] font-bold">{available.data!.length} new</span>}</h2>
           <div className="space-y-3">
             {(available.data ?? []).map((o: any) => (
