@@ -38,21 +38,16 @@ function ShopkeeperShell() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="sticky top-0 z-40 glass border-b border-border">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <Link to="/shopkeeper/dashboard" className="flex items-center gap-2 font-display font-extrabold text-lg">
-            <span className="grid h-8 w-8 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
-              <Zap className="h-4 w-4 fill-current" />
-            </span>
-            Flash<span className="text-primary">Basket</span>
-            <span className="ml-1 text-[10px] uppercase font-bold tracking-wider rounded-full bg-secondary px-2 py-0.5">Shop</span>
-          </Link>
-          <div className="flex-1" />
-          <Link to="/shopkeeper/notifications" className="grid h-10 w-10 place-items-center rounded-full bg-secondary">
+      <RoleHeader
+        homeTo="/shopkeeper/dashboard"
+        accountTo="/shopkeeper/settings"
+        searchTo="/shopkeeper/products"
+        trailing={
+          <Link to="/shopkeeper/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition">
             <Bell className="h-5 w-5" />
           </Link>
-        </div>
-      </header>
+        }
+      />
 
       <main className="flex-1 min-w-0 pb-24"><Outlet /></main>
 
