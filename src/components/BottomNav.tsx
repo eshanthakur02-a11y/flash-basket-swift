@@ -3,7 +3,7 @@ import { Home, LayoutGrid, ShoppingCart, Heart, Package } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { cn } from "@/lib/utils";
 
-const items: Array<{ to: "/" | "/products" | "/cart" | "/account" | "/orders"; label: string; icon: typeof Home; badge?: boolean }> = [
+const items: Array<{ to: "/" | "/products" | "/cart" | "/customer/wishlist" | "/orders"; label: string; icon: typeof Home; badge?: boolean }> = [
   { to: "/", label: "Home", icon: Home },
   { to: "/products", label: "Category", icon: LayoutGrid },
   { to: "/cart", label: "Cart", icon: ShoppingCart, badge: true },
