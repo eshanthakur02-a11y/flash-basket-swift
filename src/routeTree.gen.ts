@@ -34,6 +34,7 @@ import { Route as ShopkeeperEarningsRouteImport } from './routes/shopkeeper.earn
 import { Route as ShopkeeperDeliveryRouteImport } from './routes/shopkeeper.delivery'
 import { Route as ShopkeeperDashboardRouteImport } from './routes/shopkeeper.dashboard'
 import { Route as ShopkeeperCollectionsRouteImport } from './routes/shopkeeper.collections'
+import { Route as ShopkeeperCategoriesRouteImport } from './routes/shopkeeper.categories'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
 import { Route as DeliveryProfileRouteImport } from './routes/delivery.profile'
@@ -197,6 +198,11 @@ const ShopkeeperDashboardRoute = ShopkeeperDashboardRouteImport.update({
 const ShopkeeperCollectionsRoute = ShopkeeperCollectionsRouteImport.update({
   id: '/collections',
   path: '/collections',
+  getParentRoute: () => ShopkeeperRoute,
+} as any)
+const ShopkeeperCategoriesRoute = ShopkeeperCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => ShopkeeperRoute,
 } as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
@@ -444,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/delivery/profile': typeof DeliveryProfileRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
   '/shopkeeper/collections': typeof ShopkeeperCollectionsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
@@ -510,6 +517,7 @@ export interface FileRoutesByTo {
   '/delivery/profile': typeof DeliveryProfileRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
   '/shopkeeper/collections': typeof ShopkeeperCollectionsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
@@ -577,6 +585,7 @@ export interface FileRoutesById {
   '/delivery/profile': typeof DeliveryProfileRoute
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
   '/shopkeeper/collections': typeof ShopkeeperCollectionsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
@@ -645,6 +654,7 @@ export interface FileRouteTypes {
     | '/delivery/profile'
     | '/orders/$id'
     | '/product/$slug'
+    | '/shopkeeper/categories'
     | '/shopkeeper/collections'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
@@ -711,6 +721,7 @@ export interface FileRouteTypes {
     | '/delivery/profile'
     | '/orders/$id'
     | '/product/$slug'
+    | '/shopkeeper/categories'
     | '/shopkeeper/collections'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
@@ -777,6 +788,7 @@ export interface FileRouteTypes {
     | '/delivery/profile'
     | '/orders/$id'
     | '/product/$slug'
+    | '/shopkeeper/categories'
     | '/shopkeeper/collections'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
@@ -995,6 +1007,13 @@ declare module '@tanstack/react-router' {
       path: '/collections'
       fullPath: '/shopkeeper/collections'
       preLoaderRoute: typeof ShopkeeperCollectionsRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
+    '/shopkeeper/categories': {
+      id: '/shopkeeper/categories'
+      path: '/categories'
+      fullPath: '/shopkeeper/categories'
+      preLoaderRoute: typeof ShopkeeperCategoriesRouteImport
       parentRoute: typeof ShopkeeperRoute
     }
     '/product/$slug': {
@@ -1399,6 +1418,7 @@ const ShopkeeperOrdersRouteWithChildren =
   ShopkeeperOrdersRoute._addFileChildren(ShopkeeperOrdersRouteChildren)
 
 interface ShopkeeperRouteChildren {
+  ShopkeeperCategoriesRoute: typeof ShopkeeperCategoriesRoute
   ShopkeeperCollectionsRoute: typeof ShopkeeperCollectionsRoute
   ShopkeeperDashboardRoute: typeof ShopkeeperDashboardRoute
   ShopkeeperDeliveryRoute: typeof ShopkeeperDeliveryRoute
@@ -1412,6 +1432,7 @@ interface ShopkeeperRouteChildren {
 }
 
 const ShopkeeperRouteChildren: ShopkeeperRouteChildren = {
+  ShopkeeperCategoriesRoute: ShopkeeperCategoriesRoute,
   ShopkeeperCollectionsRoute: ShopkeeperCollectionsRoute,
   ShopkeeperDashboardRoute: ShopkeeperDashboardRoute,
   ShopkeeperDeliveryRoute: ShopkeeperDeliveryRoute,
