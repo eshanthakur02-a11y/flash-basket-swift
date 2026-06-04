@@ -104,7 +104,7 @@ function OrderPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <Link to="/orders" className="text-sm text-muted-foreground hover:underline">← All orders</Link>
+      <Link to="/customer/orders" className="text-sm text-muted-foreground hover:underline">← All orders</Link>
 
       <div className="mt-4 rounded-3xl gradient-hero border border-border p-6 shadow-card relative overflow-hidden">
         <div className="text-xs font-semibold text-muted-foreground">Order</div>
