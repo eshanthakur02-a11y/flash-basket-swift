@@ -7,7 +7,7 @@ const items: Array<{ to: "/" | "/products" | "/cart" | "/customer/wishlist" | "/
   { to: "/", label: "Home", icon: Home },
   { to: "/products", label: "Category", icon: LayoutGrid },
   { to: "/cart", label: "Cart", icon: ShoppingCart, badge: true },
-  { to: "/account", label: "Favourite", icon: Heart },
+  { to: "/customer/wishlist", label: "Favourite", icon: Heart },
   { to: "/orders", label: "My Orders", icon: Package },
 ];
 
