@@ -70,15 +70,6 @@ function CustomerHome() {
         <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
       </motion.section>
 
-      {/* Search */}
-      <Link
-        to="/customer/categories"
-        className="flex items-center gap-2 rounded-2xl bg-card border border-border px-4 py-3 shadow-card"
-      >
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Search for "milk", "rice"…</span>
-      </Link>
-
       {/* Promise strip */}
       <div className="grid grid-cols-3 gap-2">
         <Promise icon={<Clock className="h-4 w-4" />} label="10-min" />
