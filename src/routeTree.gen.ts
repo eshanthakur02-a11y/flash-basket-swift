@@ -28,6 +28,7 @@ import { Route as ShopkeeperSettingsRouteImport } from './routes/shopkeeper.sett
 import { Route as ShopkeeperReviewsRouteImport } from './routes/shopkeeper.reviews'
 import { Route as ShopkeeperProductsRouteImport } from './routes/shopkeeper.products'
 import { Route as ShopkeeperOrdersRouteImport } from './routes/shopkeeper.orders'
+import { Route as ShopkeeperOffersRouteImport } from './routes/shopkeeper.offers'
 import { Route as ShopkeeperNotificationsRouteImport } from './routes/shopkeeper.notifications'
 import { Route as ShopkeeperEarningsRouteImport } from './routes/shopkeeper.earnings'
 import { Route as ShopkeeperDashboardRouteImport } from './routes/shopkeeper.dashboard'
@@ -55,6 +56,7 @@ import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminDeliveryPartnersRouteImport } from './routes/admin.delivery-partners'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
@@ -163,6 +165,11 @@ const ShopkeeperProductsRoute = ShopkeeperProductsRouteImport.update({
 const ShopkeeperOrdersRoute = ShopkeeperOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => ShopkeeperRoute,
+} as any)
+const ShopkeeperOffersRoute = ShopkeeperOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
   getParentRoute: () => ShopkeeperRoute,
 } as any)
 const ShopkeeperNotificationsRoute = ShopkeeperNotificationsRouteImport.update({
@@ -300,6 +307,11 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOffersRoute = AdminOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -395,6 +407,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -422,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
+  '/shopkeeper/offers': typeof ShopkeeperOffersRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
@@ -457,6 +471,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -484,6 +499,7 @@ export interface FileRoutesByTo {
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
+  '/shopkeeper/offers': typeof ShopkeeperOffersRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
@@ -520,6 +536,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -547,6 +564,7 @@ export interface FileRoutesById {
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
+  '/shopkeeper/offers': typeof ShopkeeperOffersRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
@@ -584,6 +602,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/delivery-partners'
     | '/admin/notifications'
+    | '/admin/offers'
     | '/admin/orders'
     | '/admin/payments'
     | '/admin/products'
@@ -611,6 +630,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/dashboard'
     | '/shopkeeper/earnings'
     | '/shopkeeper/notifications'
+    | '/shopkeeper/offers'
     | '/shopkeeper/orders'
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
@@ -646,6 +666,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/delivery-partners'
     | '/admin/notifications'
+    | '/admin/offers'
     | '/admin/orders'
     | '/admin/payments'
     | '/admin/products'
@@ -673,6 +694,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/dashboard'
     | '/shopkeeper/earnings'
     | '/shopkeeper/notifications'
+    | '/shopkeeper/offers'
     | '/shopkeeper/orders'
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
@@ -708,6 +730,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/delivery-partners'
     | '/admin/notifications'
+    | '/admin/offers'
     | '/admin/orders'
     | '/admin/payments'
     | '/admin/products'
@@ -735,6 +758,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/dashboard'
     | '/shopkeeper/earnings'
     | '/shopkeeper/notifications'
+    | '/shopkeeper/offers'
     | '/shopkeeper/orders'
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
@@ -905,6 +929,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/shopkeeper/orders'
       preLoaderRoute: typeof ShopkeeperOrdersRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
+    '/shopkeeper/offers': {
+      id: '/shopkeeper/offers'
+      path: '/offers'
+      fullPath: '/shopkeeper/offers'
+      preLoaderRoute: typeof ShopkeeperOffersRouteImport
       parentRoute: typeof ShopkeeperRoute
     }
     '/shopkeeper/notifications': {
@@ -1096,6 +1127,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/offers': {
+      id: '/admin/offers'
+      path: '/offers'
+      fullPath: '/admin/offers'
+      preLoaderRoute: typeof AdminOffersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/notifications': {
       id: '/admin/notifications'
       path: '/notifications'
@@ -1217,6 +1255,7 @@ interface AdminRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDeliveryPartnersRoute: typeof AdminDeliveryPartnersRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminOffersRoute: typeof AdminOffersRoute
   AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -1233,6 +1272,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDeliveryPartnersRoute: AdminDeliveryPartnersRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminOffersRoute: AdminOffersRoute,
   AdminOrdersRoute: AdminOrdersRouteWithChildren,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminProductsRoute: AdminProductsRoute,
@@ -1324,6 +1364,7 @@ interface ShopkeeperRouteChildren {
   ShopkeeperDashboardRoute: typeof ShopkeeperDashboardRoute
   ShopkeeperEarningsRoute: typeof ShopkeeperEarningsRoute
   ShopkeeperNotificationsRoute: typeof ShopkeeperNotificationsRoute
+  ShopkeeperOffersRoute: typeof ShopkeeperOffersRoute
   ShopkeeperOrdersRoute: typeof ShopkeeperOrdersRouteWithChildren
   ShopkeeperProductsRoute: typeof ShopkeeperProductsRoute
   ShopkeeperReviewsRoute: typeof ShopkeeperReviewsRoute
@@ -1334,6 +1375,7 @@ const ShopkeeperRouteChildren: ShopkeeperRouteChildren = {
   ShopkeeperDashboardRoute: ShopkeeperDashboardRoute,
   ShopkeeperEarningsRoute: ShopkeeperEarningsRoute,
   ShopkeeperNotificationsRoute: ShopkeeperNotificationsRoute,
+  ShopkeeperOffersRoute: ShopkeeperOffersRoute,
   ShopkeeperOrdersRoute: ShopkeeperOrdersRouteWithChildren,
   ShopkeeperProductsRoute: ShopkeeperProductsRoute,
   ShopkeeperReviewsRoute: ShopkeeperReviewsRoute,
@@ -1370,13 +1412,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

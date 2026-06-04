@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Zap } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Zap, Megaphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/shopkeeper/dashboard", label: "Home", icon: LayoutDashboard },
   { to: "/shopkeeper/orders", label: "Orders", icon: ClipboardList },
   { to: "/shopkeeper/products", label: "Products", icon: Package },
+  { to: "/shopkeeper/offers", label: "Offers", icon: Megaphone },
   { to: "/shopkeeper/earnings", label: "Earnings", icon: Wallet },
   { to: "/shopkeeper/settings", label: "Account", icon: User },
 ] as const;
@@ -55,7 +56,7 @@ function ShopkeeperShell() {
       <main className="flex-1 min-w-0 pb-24"><Outlet /></main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 glass border-t border-border">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-6">
           {NAV.map((n) => {
             const active = pathname === n.to || pathname.startsWith(n.to + "/");
             const Icon = n.icon;
