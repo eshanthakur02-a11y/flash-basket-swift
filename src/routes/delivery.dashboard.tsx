@@ -180,6 +180,36 @@ function Page() {
     }
   };
 
+  // Attendance
+  const attendance = useQuery({
+    queryKey: ["partner-attendance", partner?.id],
+    queryFn: async () => {
+      if (!partner) return { rows: [], hours: 0, open: null };
+      const { data: rows } = await supabase
+        .from("partner_attendance")
+        .select("id, check_in_at, check_out_at")
+        .eq("partner_id", partner.id)
+        .order("check_in_at", { ascending: false })
+        .limit(7);
+      const { data: hours } = await supabase.rpc("partner_today_hours", { _partner_id: partner.id });
+      const open = (rows ?? []).find((r: any) => !r.check_out_at) ?? null;
+      return { rows: rows ?? [], hours: Number(hours ?? 0), open };
+    },
+    enabled: !!partner,
+    refetchInterval: 30000,
+  });
+
+  const checkIn = async () => {
+    const { error } = await supabase.rpc("partner_check_in");
+    if (error) toast.error(error.message);
+    else { toast.success("Checked in"); attendance.refetch(); }
+  };
+  const checkOut = async () => {
+    const { error } = await supabase.rpc("partner_check_out");
+    if (error) toast.error(error.message);
+    else { toast.success("Checked out"); attendance.refetch(); setPartner((p: any) => p ? { ...p, is_online: false } : p); }
+  };
+
   return (
     <RoleShell role="delivery" nav={NAV} requireRoles={["delivery", "admin"]}>
       <div className="p-4 md:p-6 space-y-5">
@@ -198,6 +228,37 @@ function Page() {
             <Switch checked={partner?.is_online ?? false} onCheckedChange={toggleOnline} />
           </div>
         </div>
+
+        <section className="rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <div className="font-bold">Attendance</div>
+              <div className="text-xs text-muted-foreground">
+                Today: <span className="font-bold text-foreground">{attendance.data?.hours.toFixed(2) ?? "0.00"}h</span>
+                {attendance.data?.open && <span className="ml-2 text-green-600 font-semibold">• Checked in</span>}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={checkIn} disabled={!!attendance.data?.open} className="rounded-xl gradient-primary text-primary-foreground">Check In</Button>
+              <Button size="sm" variant="outline" onClick={checkOut} disabled={!attendance.data?.open} className="rounded-xl">Check Out</Button>
+            </div>
+          </div>
+          {(attendance.data?.rows.length ?? 0) > 0 && (
+            <div className="mt-3 border-t border-border pt-3 text-xs space-y-1">
+              {attendance.data!.rows.map((r: any) => {
+                const inT = new Date(r.check_in_at);
+                const outT = r.check_out_at ? new Date(r.check_out_at) : null;
+                const hrs = ((outT ?? new Date()).getTime() - inT.getTime()) / 3.6e6;
+                return (
+                  <div key={r.id} className="flex justify-between text-muted-foreground">
+                    <span>{inT.toLocaleDateString()} {inT.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} → {outT ? outT.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—"}</span>
+                    <span className="font-semibold text-foreground">{hrs.toFixed(2)}h</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         <section>
           <h2 className="font-bold mb-3">Assigned to you {((assigned.data?.length ?? 0) > 0) && <span className="ml-2 rounded-full bg-yellow-200 text-yellow-900 px-2 py-0.5 text-[10px] font-bold">{assigned.data!.length}</span>}</h2>
