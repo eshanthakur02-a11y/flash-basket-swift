@@ -45,6 +45,7 @@ function CustomerShell() {
         homeTo="/customer/home"
         accountTo="/customer/profile"
         searchTo="/products"
+        showSearch={!pathname.startsWith("/customer/orders") && !pathname.startsWith("/customer/profile")}
         trailing={
           <>
             <Link to="/customer/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition">
