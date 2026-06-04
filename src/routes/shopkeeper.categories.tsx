@@ -148,6 +148,10 @@ function Page() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {picking && shopId && (
+          <ItemPicker shopId={shopId} category={picking} onClose={() => setPicking(null)} />
+        )}
       </div>
     </RoleShell>
   );
