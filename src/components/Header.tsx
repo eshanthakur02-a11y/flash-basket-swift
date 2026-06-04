@@ -16,7 +16,10 @@ import {
 export function Header() {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [query, setQuery] = useState("");
+
+  const hideSearch = pathname.startsWith("/orders") || pathname.startsWith("/account");
 
   return (
     <>
