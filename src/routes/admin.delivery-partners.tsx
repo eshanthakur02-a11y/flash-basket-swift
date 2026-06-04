@@ -212,8 +212,8 @@ function AddPartnerDialog({ onDone }: { onDone: () => void }) {
     const { error } = await supabase.rpc("create_delivery_partner", {
       _name: name.trim(),
       _phone: phone.trim(),
-      _vehicle: vehicle.trim() || null,
-      _user_email: email.trim() || null,
+      _vehicle: vehicle.trim() || undefined,
+      _user_email: email.trim() || undefined,
     });
     setBusy(false);
     if (error) toast.error(error.message);
