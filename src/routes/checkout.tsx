@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { MapPin, Plus, Wallet, CreditCard, Tag, Zap } from "lucide-react";
@@ -75,11 +75,12 @@ function CheckoutPage() {
   const handling = 5;
   const total = subtotal + deliveryFee + handling;
 
-  // pick default
-  if (!selectedAddr && (addresses.data?.length ?? 0) > 0) {
-    const def = addresses.data!.find((a) => a.is_default) ?? addresses.data![0];
-    setSelectedAddr(def.id);
-  }
+  useEffect(() => {
+    if (!selectedAddr && (addresses.data?.length ?? 0) > 0) {
+      const def = addresses.data!.find((a) => a.is_default) ?? addresses.data![0];
+      setSelectedAddr(def.id);
+    }
+  }, [addresses.data, selectedAddr]);
 
   const saveNewAddress = async () => {
     if (!newAddr.line1 || !newAddr.city || !newAddr.pincode || !newAddr.phone || !newAddr.name) {
