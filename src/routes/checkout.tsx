@@ -75,11 +75,12 @@ function CheckoutPage() {
   const handling = 5;
   const total = subtotal + deliveryFee + handling;
 
-  // pick default
-  if (!selectedAddr && (addresses.data?.length ?? 0) > 0) {
-    const def = addresses.data!.find((a) => a.is_default) ?? addresses.data![0];
-    setSelectedAddr(def.id);
-  }
+  useEffect(() => {
+    if (!selectedAddr && (addresses.data?.length ?? 0) > 0) {
+      const def = addresses.data!.find((a) => a.is_default) ?? addresses.data![0];
+      setSelectedAddr(def.id);
+    }
+  }, [addresses.data, selectedAddr]);
 
   const saveNewAddress = async () => {
     if (!newAddr.line1 || !newAddr.city || !newAddr.pincode || !newAddr.phone || !newAddr.name) {
