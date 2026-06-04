@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hero3D } from "@/components/Hero3D";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const { user } = useAuth();
   const categories = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -53,6 +55,7 @@ function HomePage() {
   return (
     <div>
       {/* HERO */}
+      {!user && (
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 gradient-aurora pointer-events-none" />
         <div className="relative mx-auto max-w-7xl px-4 py-12 md:py-20 grid md:grid-cols-2 gap-10 items-center">
@@ -103,6 +106,7 @@ function HomePage() {
           </motion.div>
         </div>
       </section>
+      )}
 
       {/* CATEGORIES */}
       <section className="mx-auto max-w-7xl px-4 py-10">

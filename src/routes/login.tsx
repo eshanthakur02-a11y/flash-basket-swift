@@ -21,7 +21,7 @@ async function redirectByRole(navigate: ReturnType<typeof useNavigate>, userId: 
   if (roles.includes("admin")) navigate({ to: "/admin/dashboard" });
   else if (roles.includes("shopkeeper")) navigate({ to: "/shopkeeper/dashboard" });
   else if (roles.includes("delivery")) navigate({ to: "/delivery/dashboard" });
-  else navigate({ to: "/products" });
+  else navigate({ to: "/" });
 }
 
 function LoginPage() {
