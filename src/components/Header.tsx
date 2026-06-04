@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { MapPin, User, LogOut, Shield, Clock } from "lucide-react";
+import { MapPin, User, LogOut, Shield, Clock, Search } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
@@ -15,67 +16,88 @@ import {
 export function Header() {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
 
   return (
-    <header className="sticky top-0 z-40 glass border-b border-border">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:gap-6">
-        <Link to="/" className="shrink-0">
-          <Logo />
-        </Link>
+    <>
+      <header className="sticky top-0 z-40 glass border-b border-border">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:gap-6">
+          <Link to="/" className="shrink-0">
+            <Logo />
+          </Link>
 
-        <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/60 border border-border">
-          <Clock className="h-4 w-4 text-primary" />
-          <div className="text-xs leading-tight">
-            <div className="font-bold">Delivery in 10 min</div>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <MapPin className="h-3 w-3" /> Your location
+          <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/60 border border-border">
+            <Clock className="h-4 w-4 text-primary" />
+            <div className="text-xs leading-tight">
+              <div className="font-bold">Delivery in 10 min</div>
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <MapPin className="h-3 w-3" /> Your location
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex-1" />
+          <div className="flex-1" />
 
-        <div className="flex items-center gap-2">
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-xl">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>
-                  Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/orders" })}>
-                  My Orders
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/account" })}>
-                  Account & Addresses
-                </DropdownMenuItem>
-                {isAdmin && (
-                  <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>
-                    <Shield className="h-4 w-4 mr-2" /> Admin Dashboard
+          <div className="flex items-center gap-2">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-xl">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>
+                    Dashboard
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}>
-                  <LogOut className="h-4 w-4 mr-2" /> Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link to="/login">
-              <Button className="rounded-xl bg-foreground text-background hover:bg-foreground/90 font-bold shadow-card">
-                <User className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Login</span>
-              </Button>
-            </Link>
-          )}
+                  <DropdownMenuItem onClick={() => navigate({ to: "/orders" })}>
+                    My Orders
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate({ to: "/account" })}>
+                    Account & Addresses
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>
+                      <Shield className="h-4 w-4 mr-2" /> Admin Dashboard
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="h-4 w-4 mr-2" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/login">
+                <Button className="rounded-xl bg-foreground text-background hover:bg-foreground/90 font-bold shadow-card">
+                  <User className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Login</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="md:hidden px-4 py-2 bg-background border-b border-border">
+        <div className="flex items-center gap-2 rounded-xl bg-card border border-border px-3 py-2.5">
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+          <input
+            type="text"
+            placeholder="Search for products..."
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && query.trim()) {
+                navigate({ to: "/products", search: { q: query.trim() } });
+              }
+            }}
+          />
         </div>
       </div>
-    </header>
+    </>
   );
 }
