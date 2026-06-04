@@ -471,6 +471,42 @@ export type Database = {
         }
         Relationships: []
       }
+      order_audit_log: {
+        Row: {
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          event_type: string
+          from_value: string | null
+          id: string
+          meta: Json
+          order_id: string
+          to_value: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          event_type: string
+          from_value?: string | null
+          id?: string
+          meta?: Json
+          order_id: string
+          to_value?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          event_type?: string
+          from_value?: string | null
+          id?: string
+          meta?: Json
+          order_id?: string
+          to_value?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -885,6 +921,68 @@ export type Database = {
           },
         ]
       }
+      shop_collection_items: {
+        Row: {
+          collection_id: string
+          created_at: string
+          product_id: string
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string
+          product_id: string
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "shop_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_collections: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          shop_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          shop_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          shop_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shop_products: {
         Row: {
           created_at: string
@@ -1036,6 +1134,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      actor_role_label: { Args: never; Returns: string }
       admin_assign_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1116,7 +1215,20 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      create_delivery_partner: {
+        Args: {
+          _name: string
+          _phone: string
+          _user_email?: string
+          _vehicle?: string
+        }
+        Returns: string
+      }
       current_user_partner_id: { Args: never; Returns: string }
+      delete_delivery_partner: {
+        Args: { _partner_id: string }
+        Returns: undefined
+      }
       find_nearest_partner_for_order: {
         Args: { _exclude?: string[]; _order_id: string }
         Returns: string
