@@ -144,13 +144,39 @@ function Page() {
     refetchInterval: 5000,
   });
 
+  const assigned = useQuery({
+    queryKey: ["assigned-to-me", partner?.id],
+    queryFn: async () => {
+      if (!partner) return [];
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_number, total, address, shop_id")
+        .eq("partner_id", partner.id)
+        .eq("status", "packed")
+        .order("placed_at", { ascending: true });
+      return data ?? [];
+    },
+    enabled: !!partner,
+    refetchInterval: 5000,
+  });
+
   const acceptAvailable = async (id: string) => {
     const { error } = await supabase.rpc("partner_accept_order", { _order_id: id });
     if (error) toast.error(error.message);
     else {
       toast.success("Accepted! Start delivery.");
       qc.invalidateQueries({ queryKey: ["dashboard-available-orders"] });
+      qc.invalidateQueries({ queryKey: ["assigned-to-me", partner?.id] });
       qc.invalidateQueries({ queryKey: ["my-deliveries"] });
+    }
+  };
+
+  const declineAssignment = async (id: string) => {
+    const { error } = await supabase.rpc("partner_decline_assignment", { _order_id: id });
+    if (error) toast.error(error.message);
+    else {
+      toast.message("Declined. Reassigning…");
+      qc.invalidateQueries({ queryKey: ["assigned-to-me", partner?.id] });
     }
   };
 
