@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Megaphone, Menu, Truck, Star, Settings, Zap } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Megaphone, Menu, Truck, Star, Settings, Zap, Tag, Layers } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { RoleHeader } from "@/components/RoleHeader";
@@ -24,11 +24,13 @@ const DRAWER_NAV = [
   { to: "/shopkeeper/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/shopkeeper/orders", label: "Orders", icon: ClipboardList },
   { to: "/shopkeeper/products", label: "Products", icon: Package },
+  { to: "/shopkeeper/categories", label: "Categories", icon: Tag },
+  { to: "/shopkeeper/collections", label: "Collections", icon: Layers },
   { to: "/shopkeeper/delivery", label: "Delivery", icon: Truck },
   { to: "/shopkeeper/offers", label: "Offers", icon: Megaphone },
   { to: "/shopkeeper/earnings", label: "Earnings", icon: Wallet },
-  { to: "/shopkeeper/reviews", label: "Reviews", icon: Star },
   { to: "/shopkeeper/notifications", label: "Alerts", icon: Bell },
+  { to: "/shopkeeper/reviews", label: "Reviews", icon: Star },
   { to: "/shopkeeper/settings", label: "Settings", icon: Settings },
 ] as const;
 
