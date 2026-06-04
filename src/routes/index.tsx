@@ -162,11 +162,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* FEATURED */}
-      <ProductSection title="✨ Featured today" query={featured} />
-      <ProductSection title="🔥 Bestsellers" query={bestsellers} />
-    </div>
-  );
       {/* CATALOG FILTERS */}
       <CatalogFilters categories={categories.data ?? []} />
 
