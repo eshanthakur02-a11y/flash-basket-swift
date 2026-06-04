@@ -1,9 +1,10 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Megaphone } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Megaphone, Menu, Truck, Star, Settings, Zap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { RoleHeader } from "@/components/RoleHeader";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/shopkeeper")({
   head: () => ({ meta: [{ title: "Shopkeeper — FlashBasket" }] }),
@@ -19,10 +20,23 @@ const NAV = [
   { to: "/shopkeeper/settings", label: "Account", icon: User },
 ] as const;
 
+const DRAWER_NAV = [
+  { to: "/shopkeeper/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/shopkeeper/orders", label: "Orders", icon: ClipboardList },
+  { to: "/shopkeeper/products", label: "Products", icon: Package },
+  { to: "/shopkeeper/delivery", label: "Delivery", icon: Truck },
+  { to: "/shopkeeper/offers", label: "Offers", icon: Megaphone },
+  { to: "/shopkeeper/earnings", label: "Earnings", icon: Wallet },
+  { to: "/shopkeeper/reviews", label: "Reviews", icon: Star },
+  { to: "/shopkeeper/notifications", label: "Alerts", icon: Bell },
+  { to: "/shopkeeper/settings", label: "Settings", icon: Settings },
+] as const;
+
 function ShopkeeperShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, loading, roles } = useAuth() as any;
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -42,6 +56,45 @@ function ShopkeeperShell() {
         homeTo="/shopkeeper/dashboard"
         accountTo="/shopkeeper/settings"
         searchTo="/shopkeeper/products"
+        leading={
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <button aria-label="Open menu" className="md:hidden grid h-10 w-10 place-items-center rounded-xl bg-secondary hover:bg-secondary/80 transition">
+                <Menu className="h-5 w-5" />
+              </button>
+            </SheetTrigger>
+            <SwipeableSheetContent onClose={() => setOpen(false)}>
+              <SheetHeader className="p-4 border-b border-border">
+                <SheetTitle className="flex items-center gap-2 font-display font-extrabold">
+                  <span className="grid h-7 w-7 place-items-center rounded-full gradient-primary text-primary-foreground">
+                    <Zap className="h-3.5 w-3.5 fill-current" />
+                  </span>
+                  Shop Menu
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="p-2">
+                {DRAWER_NAV.map((n) => {
+                  const Icon = n.icon;
+                  const active = pathname === n.to || pathname.startsWith(n.to + "/");
+                  return (
+                    <Link
+                      key={n.to}
+                      to={n.to as any}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition",
+                        active ? "bg-primary/10 text-primary" : "hover:bg-secondary text-foreground",
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                      {n.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </SwipeableSheetContent>
+          </Sheet>
+        }
         trailing={
           <Link to="/shopkeeper/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition">
             <Bell className="h-5 w-5" />
@@ -51,7 +104,7 @@ function ShopkeeperShell() {
 
       <main className="flex-1 min-w-0 pb-24"><Outlet /></main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 glass border-t border-border">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 glass border-t border-border md:hidden">
         <div className="grid grid-cols-6">
           {NAV.map((n) => {
             const active = pathname === n.to || pathname.startsWith(n.to + "/");
@@ -75,5 +128,21 @@ function ShopkeeperShell() {
         </div>
       </nav>
     </div>
+  );
+}
+
+function SwipeableSheetContent({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  const startX = useRef<number | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => { startX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (startX.current == null) return;
+    const dx = e.changedTouches[0].clientX - startX.current;
+    if (dx < -60) onClose();
+    startX.current = null;
+  };
+  return (
+    <SheetContent side="left" className="w-72 p-0" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      {children}
+    </SheetContent>
   );
 }

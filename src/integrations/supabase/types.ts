@@ -624,6 +624,33 @@ export type Database = {
           },
         ]
       }
+      partner_attendance: {
+        Row: {
+          check_in_at: string
+          check_out_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          partner_id: string
+        }
+        Insert: {
+          check_in_at?: string
+          check_out_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          partner_id: string
+        }
+        Update: {
+          check_in_at?: string
+          check_out_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          partner_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -1046,7 +1073,27 @@ export type Database = {
           roles: Database["public"]["Enums"]["app_role"][]
         }[]
       }
+      admin_partner_performance: {
+        Args: never
+        Returns: {
+          avg_minutes_30d: number
+          hours_today: number
+          is_online: boolean
+          name: string
+          on_time_pct_30d: number
+          orders_30d: number
+          orders_7d: number
+          orders_today: number
+          partner_id: string
+          phone: string
+          rating: number
+        }[]
+      }
       admin_payments_summary: { Args: never; Returns: Json }
+      admin_reassign_partner: {
+        Args: { _order_id: string; _partner_id: string }
+        Returns: undefined
+      }
       admin_record_refund: {
         Args: { _amount: number; _payment_id: string; _refund_id: string }
         Returns: undefined
@@ -1131,6 +1178,8 @@ export type Database = {
           total: number
         }[]
       }
+      partner_check_in: { Args: never; Returns: string }
+      partner_check_out: { Args: never; Returns: undefined }
       partner_decline_assignment: {
         Args: { _order_id: string }
         Returns: undefined
@@ -1140,6 +1189,7 @@ export type Database = {
         Args: { _order_id: string }
         Returns: undefined
       }
+      partner_today_hours: { Args: { _partner_id: string }; Returns: number }
       place_order: {
         Args: {
           _address: Json
@@ -1156,7 +1206,26 @@ export type Database = {
         Returns: undefined
       }
       shop_accept_order: { Args: { _order_id: string }; Returns: undefined }
+      shop_assign_partner: {
+        Args: { _order_id: string; _partner_id: string }
+        Returns: undefined
+      }
       shop_mark_packed: { Args: { _order_id: string }; Returns: undefined }
+      shop_partner_performance: {
+        Args: { _shop_id: string }
+        Returns: {
+          avg_minutes_today: number
+          hours_today: number
+          is_online: boolean
+          name: string
+          on_time_pct: number
+          orders_7d: number
+          orders_today: number
+          partner_id: string
+          phone: string
+          rating: number
+        }[]
+      }
       shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
       user_owns_shop_for_order: {
         Args: { _order_id: string }

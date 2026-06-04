@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
   LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet,
@@ -70,7 +70,7 @@ function AdminShell() {
                 <Menu className="h-5 w-5" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
+            <SwipeableSheetContent onClose={() => setOpen(false)}>
               <SheetHeader className="p-4 border-b border-border">
                 <SheetTitle className="flex items-center gap-2 font-display font-extrabold">
                   <span className="grid h-7 w-7 place-items-center rounded-full gradient-primary text-primary-foreground">
@@ -99,7 +99,7 @@ function AdminShell() {
                   );
                 })}
               </nav>
-            </SheetContent>
+            </SwipeableSheetContent>
           </Sheet>
         }
         trailing={
@@ -218,5 +218,21 @@ function SwipeArea({ pathname, children }: { pathname: string; children: React.R
         {children}
       </motion.div>
     </AnimatePresence>
+  );
+}
+
+function SwipeableSheetContent({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  const startX = useRef<number | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => { startX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (startX.current == null) return;
+    const dx = e.changedTouches[0].clientX - startX.current;
+    if (dx < -60) onClose();
+    startX.current = null;
+  };
+  return (
+    <SheetContent side="left" className="w-72 p-0" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      {children}
+    </SheetContent>
   );
 }
