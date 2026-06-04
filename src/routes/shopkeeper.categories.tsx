@@ -39,6 +39,7 @@ function Page() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [confirmDel, setConfirmDel] = useState<Category | null>(null);
+  const [picking, setPicking] = useState<Category | null>(null);
 
   useEffect(() => {
     if (!user) return;
