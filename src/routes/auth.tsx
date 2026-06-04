@@ -23,9 +23,9 @@ function AuthPage() {
   const [li, setLi] = useState({ email: "", password: "" });
   const [su, setSu] = useState({ name: "", email: "", password: "" });
 
-  if (user) {
-    navigate({ to: "/dashboard" });
-  }
+  useEffect(() => {
+    if (user) navigate({ to: "/dashboard" });
+  }, [user, navigate]);
 
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
