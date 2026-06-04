@@ -59,8 +59,11 @@ function AdminShell() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="sticky top-0 z-40 glass border-b border-border">
-        <div className="flex items-center gap-3 px-4 py-3">
+      <RoleHeader
+        homeTo="/admin/dashboard"
+        accountTo="/admin/settings"
+        searchTo="/admin/products"
+        leading={
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <button aria-label="Open menu" className="grid h-10 w-10 place-items-center rounded-xl bg-secondary hover:bg-secondary/80 transition">
@@ -98,20 +101,13 @@ function AdminShell() {
               </nav>
             </SheetContent>
           </Sheet>
-
-          <Link to="/admin/dashboard" className="flex items-center gap-2 font-display font-extrabold text-lg">
-            <span className="grid h-8 w-8 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
-              <Zap className="h-4 w-4 fill-current" />
-            </span>
-            Flash<span className="text-primary">Basket</span>
-            <span className="ml-1 text-[10px] uppercase font-bold tracking-wider rounded-full bg-secondary px-2 py-0.5">Admin</span>
-          </Link>
-          <div className="flex-1" />
-          <Link to="/admin/notifications" className="grid h-10 w-10 place-items-center rounded-full bg-secondary">
+        }
+        trailing={
+          <Link to="/admin/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition">
             <Bell className="h-5 w-5" />
           </Link>
-        </div>
-      </header>
+        }
+      />
 
       <SwipeTabs pathname={pathname} />
 
