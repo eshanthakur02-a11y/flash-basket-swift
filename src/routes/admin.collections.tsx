@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { ImageInput } from "@/components/ImageInput";
 
 export const Route = createFileRoute("/admin/collections")({
   head: () => ({ meta: [{ title: "Collections — Admin" }] }),
@@ -131,12 +132,12 @@ function CollectionDialog({ initial, onSave, saving }: { initial: Collection | n
         <div><label className="text-xs font-bold">Name</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
         <div><label className="text-xs font-bold">Slug</label><Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugify(name)} /></div>
         <div><label className="text-xs font-bold">Description</label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} /></div>
-        <div><label className="text-xs font-bold">Image URL</label><Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." /></div>
+        <ImageInput value={imageUrl ?? ""} onChange={setImageUrl} bucket="categories" label="Cover image" required />
         <div><label className="text-xs font-bold">Display order</label><Input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value))} /></div>
         <div className="flex items-center gap-3"><Switch checked={active} onCheckedChange={setActive} /><span className="text-sm">Active (visible to customers)</span></div>
       </div>
       <DialogFooter>
-        <Button disabled={!name || saving} onClick={() => onSave({ name, slug: slug || slugify(name), description, image_url: imageUrl, display_order: order, is_active: active })}>
+        <Button disabled={!name || !imageUrl || saving} onClick={() => onSave({ name, slug: slug || slugify(name), description, image_url: imageUrl, display_order: order, is_active: active })}>
           {saving ? "Saving..." : "Save"}
         </Button>
       </DialogFooter>
