@@ -35,6 +35,23 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   const discount = pct(product.price, product.mrp);
   const outOfStock = product.stock <= 0;
 
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    setIsFav(readFavIds().includes(product.id));
+  }, [product.id]);
+
+  const toggleFav = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const ids = readFavIds();
+    const next = ids.includes(product.id)
+      ? ids.filter((id) => id !== product.id)
+      : [...ids, product.id];
+    writeFavIds(next);
+    setIsFav(next.includes(product.id));
+  };
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
