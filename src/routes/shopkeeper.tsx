@@ -36,19 +36,19 @@ const DRAWER_NAV = [
 
 function ShopkeeperShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user, loading, roles } = useAuth() as any;
+  const { user, loading, rolesLoading, roles } = useAuth() as any;
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || rolesLoading) return;
     if (!user) { navigate({ to: "/login", replace: true }); return; }
     const r: string[] = roles ?? [];
     if (!r.includes("shopkeeper") && !r.includes("admin")) {
       if (r.includes("delivery")) navigate({ to: "/delivery/dashboard", replace: true });
       else navigate({ to: "/customer/home", replace: true });
     }
-  }, [user, loading, roles, navigate]);
+  }, [user, loading, rolesLoading, roles, navigate]);
 
   if (pathname === "/shopkeeper") return <Navigate to="/shopkeeper/dashboard" replace />;
 
