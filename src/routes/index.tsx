@@ -457,64 +457,82 @@ function FloatingBasket() {
   );
 }
 
-function OfferBannersCarousel() {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: "start" },
-    [Autoplay({ delay: 3500, stopOnInteraction: false, stopOnMouseEnter: true })]
-  );
-  const [selected, setSelected] = useState(0);
+type OfferRow = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  image_url: string;
+  link_url: string | null;
+  badge: string | null;
+  scope: "global" | "shop";
+};
 
-  useEffect(() => {
-    if (!emblaApi) return;
-    const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
-    emblaApi.on("select", onSelect);
-    onSelect();
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
-  }, [emblaApi]);
+function OfferBannersCarousel() {
+  const offers = useQuery({
+    queryKey: ["offers-public"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("offers" as any)
+        .select("id, title, subtitle, image_url, link_url, badge, scope, display_order")
+        .order("display_order", { ascending: true });
+      return (data ?? []) as unknown as OfferRow[];
+    },
+  });
+
+  if (!offers.isLoading && (!offers.data || offers.data.length === 0)) return null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 pt-6">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-display text-lg md:text-xl font-bold">🎁 Offers & deals</h2>
       </div>
-      <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
-        <div className="flex">
-          {OFFER_BANNERS.map((b, i) => (
-            <div
-              key={i}
-              className="flex-[0_0_100%] sm:flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_25%] min-w-0 pr-3"
-            >
-              <Link
-                to={b.to}
-                className="block rounded-2xl overflow-hidden shadow-md hover:shadow-glow transition-shadow border border-border bg-card"
-              >
+
+      {offers.isLoading ? (
+        <Skeleton className="w-full h-28 sm:h-32 rounded-2xl" />
+      ) : (
+        <Swiper
+          modules={[Autoplay, Pagination]}
+          loop={(offers.data?.length ?? 0) > 1}
+          spaceBetween={12}
+          autoplay={{ delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }}
+          pagination={{ clickable: true, dynamicBullets: true }}
+          breakpoints={{
+            0: { slidesPerView: 1.1 },
+            640: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            1024: { slidesPerView: 4 },
+          }}
+          className="!pb-8"
+        >
+          {offers.data!.map((o) => {
+            const href = o.link_url || "/";
+            const img = (
+              <div className="relative rounded-2xl overflow-hidden shadow-md hover:shadow-glow transition-shadow border border-border bg-card">
                 <img
-                  src={b.src}
-                  alt={b.alt}
-                  width={768}
-                  height={512}
+                  src={o.image_url}
+                  alt={o.title}
                   loading="lazy"
-                  className="w-full h-24 sm:h-28 md:h-32 object-cover"
+                  className="w-full h-28 sm:h-32 md:h-36 object-cover"
                 />
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex justify-center gap-1.5 mt-3">
-        {OFFER_BANNERS.map((_, i) => (
-          <button
-            key={i}
-            aria-label={`Go to banner ${i + 1}`}
-            onClick={() => emblaApi?.scrollTo(i)}
-            className={`h-1.5 rounded-full transition-all ${
-              selected === i ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/40"
-            }`}
-          />
-        ))}
-      </div>
+                {o.badge && (
+                  <span className="absolute top-2 left-2 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 shadow-glow">
+                    {o.badge}
+                  </span>
+                )}
+              </div>
+            );
+            return (
+              <SwiperSlide key={o.id}>
+                {href.startsWith("/") ? (
+                  <Link to={href as any} className="block">{img}</Link>
+                ) : (
+                  <a href={href} target="_blank" rel="noreferrer" className="block">{img}</a>
+                )}
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
+      )}
     </section>
   );
 }
