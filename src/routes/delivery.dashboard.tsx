@@ -80,7 +80,7 @@ function Page() {
           lastLat = lat; lastLng = lng;
           setMyPos({ lat, lng });
         }
-        if (now - lastPush > 8000) {
+        if (now - lastPush > 5000) {
           lastPush = now;
           await supabase.from("delivery_partners").update({ current_lat: lat, current_lng: lng }).eq("id", partner.id);
         }
