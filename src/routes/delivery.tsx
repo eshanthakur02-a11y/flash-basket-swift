@@ -1,8 +1,9 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LayoutDashboard, PackageSearch, History, Wallet, User, Bell, Zap } from "lucide-react";
+import { LayoutDashboard, PackageSearch, History, Wallet, User, Bell } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { RoleHeader } from "@/components/RoleHeader";
 
 export const Route = createFileRoute("/delivery")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
