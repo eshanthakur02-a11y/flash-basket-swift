@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import { Zap, Clock, Truck, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -122,6 +125,9 @@ function HomePage() {
       </section>
       )}
 
+      {/* OFFER BANNERS */}
+      <OfferBannersCarousel />
+
       {/* CATEGORIES */}
       <section className="mx-auto max-w-7xl px-4 py-10">
         <h2 className="font-display text-2xl md:text-3xl font-bold mb-4">Shop by category</h2>
@@ -173,30 +179,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* OFFER BANNERS */}
-      <section className="px-4 md:px-8 mt-2">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg md:text-xl font-bold">🎁 Offers & deals</h2>
-        </div>
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory scrollbar-hide">
-          {OFFER_BANNERS.map((b, i) => (
-            <Link
-              key={i}
-              to={b.to}
-              className="snap-start shrink-0 w-[78%] sm:w-[48%] md:w-[32%] lg:w-[24%] rounded-2xl overflow-hidden shadow-md hover:shadow-glow transition-shadow border border-border bg-card"
-            >
-              <img
-                src={b.src}
-                alt={b.alt}
-                width={768}
-                height={512}
-                loading="lazy"
-                className="w-full h-24 sm:h-28 md:h-32 object-cover"
-              />
-            </Link>
-          ))}
-        </div>
-      </section>
 
       {/* CATALOG FILTERS */}
       <CatalogFilters categories={categories.data ?? []} />
@@ -481,5 +463,67 @@ function FloatingBasket() {
         <Zap className="inline h-4 w-4 fill-primary text-primary mr-1" /> 10 min
       </motion.div>
     </div>
+  );
+}
+
+function OfferBannersCarousel() {
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, align: "start" },
+    [Autoplay({ delay: 3500, stopOnInteraction: false, stopOnMouseEnter: true })]
+  );
+  const [selected, setSelected] = useState(0);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    onSelect();
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi]);
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 pt-6">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-display text-lg md:text-xl font-bold">🎁 Offers & deals</h2>
+      </div>
+      <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
+        <div className="flex">
+          {OFFER_BANNERS.map((b, i) => (
+            <div
+              key={i}
+              className="flex-[0_0_100%] sm:flex-[0_0_50%] md:flex-[0_0_33.333%] lg:flex-[0_0_25%] min-w-0 pr-3"
+            >
+              <Link
+                to={b.to}
+                className="block rounded-2xl overflow-hidden shadow-md hover:shadow-glow transition-shadow border border-border bg-card"
+              >
+                <img
+                  src={b.src}
+                  alt={b.alt}
+                  width={768}
+                  height={512}
+                  loading="lazy"
+                  className="w-full h-24 sm:h-28 md:h-32 object-cover"
+                />
+              </Link>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex justify-center gap-1.5 mt-3">
+        {OFFER_BANNERS.map((_, i) => (
+          <button
+            key={i}
+            aria-label={`Go to banner ${i + 1}`}
+            onClick={() => emblaApi?.scrollTo(i)}
+            className={`h-1.5 rounded-full transition-all ${
+              selected === i ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/40"
+            }`}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
