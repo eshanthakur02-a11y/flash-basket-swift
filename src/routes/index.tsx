@@ -8,6 +8,17 @@ import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hero3D } from "@/components/Hero3D";
 import { useAuth } from "@/hooks/useAuth";
+import banner1 from "@/assets/banners/banner1.jpg.asset.json";
+import banner2 from "@/assets/banners/banner2.jpg.asset.json";
+import banner3 from "@/assets/banners/banner3.jpg.asset.json";
+import banner4 from "@/assets/banners/banner4.jpg.asset.json";
+
+const OFFER_BANNERS = [
+  { src: banner1.url, alt: "50% off fresh fruits", to: "/category/fruits-vegetables" },
+  { src: banner2.url, alt: "Free delivery on your order", to: "/" },
+  { src: banner3.url, alt: "Buy 1 Get 1 on dairy", to: "/category/dairy" },
+  { src: banner4.url, alt: "Weekend sale up to 70% off", to: "/" },
+];
 
 type SortKey = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 
@@ -159,6 +170,31 @@ function HomePage() {
                   <div className="text-xs text-center font-medium leading-tight">{c.name}</div>
                 </Link>
               ))}
+        </div>
+      </section>
+
+      {/* OFFER BANNERS */}
+      <section className="px-4 md:px-8 mt-2">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg md:text-xl font-bold">🎁 Offers & deals</h2>
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory scrollbar-hide">
+          {OFFER_BANNERS.map((b, i) => (
+            <Link
+              key={i}
+              to={b.to}
+              className="snap-start shrink-0 w-[78%] sm:w-[48%] md:w-[32%] lg:w-[24%] rounded-2xl overflow-hidden shadow-md hover:shadow-glow transition-shadow border border-border bg-card"
+            >
+              <img
+                src={b.src}
+                alt={b.alt}
+                width={768}
+                height={512}
+                loading="lazy"
+                className="w-full h-24 sm:h-28 md:h-32 object-cover"
+              />
+            </Link>
+          ))}
         </div>
       </section>
 
