@@ -136,7 +136,9 @@ function Page() {
 
         <section>
           <h2 className="font-bold mb-3 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" />Partner roster &amp; performance</h2>
-          <div className="overflow-x-auto rounded-2xl border border-border">
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto rounded-2xl border border-border">
             <table className="w-full text-sm">
               <thead className="bg-secondary/40 text-xs uppercase">
                 <tr>
@@ -179,6 +181,41 @@ function Page() {
                 {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={11} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {(perf.data ?? []).map((r: any) => {
+              const pp = partnerById(r.partner_id);
+              return (
+                <div key={r.partner_id} className="rounded-2xl border border-border bg-card p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-bold truncate">{r.name}</div>
+                      <div className="text-xs text-muted-foreground">{pp?.phone ?? "No phone"}</div>
+                      <div className="mt-1 text-xs">
+                        {r.is_online
+                          ? <span className="inline-flex items-center gap-1 text-green-600 font-bold"><Circle className="h-2 w-2 fill-green-500 text-green-500" />Online</span>
+                          : <span className="text-muted-foreground">Offline</span>}
+                      </div>
+                    </div>
+                    <Button size="icon" variant="ghost" onClick={() => setConfirmDel(r)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-3 text-center">
+                    <MiniStat label="Today" value={String(r.orders_today)} />
+                    <MiniStat label="7d" value={String(r.orders_7d)} />
+                    <MiniStat label="30d" value={String(r.orders_30d)} />
+                    <MiniStat label="Avg min" value={Number(r.avg_minutes_30d).toFixed(1)} />
+                    <MiniStat label="On-time" value={`${Number(r.on_time_pct_30d).toFixed(0)}%`} />
+                    <MiniStat label="Rating" value={Number(r.rating).toFixed(1)} />
+                  </div>
+                  <div className="mt-2 text-[11px] text-muted-foreground text-right">Hours today: {Number(r.hours_today).toFixed(2)}</div>
+                </div>
+              );
+            })}
+            {(perf.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground text-center py-6">No data yet.</div>}
           </div>
         </section>
 
@@ -245,6 +282,15 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="text-xs text-muted-foreground font-semibold">{label}</div>
       <div className="font-display text-2xl font-extrabold mt-1">{value}</div>
+    </div>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-secondary/40 px-2 py-1.5">
+      <div className="text-[10px] uppercase font-bold text-muted-foreground">{label}</div>
+      <div className="font-bold text-sm">{value}</div>
     </div>
   );
 }

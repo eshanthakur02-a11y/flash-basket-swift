@@ -1219,6 +1219,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_create_shopkeeper: {
+        Args: {
+          _address: string
+          _city: string
+          _lat: number
+          _lng: number
+          _phone?: string
+          _pincode: string
+          _radius?: number
+          _shop_name: string
+          _user_email: string
+        }
+        Returns: string
+      }
       admin_list_payments: {
         Args: {
           _limit?: number
