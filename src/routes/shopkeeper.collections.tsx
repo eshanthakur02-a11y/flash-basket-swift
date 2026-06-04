@@ -90,10 +90,14 @@ function Page() {
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
       <div className="p-4 md:p-6 max-w-5xl space-y-4">
-        <div className="flex items-center gap-3">
-          <h1 className="font-display text-3xl font-extrabold flex-1 flex items-center gap-2">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="font-display text-3xl font-extrabold flex items-center gap-2 flex-1">
             <Layers className="h-7 w-7 text-primary" /> My Collections
           </h1>
+          <div className="flex gap-2 rounded-full bg-secondary p-1">
+            <Link to="/shopkeeper/categories" className="px-3 py-1.5 rounded-full text-sm font-semibold inline-flex items-center gap-1 hover:bg-background/50"><Tag className="h-3.5 w-3.5" /> Categories</Link>
+            <span className="px-3 py-1.5 rounded-full bg-background text-sm font-semibold inline-flex items-center gap-1"><Layers className="h-3.5 w-3.5" /> Collections</span>
+          </div>
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditing(null)}><Plus className="h-4 w-4 mr-1" />New</Button>
