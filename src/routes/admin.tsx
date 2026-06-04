@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
   LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet,
