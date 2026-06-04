@@ -379,6 +379,68 @@ export type Database = {
         }
         Relationships: []
       }
+      offers: {
+        Row: {
+          badge: string | null
+          created_at: string
+          created_by: string | null
+          display_order: number
+          ends_at: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          link_url: string | null
+          scope: Database["public"]["Enums"]["offer_scope"]
+          shop_id: string | null
+          starts_at: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          ends_at?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          link_url?: string | null
+          scope?: Database["public"]["Enums"]["offer_scope"]
+          shop_id?: string | null
+          starts_at?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          ends_at?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          link_url?: string | null
+          scope?: Database["public"]["Enums"]["offer_scope"]
+          shop_id?: string | null
+          starts_at?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onesignal_subscriptions: {
         Row: {
           created_at: string
@@ -1097,6 +1159,7 @@ export type Database = {
       address_type: "home" | "work" | "other"
       app_role: "admin" | "customer" | "shopkeeper" | "delivery"
       coupon_type: "percent" | "flat"
+      offer_scope: "global" | "shop"
       order_status:
         | "placed"
         | "payment_confirmed"
@@ -1246,6 +1309,7 @@ export const Constants = {
       address_type: ["home", "work", "other"],
       app_role: ["admin", "customer", "shopkeeper", "delivery"],
       coupon_type: ["percent", "flat"],
+      offer_scope: ["global", "shop"],
       order_status: [
         "placed",
         "payment_confirmed",
