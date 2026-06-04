@@ -38,14 +38,6 @@ function CustomerShell() {
 
   if (pathname === "/customer") return <Navigate to="/customer/home" replace />;
 
-  const [search, setSearch] = useState("");
-  const nav = useNavigate();
-
-  const onSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (search.trim()) nav({ to: "/products", search: { q: search.trim() } as any });
-    else nav({ to: "/customer/categories" });
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
