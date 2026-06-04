@@ -111,7 +111,13 @@ function AdminShell() {
         </div>
       </header>
 
-      <main className="flex-1 min-w-0 pb-24"><Outlet /></main>
+      <SwipeTabs pathname={pathname} />
+
+      <main className="flex-1 min-w-0 pb-24">
+        <SwipeArea pathname={pathname}>
+          <Outlet />
+        </SwipeArea>
+      </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 glass border-t border-border">
         <div className="grid grid-cols-5">
