@@ -173,6 +173,31 @@ function HomePage() {
         </div>
       </section>
 
+      {/* OFFER BANNERS */}
+      <section className="px-4 md:px-8 mt-2">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg md:text-xl font-bold">🎁 Offers & deals</h2>
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory scrollbar-hide">
+          {OFFER_BANNERS.map((b, i) => (
+            <Link
+              key={i}
+              to={b.to}
+              className="snap-start shrink-0 w-[78%] sm:w-[48%] md:w-[32%] lg:w-[24%] rounded-2xl overflow-hidden shadow-md hover:shadow-glow transition-shadow border border-border bg-card"
+            >
+              <img
+                src={b.src}
+                alt={b.alt}
+                width={768}
+                height={512}
+                loading="lazy"
+                className="w-full h-24 sm:h-28 md:h-32 object-cover"
+              />
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* CATALOG FILTERS */}
       <CatalogFilters categories={categories.data ?? []} />
 
