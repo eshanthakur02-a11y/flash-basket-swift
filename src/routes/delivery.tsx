@@ -41,6 +41,7 @@ function DeliveryShell() {
         homeTo="/delivery/dashboard"
         accountTo="/delivery/profile"
         searchTo="/delivery/available-orders"
+        showSearch={false}
         trailing={
           <Link to="/delivery/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition">
             <Bell className="h-5 w-5" />
