@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 import { LocationPicker } from "@/components/maps/LocationPicker";
-import { Store, User as UserIcon, LogOut, Package, ClipboardList, Star, Wallet, ShieldCheck, Mail } from "lucide-react";
+import { Store, User as UserIcon, LogOut, Package, ClipboardList, Clock, Wallet, ShieldCheck, Mail } from "lucide-react";
 import { rupees } from "@/lib/format";
 
 export const Route = createFileRoute("/shopkeeper/settings")({ component: Page });
@@ -37,16 +37,14 @@ function Page() {
     queryKey: ["shopkeeper-account-stats", shop?.id],
     queryFn: async () => {
       if (!shop) return null;
-      const [{ count: products }, { count: orders }, { data: rev }, { data: rate }] = await Promise.all([
+      const [{ count: products }, { count: orders }, { data: rev }, { count: pending }] = await Promise.all([
         supabase.from("shop_products").select("id", { count: "exact", head: true }).eq("shop_id", shop.id),
         supabase.from("orders").select("id", { count: "exact", head: true }).eq("shop_id", shop.id),
         supabase.from("orders").select("total").eq("shop_id", shop.id).eq("status", "delivered"),
-        supabase.from("orders").select("rating").eq("shop_id", shop.id).not("rating", "is", null),
+        supabase.from("orders").select("id", { count: "exact", head: true }).eq("shop_id", shop.id).in("status", ["placed", "confirmed", "packed"]),
       ]);
       const revenue = (rev ?? []).reduce((s: number, r: any) => s + Number(r.total || 0), 0);
-      const ratings = (rate ?? []).map((r: any) => Number(r.rating)).filter((n: number) => !isNaN(n));
-      const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
-      return { products: products ?? 0, orders: orders ?? 0, revenue, rating: avg, ratingCount: ratings.length };
+      return { products: products ?? 0, orders: orders ?? 0, revenue, pending: pending ?? 0 };
     },
     enabled: !!shop,
   });
