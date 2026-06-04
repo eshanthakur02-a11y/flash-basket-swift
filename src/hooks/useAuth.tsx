@@ -8,6 +8,7 @@ interface AuthContextValue {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  rolesLoading: boolean;
   roles: Role[];
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -22,23 +23,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
+        setRolesLoading(true);
         // defer DB call
         setTimeout(() => loadRoles(s.user.id), 0);
       } else {
         setRoles([]);
+        setRolesLoading(false);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) loadRoles(s.user.id);
+      if (s?.user) {
+        setRolesLoading(true);
+        loadRoles(s.user.id);
+      } else {
+        setRolesLoading(false);
+      }
       setLoading(false);
     });
 
@@ -46,8 +55,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function loadRoles(userId: string) {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-    setRoles((data ?? []).map((r) => r.role as Role));
+    try {
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+      setRoles((data ?? []).map((r) => r.role as Role));
+    } finally {
+      setRolesLoading(false);
+    }
   }
 
   const signIn = async (email: string, password: string) => {
