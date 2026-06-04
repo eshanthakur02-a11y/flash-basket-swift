@@ -220,3 +220,19 @@ function SwipeArea({ pathname, children }: { pathname: string; children: React.R
     </AnimatePresence>
   );
 }
+
+function SwipeableSheetContent({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  const startX = useRef<number | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => { startX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (startX.current == null) return;
+    const dx = e.changedTouches[0].clientX - startX.current;
+    if (dx < -60) onClose();
+    startX.current = null;
+  };
+  return (
+    <SheetContent side="left" className="w-72 p-0" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      {children}
+    </SheetContent>
+  );
+}
