@@ -1,9 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Plus, Minus, Clock } from "lucide-react";
+import { Plus, Minus, Clock, Heart } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { useCart } from "@/hooks/useCart";
 import { rupees, pct } from "@/lib/format";
+
+const FAV_KEY = "fb_favourites_v1";
+
+function readFavIds(): string[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(FAV_KEY) ?? "[]"); } catch { return []; }
+}
+
+function writeFavIds(ids: string[]) {
+  localStorage.setItem(FAV_KEY, JSON.stringify(ids));
+}
 
 export interface ProductCardData {
   id: string;
@@ -23,6 +35,23 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   const discount = pct(product.price, product.mrp);
   const outOfStock = product.stock <= 0;
 
+  const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    setIsFav(readFavIds().includes(product.id));
+  }, [product.id]);
+
+  const toggleFav = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const ids = readFavIds();
+    const next = ids.includes(product.id)
+      ? ids.filter((id) => id !== product.id)
+      : [...ids, product.id];
+    writeFavIds(next);
+    setIsFav(next.includes(product.id));
+  };
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -34,6 +63,17 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {discount}% OFF
         </div>
       )}
+      <button
+        onClick={toggleFav}
+        className="absolute top-2 right-2 z-10 h-8 w-8 grid place-items-center rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-sm"
+        aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+      >
+        <Heart
+          className={isFav ? "text-primary" : "text-muted-foreground"}
+          fill={isFav ? "currentColor" : "none"}
+          size={16}
+        />
+      </button>
       <Link to="/product/$slug" params={{ slug: product.slug }} className="block">
         <div className="aspect-square w-full overflow-hidden rounded-xl bg-secondary/40">
           {product.image_url ? (
