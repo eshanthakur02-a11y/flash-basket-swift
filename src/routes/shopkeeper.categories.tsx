@@ -185,3 +185,57 @@ function Editor({ initial, onSave, saving }: { initial: Category | null; onSave:
     </DialogContent>
   );
 }
+
+function ItemPicker({ shopId, category, onClose }: { shopId: string; category: Category; onClose: () => void }) {
+  const qc = useQueryClient();
+  const products = useQuery({
+    queryKey: ["shop-prods-for-cat", shopId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("shop_products")
+        .select("product_id, products(id, name, image_url)")
+        .eq("shop_id", shopId)
+        .limit(500);
+      return (data ?? []).map((r: any) => r.products).filter(Boolean);
+    },
+  });
+  const selected = useQuery({
+    queryKey: ["shop-category-items", category.id],
+    queryFn: async () => {
+      const { data } = await (supabase as any).from("shop_category_items").select("product_id").eq("category_id", category.id);
+      return new Set((data ?? []).map((r: any) => r.product_id as string));
+    },
+  });
+
+  const toggle = async (pid: string) => {
+    const isIn = selected.data?.has(pid);
+    if (isIn) {
+      await (supabase as any).from("shop_category_items").delete().eq("category_id", category.id).eq("product_id", pid);
+    } else {
+      await (supabase as any).from("shop_category_items").insert({ category_id: category.id, product_id: pid });
+    }
+    qc.invalidateQueries({ queryKey: ["shop-category-items", category.id] });
+  };
+
+  return (
+    <Dialog open onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Products in “{category.name}”</DialogTitle></DialogHeader>
+        <div className="space-y-2">
+          {(products.data ?? []).map((p: any) => {
+            const on = selected.data?.has(p.id);
+            return (
+              <button key={p.id} onClick={() => toggle(p.id)} className={`w-full flex items-center gap-3 rounded-xl border p-2 text-left ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
+                {p.image_url ? <img src={p.image_url} className="h-10 w-10 rounded-lg object-cover" alt="" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
+                <span className="flex-1 text-sm font-semibold truncate">{p.name}</span>
+                {on && <Check className="h-4 w-4 text-primary" />}
+              </button>
+            );
+          })}
+          {(products.data?.length ?? 0) === 0 && <p className="text-sm text-muted-foreground">No products in your shop yet.</p>}
+        </div>
+        <DialogFooter><Button onClick={onClose}>Done</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
