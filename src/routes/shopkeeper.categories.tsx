@@ -126,6 +126,7 @@ function Page() {
                     <div className="font-bold truncate">{c.name}</div>
                     <div className="text-xs text-muted-foreground truncate">/{c.slug} · order {c.display_order} {c.is_active ? "" : "· hidden"}</div>
                   </div>
+                  <Button size="sm" variant="secondary" onClick={() => setPicking(c)}>Products</Button>
                   <Button size="icon" variant="ghost" onClick={() => { setEditing(c); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
                   <Button size="icon" variant="ghost" onClick={() => setConfirmDel(c)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                 </div>
