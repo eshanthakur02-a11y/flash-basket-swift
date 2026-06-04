@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
   LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet,
   Package, Tag, Layers, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings,
@@ -7,6 +8,13 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
+const SWIPE_PAGES = [
+  { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/categories", label: "Categories", icon: Tag },
+  { to: "/admin/collections", label: "Collections", icon: Layers },
+] as const;
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — FlashBasket" }] }),
