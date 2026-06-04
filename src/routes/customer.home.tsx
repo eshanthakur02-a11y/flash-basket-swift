@@ -83,25 +83,27 @@ function CustomerHome() {
           <h2 className="font-display text-lg font-bold">Shop by category</h2>
           <Link to="/customer/categories" className="text-xs font-bold text-primary">See all →</Link>
         </div>
-        <div className="grid grid-cols-4 gap-3">
-          {categories.isLoading
-            ? Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-square rounded-2xl" />)
-            : categories.data?.slice(0, 8).map((c) => (
-                <Link
-                  key={c.id}
-                  to="/category/$slug"
-                  params={{ slug: c.slug }}
-                  className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card p-2 shadow-card"
-                >
-                  <div
-                    className="grid h-12 w-12 place-items-center rounded-xl text-2xl"
-                    style={{ backgroundColor: (c.color ?? "#A3E635") + "55" }}
+        <div className="-mx-4 px-4 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="grid grid-rows-2 grid-flow-col auto-cols-[28%] gap-3 snap-x">
+            {categories.isLoading
+              ? Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-square rounded-2xl" />)
+              : categories.data?.map((c) => (
+                  <Link
+                    key={c.id}
+                    to="/category/$slug"
+                    params={{ slug: c.slug }}
+                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card p-2 shadow-card snap-start"
                   >
-                    {c.icon}
-                  </div>
-                  <div className="text-[10px] font-semibold text-center leading-tight line-clamp-2">{c.name}</div>
-                </Link>
-              ))}
+                    <div
+                      className="grid h-14 w-14 place-items-center rounded-xl text-2xl"
+                      style={{ backgroundColor: (c.color ?? "#A3E635") + "55" }}
+                    >
+                      {c.icon}
+                    </div>
+                    <div className="text-[10px] font-semibold text-center leading-tight line-clamp-2">{c.name}</div>
+                  </Link>
+                ))}
+          </div>
         </div>
       </section>
 
