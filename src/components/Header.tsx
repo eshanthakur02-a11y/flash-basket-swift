@@ -1,12 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, ShoppingCart, MapPin, User, LogOut, Shield, Clock } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { MapPin, User, LogOut, Shield, Clock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useCart } from "@/hooks/useCart";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,14 +14,7 @@ import {
 
 export function Header() {
   const { user, signOut, isAdmin } = useAuth();
-  const { totalQty } = useCart();
   const navigate = useNavigate();
-  const [q, setQ] = useState("");
-
-  const onSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate({ to: "/products", search: { q } as any });
-  };
 
   return (
     <header className="sticky top-0 z-40 glass border-b border-border">
@@ -44,17 +33,7 @@ export function Header() {
           </div>
         </div>
 
-        <form onSubmit={onSearch} className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder='Search "milk", "bread", "atta"...'
-              className="pl-10 h-11 rounded-xl bg-secondary/60 border-border"
-            />
-          </div>
-        </form>
+        <div className="flex-1" />
 
         <div className="flex items-center gap-2">
           {user ? (
@@ -95,34 +74,7 @@ export function Header() {
               </Button>
             </Link>
           )}
-
-          <Link to="/cart">
-            <Button className="rounded-xl gradient-primary text-primary-foreground hover:opacity-95 relative">
-              <ShoppingCart className="h-4 w-4 md:mr-2" />
-              <span className="hidden md:inline">My Cart</span>
-              {totalQty > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 h-5 min-w-5 px-1 grid place-items-center rounded-full bg-foreground text-background text-[10px] font-bold">
-                  {totalQty}
-                </span>
-              )}
-            </Button>
-          </Link>
         </div>
-      </div>
-
-      {/* Mobile search bar below header */}
-      <div className="md:hidden border-t border-border bg-background/50">
-        <form onSubmit={onSearch} className="mx-auto max-w-7xl px-4 py-2">
-          <div className="flex items-center gap-2 rounded-xl bg-card border border-border px-3 py-2.5">
-            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder='Search "milk", "bread", "atta"…'
-              className="bg-transparent text-sm outline-none placeholder:text-muted-foreground w-full"
-            />
-          </div>
-        </form>
       </div>
     </header>
   );

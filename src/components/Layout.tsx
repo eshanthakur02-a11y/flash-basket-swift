@@ -1,5 +1,6 @@
 import { Outlet, useRouterState } from "@tanstack/react-router";
 import { Header } from "./Header";
+import { BottomNav } from "./BottomNav";
 import { Toaster } from "./ui/sonner";
 import { useNotifications } from "@/hooks/useNotifications";
 
@@ -20,7 +21,7 @@ export function Layout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Header />
       <main className="flex-1">
         <Outlet />
@@ -35,6 +36,7 @@ export function Layout() {
           </div>
         </div>
       </footer>
+      <BottomNav />
       <Toaster richColors closeButton position="top-center" />
     </div>
   );
