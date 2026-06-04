@@ -18,6 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
+  const { user } = useAuth();
   const categories = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
