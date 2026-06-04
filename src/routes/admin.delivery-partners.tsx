@@ -285,3 +285,12 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-secondary/40 px-2 py-1.5">
+      <div className="text-[10px] uppercase font-bold text-muted-foreground">{label}</div>
+      <div className="font-bold text-sm">{value}</div>
+    </div>
+  );
+}
