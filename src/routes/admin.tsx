@@ -62,6 +62,7 @@ function AdminShell() {
         homeTo="/admin/dashboard"
         accountTo="/admin/settings"
         searchTo="/admin/products"
+        showSearch={false}
         leading={
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
