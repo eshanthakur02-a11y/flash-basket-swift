@@ -58,38 +58,82 @@ function CustomersPage() {
       {users.isLoading ? (
         <div className="text-sm text-muted-foreground">Loading…</div>
       ) : (
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-secondary/50 text-left">
-              <tr>
-                <th className="p-3">Name</th>
-                <th className="p-3">Phone</th>
-                <th className="p-3">Roles</th>
-                <th className="p-3">Add role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(users.data ?? []).map((u: any) => (
-                <tr key={u.id} className="border-t border-border align-top">
-                  <td className="p-3 font-medium">{u.full_name || "—"}<div className="text-xs text-muted-foreground font-mono">{u.id.slice(0, 8)}</div></td>
-                  <td className="p-3 text-muted-foreground">{u.phone || "—"}</td>
-                  <td className="p-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
-                      {(u.roles ?? []).map((r: AppRole) => {
-                        const Icon = ICONS[r];
-                        return (
-                          <span key={r} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-1 text-xs font-semibold">
-                            <Icon className="h-3 w-3" />{r}
-                            <button onClick={() => remove.mutate({ user_id: u.id, role: r })} className="ml-1 hover:bg-primary/20 rounded-full">
-                              <X className="h-3 w-3" />
-                            </button>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </td>
-                  <td className="p-3">
+        <>
+          <div className="hidden md:block rounded-2xl border border-border bg-card overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-secondary/50 text-left">
+                <tr>
+                  <th className="p-3">Name</th>
+                  <th className="p-3">Phone</th>
+                  <th className="p-3">Roles</th>
+                  <th className="p-3">Add role</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(users.data ?? []).map((u: any) => (
+                  <tr key={u.id} className="border-t border-border align-top">
+                    <td className="p-3 font-medium">{u.full_name || "—"}<div className="text-xs text-muted-foreground font-mono">{u.id.slice(0, 8)}</div></td>
+                    <td className="p-3 text-muted-foreground">{u.phone || "—"}</td>
+                    <td className="p-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
+                        {(u.roles ?? []).map((r: AppRole) => {
+                          const Icon = ICONS[r];
+                          return (
+                            <span key={r} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-1 text-xs font-semibold">
+                              <Icon className="h-3 w-3" />{r}
+                              <button onClick={() => remove.mutate({ user_id: u.id, role: r })} className="ml-1 hover:bg-primary/20 rounded-full">
+                                <X className="h-3 w-3" />
+                              </button>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        {ROLES.filter((r) => !(u.roles ?? []).includes(r)).map((r) => (
+                          <Button key={r} size="sm" variant="outline" className="h-7 text-xs"
+                            onClick={() => assign.mutate({ user_id: u.id, role: r })}>
+                            + {r}
+                          </Button>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {(users.data ?? []).map((u: any) => (
+              <div key={u.id} className="rounded-2xl border border-border bg-card p-4 space-y-3">
+                <div>
+                  <div className="font-bold">{u.full_name || "—"}</div>
+                  <div className="text-[11px] text-muted-foreground font-mono">{u.id.slice(0, 8)}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{u.phone || "No phone"}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold uppercase text-muted-foreground mb-1.5">Current roles</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
+                    {(u.roles ?? []).map((r: AppRole) => {
+                      const Icon = ICONS[r];
+                      return (
+                        <span key={r} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-1 text-xs font-semibold">
+                          <Icon className="h-3 w-3" />{r}
+                          <button onClick={() => remove.mutate({ user_id: u.id, role: r })} className="ml-1 hover:bg-primary/20 rounded-full">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+                {ROLES.filter((r) => !(u.roles ?? []).includes(r)).length > 0 && (
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-muted-foreground mb-1.5">Add role</div>
                     <div className="flex flex-wrap gap-1.5">
                       {ROLES.filter((r) => !(u.roles ?? []).includes(r)).map((r) => (
                         <Button key={r} size="sm" variant="outline" className="h-7 text-xs"
@@ -98,12 +142,12 @@ function CustomersPage() {
                         </Button>
                       ))}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
