@@ -6,11 +6,12 @@ type Props = {
   homeTo: string;
   accountTo: string;
   searchTo?: string;
+  showSearch?: boolean;
   leading?: ReactNode;
   trailing?: ReactNode;
 };
 
-export function RoleHeader({ homeTo, accountTo, searchTo = "/products", leading, trailing }: Props) {
+export function RoleHeader({ homeTo, accountTo, searchTo = "/products", showSearch = true, leading, trailing }: Props) {
   const [q, setQ] = useState("");
   const nav = useNavigate();
 
