@@ -170,14 +170,73 @@ function Page() {
                     <td className="px-3 py-2 text-right">{Number(r.avg_minutes_today).toFixed(1)}</td>
                     <td className="px-3 py-2 text-right">{Number(r.on_time_pct).toFixed(0)}%</td>
                     <td className="px-3 py-2 text-right">{Number(r.hours_today).toFixed(2)}</td>
+                    <td className="px-3 py-2 text-right">
+                      <Button size="icon" variant="ghost" onClick={() => setConfirmDel(r)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </td>
                   </tr>
                 ))}
-                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
+                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
               </tbody>
             </table>
           </div>
         </section>
+
+        <AlertDialog open={!!confirmDel} onOpenChange={(v) => !v && setConfirmDel(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove “{confirmDel?.name}”?</AlertDialogTitle>
+              <AlertDialogDescription>The partner profile and delivery role will be removed. Active orders block deletion.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => confirmDel && deletePartner(confirmDel.partner_id)}>Remove</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </RoleShell>
+  );
+}
+
+function AddPartnerDialog({ onDone }: { onDone: () => void }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [vehicle, setVehicle] = useState("");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (!name.trim()) { toast.error("Name required"); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("create_delivery_partner", {
+      _name: name.trim(),
+      _phone: phone.trim(),
+      _vehicle: vehicle.trim() || undefined,
+      _user_email: email.trim() || undefined,
+    });
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Partner added"); onDone(); }
+  };
+
+  return (
+    <DialogContent>
+      <DialogHeader><DialogTitle>Add delivery boy</DialogTitle></DialogHeader>
+      <div className="space-y-3">
+        <div><label className="text-xs font-bold">Name *</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+        <div><label className="text-xs font-bold">Phone</label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+        <div><label className="text-xs font-bold">Vehicle</label><Input value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="Bike / Scooter / EV" /></div>
+        <div>
+          <label className="text-xs font-bold">Account email (optional)</label>
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Existing signed-up email to grant login" />
+          <p className="text-[11px] text-muted-foreground mt-1">Leave blank to create a profile-only partner without login.</p>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button onClick={submit} disabled={busy}>{busy ? "Adding…" : "Add partner"}</Button>
+      </DialogFooter>
+    </DialogContent>
   );
 }
