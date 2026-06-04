@@ -33,6 +33,7 @@ const DRAWER_NAV = [
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: Tag },
   { to: "/admin/collections", label: "Collections", icon: Layers },
+  { to: "/admin/offers", label: "Offers", icon: Megaphone },
   { to: "/admin/products?filter=low-stock", label: "Stock Alerts", icon: AlertTriangle },
   { to: "/admin/reports", label: "Reports", icon: BarChart },
   { to: "/admin/delivery-partners", label: "Partners", icon: Truck },
