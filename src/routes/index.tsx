@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Zap, Clock, Truck, ShieldCheck } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Zap, Clock, Truck, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hero3D } from "@/components/Hero3D";
 import { useAuth } from "@/hooks/useAuth";
+
+type SortKey = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -159,10 +162,197 @@ function HomePage() {
         </div>
       </section>
 
+      {/* CATALOG FILTERS */}
+      <CatalogFilters categories={categories.data ?? []} />
+
       {/* FEATURED */}
       <ProductSection title="✨ Featured today" query={featured} />
       <ProductSection title="🔥 Bestsellers" query={bestsellers} />
     </div>
+  );
+}
+
+function CatalogFilters({ categories }: { categories: Array<{ id: string; slug: string; name: string; icon: string | null }> }) {
+  const [activeCat, setActiveCat] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortKey>("relevance");
+  const [maxPrice, setMaxPrice] = useState<number>(1000);
+  const [onlyDiscounted, setOnlyDiscounted] = useState(false);
+  const [inStock, setInStock] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const collections = useQuery({
+    queryKey: ["home-collections"],
+    queryFn: async () =>
+      (await supabase.from("collections").select("id, slug, name").eq("is_active", true).order("display_order")).data ?? [],
+  });
+  const [activeColl, setActiveColl] = useState<string | null>(null);
+
+  const products = useQuery({
+    queryKey: ["catalog", activeCat, activeColl, sort, maxPrice, onlyDiscounted, inStock],
+    queryFn: async () => {
+      let ids: string[] | null = null;
+      if (activeColl) {
+        const { data: pc } = await supabase
+          .from("product_collections")
+          .select("product_id")
+          .eq("collection_id", activeColl);
+        ids = (pc ?? []).map((r) => r.product_id);
+        if (ids.length === 0) return [];
+      }
+      let qb = supabase
+        .from("products")
+        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock, rating, category_id");
+      if (activeCat) qb = qb.eq("category_id", activeCat);
+      if (ids) qb = qb.in("id", ids);
+      if (maxPrice < 1000) qb = qb.lte("price", maxPrice);
+      if (inStock) qb = qb.gt("stock", 0);
+      if (sort === "price-asc") qb = qb.order("price", { ascending: true });
+      else if (sort === "price-desc") qb = qb.order("price", { ascending: false });
+      else if (sort === "rating") qb = qb.order("rating", { ascending: false });
+      const { data } = await qb.limit(60);
+      let rows = (data ?? []) as ProductCardData[];
+      if (onlyDiscounted) rows = rows.filter((p) => Number(p.mrp) > Number(p.price));
+      if (sort === "discount")
+        rows = [...rows].sort(
+          (a, b) => (Number(b.mrp) - Number(b.price)) / Number(b.mrp || 1) - (Number(a.mrp) - Number(a.price)) / Number(a.mrp || 1),
+        );
+      return rows;
+    },
+  });
+
+  const activeCount = useMemo(
+    () => [activeCat, activeColl, onlyDiscounted, inStock, sort !== "relevance", maxPrice < 1000].filter(Boolean).length,
+    [activeCat, activeColl, onlyDiscounted, inStock, sort, maxPrice],
+  );
+
+  const reset = () => {
+    setActiveCat(null);
+    setActiveColl(null);
+    setSort("relevance");
+    setMaxPrice(1000);
+    setOnlyDiscounted(false);
+    setInStock(false);
+  };
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-6">
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <h2 className="font-display text-2xl md:text-3xl font-bold">🛍️ Browse catalog</h2>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold shadow-card"
+        >
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          Filters {activeCount > 0 && <span className="ml-1 rounded-full gradient-primary text-primary-foreground px-1.5 text-[10px]">{activeCount}</span>}
+        </button>
+      </div>
+
+      {/* Category chips */}
+      <div className="-mx-4 px-4 overflow-x-auto no-scrollbar pb-2">
+        <div className="flex gap-2 w-max">
+          <Chip active={!activeCat} onClick={() => setActiveCat(null)}>All</Chip>
+          {categories.map((c) => (
+            <Chip key={c.id} active={activeCat === c.id} onClick={() => setActiveCat(activeCat === c.id ? null : c.id)}>
+              <span>{c.icon}</span> {c.name}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      {/* Advanced filters drawer */}
+      {open && (
+        <div className="mt-3 rounded-2xl border border-border bg-card p-4 shadow-card space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-sm">Refine results</span>
+            <button onClick={reset} className="text-xs font-semibold text-primary inline-flex items-center gap-1">
+              <X className="h-3 w-3" /> Reset
+            </button>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Sort by</label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(["relevance", "price-asc", "price-desc", "rating", "discount"] as SortKey[]).map((s) => (
+                <Chip key={s} active={sort === s} onClick={() => setSort(s)}>
+                  {s === "relevance" ? "Relevance" : s === "price-asc" ? "Price ↑" : s === "price-desc" ? "Price ↓" : s === "rating" ? "Top rated" : "Best discount"}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Max price</label>
+              <span className="text-xs font-bold">{maxPrice >= 1000 ? "Any" : `₹${maxPrice}`}</span>
+            </div>
+            <input
+              type="range"
+              min={50}
+              max={1000}
+              step={50}
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value))}
+              className="mt-2 w-full accent-primary"
+            />
+          </div>
+
+          {collections.data && collections.data.length > 0 && (
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Collection</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Chip active={!activeColl} onClick={() => setActiveColl(null)}>Any</Chip>
+                {collections.data.map((c) => (
+                  <Chip key={c.id} active={activeColl === c.id} onClick={() => setActiveColl(activeColl === c.id ? null : c.id)}>
+                    {c.name}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            <Chip active={onlyDiscounted} onClick={() => setOnlyDiscounted((v) => !v)}>% Discounted only</Chip>
+            <Chip active={inStock} onClick={() => setInStock((v) => !v)}>In stock</Chip>
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      <div className="mt-4">
+        {products.isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />)}
+          </div>
+        ) : products.data?.length === 0 ? (
+          <div className="text-center py-12 rounded-2xl border border-dashed border-border">
+            <div className="text-5xl">🛒</div>
+            <p className="mt-2 text-sm text-muted-foreground">No products match your filters.</p>
+            <button onClick={reset} className="mt-3 rounded-full gradient-primary px-4 py-2 text-xs font-bold text-primary-foreground">
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {products.data?.map((p) => <ProductCard key={p.id} product={p} />)}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function Chip({ active, onClick, children }: { active?: boolean; onClick?: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition ${
+        active
+          ? "gradient-primary text-primary-foreground border-transparent shadow-glow"
+          : "border-border bg-card hover:bg-muted"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
