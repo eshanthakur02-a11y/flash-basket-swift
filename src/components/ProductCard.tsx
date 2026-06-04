@@ -1,9 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Plus, Minus, Clock } from "lucide-react";
+import { Plus, Minus, Clock, Heart } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { useCart } from "@/hooks/useCart";
 import { rupees, pct } from "@/lib/format";
+
+const FAV_KEY = "fb_favourites_v1";
+
+function readFavIds(): string[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(FAV_KEY) ?? "[]"); } catch { return []; }
+}
+
+function writeFavIds(ids: string[]) {
+  localStorage.setItem(FAV_KEY, JSON.stringify(ids));
+}
 
 export interface ProductCardData {
   id: string;
