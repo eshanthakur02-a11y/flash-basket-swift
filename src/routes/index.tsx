@@ -106,6 +106,7 @@ function HomePage() {
           </motion.div>
         </div>
       </section>
+      )}
 
       {/* CATEGORIES */}
       <section className="mx-auto max-w-7xl px-4 py-10">
