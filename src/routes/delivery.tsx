@@ -20,18 +20,18 @@ const NAV = [
 
 function DeliveryShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user, loading, roles } = useAuth() as any;
+  const { user, loading, rolesLoading, roles } = useAuth() as any;
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || rolesLoading) return;
     if (!user) { navigate({ to: "/login", replace: true }); return; }
     const r: string[] = roles ?? [];
     if (!r.includes("delivery") && !r.includes("admin")) {
       if (r.includes("shopkeeper")) navigate({ to: "/shopkeeper/dashboard", replace: true });
       else navigate({ to: "/customer/home", replace: true });
     }
-  }, [user, loading, roles, navigate]);
+  }, [user, loading, rolesLoading, roles, navigate]);
 
   if (pathname === "/delivery") return <Navigate to="/delivery/dashboard" replace />;
 

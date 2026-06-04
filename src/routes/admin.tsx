@@ -44,15 +44,15 @@ const DRAWER_NAV = [
 
 function AdminShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { user, loading, isAdmin } = useAuth() as any;
+  const { user, loading, rolesLoading, isAdmin } = useAuth() as any;
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || rolesLoading) return;
     if (!user) { navigate({ to: "/login", replace: true }); return; }
     if (!isAdmin) navigate({ to: "/customer/home", replace: true });
-  }, [user, loading, isAdmin, navigate]);
+  }, [user, loading, rolesLoading, isAdmin, navigate]);
 
   if (pathname === "/admin") return <Navigate to="/admin/dashboard" replace />;
 

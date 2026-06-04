@@ -16,17 +16,17 @@ export function RoleShell({
   children?: ReactNode;
   requireRoles?: string[];
 }) {
-  const { user, loading, roles } = useAuth() as any;
+  const { user, loading, rolesLoading, roles } = useAuth() as any;
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || rolesLoading) return;
     if (!user) navigate({ to: "/login" });
     else if (requireRoles && !requireRoles.some((r) => roles?.includes(r))) {
       navigate({ to: "/dashboard" });
     }
-  }, [user, loading, roles, requireRoles, navigate]);
+  }, [user, loading, rolesLoading, roles, requireRoles, navigate]);
 
   const useSidebar = role === "shopkeeper" || role === "admin";
 
