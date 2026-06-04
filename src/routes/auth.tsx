@@ -35,7 +35,7 @@ function AuthPage() {
     if (error) toast.error(error.message);
     else {
       toast.success("Welcome back!");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/" });
     }
   };
 
