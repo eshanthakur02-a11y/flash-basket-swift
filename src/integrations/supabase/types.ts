@@ -1070,6 +1070,10 @@ export type Database = {
         Returns: undefined
       }
       current_user_partner_id: { Args: never; Returns: string }
+      find_nearest_partner_for_order: {
+        Args: { _exclude?: string[]; _order_id: string }
+        Returns: string
+      }
       find_nearest_shop_for_cart: {
         Args: {
           _exclude?: string[]
@@ -1126,6 +1130,10 @@ export type Database = {
           placed_at: string
           total: number
         }[]
+      }
+      partner_decline_assignment: {
+        Args: { _order_id: string }
+        Returns: undefined
       }
       partner_is_on_order: { Args: { _partner_id: string }; Returns: boolean }
       partner_mark_delivered: {
