@@ -52,6 +52,7 @@ import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminShopsRouteImport } from './routes/admin.shops'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
@@ -59,6 +60,8 @@ import { Route as AdminDeliveryPartnersRouteImport } from './routes/admin.delive
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminComplaintsRouteImport } from './routes/admin.complaints'
+import { Route as AdminCollectionsRouteImport } from './routes/admin.collections'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as ShopkeeperOrdersIdRouteImport } from './routes/shopkeeper.orders.$id'
 import { Route as DeliveryTaskIdRouteImport } from './routes/delivery.task.$id'
 import { Route as CustomerProductIdRouteImport } from './routes/customer.product.$id'
@@ -282,6 +285,11 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -315,6 +323,16 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
 const AdminComplaintsRoute = AdminComplaintsRouteImport.update({
   id: '/complaints',
   path: '/complaints',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCollectionsRoute = AdminCollectionsRouteImport.update({
+  id: '/collections',
+  path: '/collections',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
 const ShopkeeperOrdersIdRoute = ShopkeeperOrdersIdRouteImport.update({
@@ -370,6 +388,8 @@ export interface FileRoutesByFullPath {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/collections': typeof AdminCollectionsRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -377,6 +397,7 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
@@ -429,6 +450,8 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/collections': typeof AdminCollectionsRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -436,6 +459,7 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
@@ -489,6 +513,8 @@ export interface FileRoutesById {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/collections': typeof AdminCollectionsRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -496,6 +522,7 @@ export interface FileRoutesById {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
@@ -550,6 +577,8 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/admin/categories'
+    | '/admin/collections'
     | '/admin/complaints'
     | '/admin/customers'
     | '/admin/dashboard'
@@ -557,6 +586,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/orders'
     | '/admin/payments'
+    | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/shops'
@@ -609,6 +639,8 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/admin/categories'
+    | '/admin/collections'
     | '/admin/complaints'
     | '/admin/customers'
     | '/admin/dashboard'
@@ -616,6 +648,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/orders'
     | '/admin/payments'
+    | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/shops'
@@ -668,6 +701,8 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/admin/categories'
+    | '/admin/collections'
     | '/admin/complaints'
     | '/admin/customers'
     | '/admin/dashboard'
@@ -675,6 +710,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/orders'
     | '/admin/payments'
+    | '/admin/products'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/shops'
@@ -1039,6 +1075,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/payments': {
       id: '/admin/payments'
       path: '/payments'
@@ -1086,6 +1129,20 @@ declare module '@tanstack/react-router' {
       path: '/complaints'
       fullPath: '/admin/complaints'
       preLoaderRoute: typeof AdminComplaintsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/collections': {
+      id: '/admin/collections'
+      path: '/collections'
+      fullPath: '/admin/collections'
+      preLoaderRoute: typeof AdminCollectionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/shopkeeper/orders/$id': {
@@ -1153,6 +1210,8 @@ const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminCollectionsRoute: typeof AdminCollectionsRoute
   AdminComplaintsRoute: typeof AdminComplaintsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
@@ -1160,12 +1219,15 @@ interface AdminRouteChildren {
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
   AdminPaymentsRoute: typeof AdminPaymentsRoute
+  AdminProductsRoute: typeof AdminProductsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminShopsRoute: typeof AdminShopsRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminCollectionsRoute: AdminCollectionsRoute,
   AdminComplaintsRoute: AdminComplaintsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminDashboardRoute: AdminDashboardRoute,
@@ -1173,6 +1235,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminOrdersRoute: AdminOrdersRouteWithChildren,
   AdminPaymentsRoute: AdminPaymentsRoute,
+  AdminProductsRoute: AdminProductsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminShopsRoute: AdminShopsRoute,
