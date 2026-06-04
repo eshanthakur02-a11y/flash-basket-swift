@@ -1,9 +1,10 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Home, LayoutGrid, Heart, Package, User, ShoppingCart, Bell, Zap, Search } from "lucide-react";
+import { Home, LayoutGrid, Heart, Package, User, ShoppingCart, Bell } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { cn } from "@/lib/utils";
+import { RoleHeader } from "@/components/RoleHeader";
 
 export const Route = createFileRoute("/customer")({
   head: () => ({ meta: [{ title: "FlashBasket App" }] }),
