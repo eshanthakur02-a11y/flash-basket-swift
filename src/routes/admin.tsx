@@ -8,6 +8,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { RoleHeader } from "@/components/RoleHeader";
 
 const SWIPE_PAGES = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
