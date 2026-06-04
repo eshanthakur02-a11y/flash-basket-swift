@@ -41,7 +41,7 @@ function Page() {
         supabase.from("shop_products").select("id", { count: "exact", head: true }).eq("shop_id", shop.id),
         supabase.from("orders").select("id", { count: "exact", head: true }).eq("shop_id", shop.id),
         supabase.from("orders").select("total").eq("shop_id", shop.id).eq("status", "delivered"),
-        supabase.from("orders").select("id", { count: "exact", head: true }).eq("shop_id", shop.id).in("status", ["placed", "confirmed", "packed"]),
+        supabase.from("orders").select("id", { count: "exact", head: true }).eq("shop_id", shop.id).in("status", ["placed", "accepted_by_shop", "packing", "packed"]),
       ]);
       const revenue = (rev ?? []).reduce((s: number, r: any) => s + Number(r.total || 0), 0);
       return { products: products ?? 0, orders: orders ?? 0, revenue, pending: pending ?? 0 };
@@ -106,7 +106,7 @@ function Page() {
             <StatCard icon={Package} label="Products" value={String(stats.data?.products ?? "—")} />
             <StatCard icon={ClipboardList} label="Orders" value={String(stats.data?.orders ?? "—")} />
             <StatCard icon={Wallet} label="Revenue" value={stats.data ? rupees(stats.data.revenue) : "—"} />
-            <StatCard icon={Star} label="Rating" value={stats.data && stats.data.ratingCount > 0 ? stats.data.rating.toFixed(1) : "—"} />
+            <StatCard icon={Clock} label="In progress" value={String(stats.data?.pending ?? "—")} />
           </div>
         )}
 
