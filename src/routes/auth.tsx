@@ -1,6 +1,16 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+
+async function redirectByRole(navigate: ReturnType<typeof useNavigate>, userId: string) {
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const roles = (data ?? []).map((r) => r.role as string);
+  if (roles.includes("admin")) navigate({ to: "/admin/dashboard" });
+  else if (roles.includes("shopkeeper")) navigate({ to: "/shopkeeper/dashboard" });
+  else if (roles.includes("delivery")) navigate({ to: "/delivery/dashboard" });
+  else navigate({ to: "/customer/home" });
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +34,7 @@ function AuthPage() {
   const [su, setSu] = useState({ name: "", email: "", password: "" });
 
   useEffect(() => {
-    if (user) navigate({ to: "/" });
+    if (user) redirectByRole(navigate, user.id);
   }, [user, navigate]);
 
   const onLogin = async (e: React.FormEvent) => {
@@ -35,7 +45,8 @@ function AuthPage() {
     if (error) toast.error(error.message);
     else {
       toast.success("Welcome back!");
-      navigate({ to: "/" });
+      const { data } = await supabase.auth.getUser();
+      if (data.user) await redirectByRole(navigate, data.user.id);
     }
   };
 
