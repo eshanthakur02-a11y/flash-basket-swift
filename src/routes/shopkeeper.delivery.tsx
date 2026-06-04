@@ -93,17 +93,17 @@ function Page() {
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
       <div className="p-4 md:p-6 space-y-6">
-        <header className="flex flex-wrap items-center gap-3">
+        <header className="flex flex-col sm:flex-row sm:items-start gap-3">
           <div className="flex-1 min-w-0">
-            <h1 className="font-display text-3xl font-extrabold flex items-center gap-2">
-              <Truck className="h-7 w-7 text-primary" />
+            <h1 className="font-display text-2xl sm:text-3xl font-extrabold flex items-center gap-2">
+              <Truck className="h-6 w-6 sm:h-7 sm:w-7 text-primary shrink-0" />
               Delivery Management
             </h1>
             <p className="text-sm text-muted-foreground mt-1">Add or remove delivery boys, assign live orders, and track performance.</p>
           </div>
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
-              <Button><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
+              <Button className="w-full sm:w-auto shrink-0 whitespace-nowrap"><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
             </DialogTrigger>
             <AddPartnerDialog onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["online-partners"] }); qc.invalidateQueries({ queryKey: ["shop-perf", shopId] }); }} />
           </Dialog>

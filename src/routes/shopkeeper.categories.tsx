@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Tag, Layers, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, Check } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -100,10 +100,6 @@ function Page() {
           <h1 className="font-display text-3xl font-extrabold flex items-center gap-2 flex-1">
             <Tag className="h-7 w-7 text-primary" /> My Categories
           </h1>
-          <div className="flex gap-2 rounded-full bg-secondary p-1">
-            <span className="px-3 py-1.5 rounded-full bg-background text-sm font-semibold inline-flex items-center gap-1"><Tag className="h-3.5 w-3.5" /> Categories</span>
-            <Link to="/shopkeeper/collections" className="px-3 py-1.5 rounded-full text-sm font-semibold inline-flex items-center gap-1 hover:bg-background/50"><Layers className="h-3.5 w-3.5" /> Collections</Link>
-          </div>
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditing(null)}><Plus className="h-4 w-4 mr-1" />New</Button>
