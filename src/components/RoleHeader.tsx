@@ -1,6 +1,16 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, User, Zap } from "lucide-react";
+import { LogOut, Search, Shield, User, Zap } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 type Props = {
   homeTo: string;
@@ -14,6 +24,7 @@ type Props = {
 export function RoleHeader({ homeTo, accountTo, searchTo = "/products", showSearch = true, leading, trailing }: Props) {
   const [q, setQ] = useState("");
   const nav = useNavigate();
+  const { user, signOut, isAdmin } = useAuth();
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,13 +44,47 @@ export function RoleHeader({ homeTo, accountTo, searchTo = "/products", showSear
         </Link>
         <div className="flex-1" />
         {trailing}
-        <Link
-          to={accountTo as any}
-          aria-label="Account"
-          className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition"
-        >
-          <User className="h-5 w-5" />
-        </Link>
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Account"
+                className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition"
+              >
+                <User className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => nav({ to: "/dashboard" })}>
+                Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => nav({ to: accountTo as any })}>
+                Account
+              </DropdownMenuItem>
+              {isAdmin && (
+                <DropdownMenuItem onClick={() => nav({ to: "/admin/dashboard" })}>
+                  <Shield className="h-4 w-4 mr-2" /> Admin Dashboard
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => signOut()}>
+                <LogOut className="h-4 w-4 mr-2" /> Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Link
+            to={accountTo as any}
+            aria-label="Account"
+            className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition"
+          >
+            <User className="h-5 w-5" />
+          </Link>
+        )}
       </div>
 
       {showSearch && (
