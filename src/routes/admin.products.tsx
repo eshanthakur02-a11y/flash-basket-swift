@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { rupees } from "@/lib/format";
+import { ImageInput } from "@/components/ImageInput";
 
 const searchSchema = z.object({ filter: z.string().optional() });
 
@@ -191,7 +192,7 @@ function ProductDialog({ initial, categories, onSave, saving }: { initial: Produ
           </Select>
         </div>
         <div><label className="text-xs font-bold">Description</label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} /></div>
-        <div><label className="text-xs font-bold">Image URL</label><Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." /></div>
+        <ImageInput value={imageUrl} onChange={setImageUrl} bucket="products" label="Product image" required />
         <div className="grid grid-cols-3 gap-2">
           <div><label className="text-xs font-bold">Price ₹</label><Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} /></div>
           <div><label className="text-xs font-bold">MRP ₹</label><Input type="number" value={mrp} onChange={(e) => setMrp(Number(e.target.value))} /></div>
@@ -205,7 +206,7 @@ function ProductDialog({ initial, categories, onSave, saving }: { initial: Produ
         </div>
       </div>
       <DialogFooter>
-        <Button disabled={!name || !categoryId || saving} onClick={() => onSave({
+        <Button disabled={!name || !categoryId || !imageUrl || saving} onClick={() => onSave({
           name, slug: slug || slugify(name), description, image_url: imageUrl, category_id: categoryId,
           price, mrp: mrp || price, unit, stock, brand,
           is_available: available, is_featured: featured, is_bestseller: bestseller,
