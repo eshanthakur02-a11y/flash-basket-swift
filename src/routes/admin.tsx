@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
   LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet,
   Package, Tag, Layers, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings,
@@ -7,6 +8,13 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
+const SWIPE_PAGES = [
+  { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/categories", label: "Categories", icon: Tag },
+  { to: "/admin/collections", label: "Collections", icon: Layers },
+] as const;
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — FlashBasket" }] }),
@@ -103,7 +111,13 @@ function AdminShell() {
         </div>
       </header>
 
-      <main className="flex-1 min-w-0 pb-24"><Outlet /></main>
+      <SwipeTabs pathname={pathname} />
+
+      <main className="flex-1 min-w-0 pb-24">
+        <SwipeArea pathname={pathname}>
+          <Outlet />
+        </SwipeArea>
+      </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 glass border-t border-border">
         <div className="grid grid-cols-5">
@@ -129,5 +143,82 @@ function AdminShell() {
         </div>
       </nav>
     </div>
+  );
+}
+
+function swipeIndex(pathname: string) {
+  return SWIPE_PAGES.findIndex((p) => pathname === p.to || pathname.startsWith(p.to + "/"));
+}
+
+function SwipeTabs({ pathname }: { pathname: string }) {
+  const idx = swipeIndex(pathname);
+  if (idx < 0) return null;
+  return (
+    <div className="md:hidden sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
+      <div className="flex px-2 py-2 gap-1 overflow-x-auto no-scrollbar">
+        {SWIPE_PAGES.map((p, i) => {
+          const Icon = p.icon;
+          const active = i === idx;
+          return (
+            <Link
+              key={p.to}
+              to={p.to}
+              className={cn(
+                "relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition",
+                active ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {active && (
+                <motion.span
+                  layoutId="admin-swipe-pill"
+                  className="absolute inset-0 gradient-primary rounded-full shadow-glow"
+                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                />
+              )}
+              <span className="relative flex items-center gap-1.5">
+                <Icon className="h-3.5 w-3.5" />
+                {p.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SwipeArea({ pathname, children }: { pathname: string; children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const idx = swipeIndex(pathname);
+  if (idx < 0) return <>{children}</>;
+
+  const onDragEnd = (_: unknown, info: PanInfo) => {
+    const { offset, velocity } = info;
+    const swipe = offset.x;
+    const power = Math.abs(swipe) * Math.abs(velocity.x);
+    if (swipe < -60 && (power > 1000 || swipe < -120) && idx < SWIPE_PAGES.length - 1) {
+      navigate({ to: SWIPE_PAGES[idx + 1].to });
+    } else if (swipe > 60 && (power > 1000 || swipe > 120) && idx > 0) {
+      navigate({ to: SWIPE_PAGES[idx - 1].to });
+    }
+  };
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={pathname}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.25}
+        onDragEnd={onDragEnd}
+        initial={{ opacity: 0, x: 24 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -24 }}
+        transition={{ duration: 0.18 }}
+        className="touch-pan-y"
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   );
 }
