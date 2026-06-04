@@ -55,6 +55,7 @@ function HomePage() {
   return (
     <div>
       {/* HERO */}
+      {!user && (
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 gradient-aurora pointer-events-none" />
         <div className="relative mx-auto max-w-7xl px-4 py-12 md:py-20 grid md:grid-cols-2 gap-10 items-center">
