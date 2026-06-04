@@ -58,6 +58,7 @@ function ShopkeeperShell() {
         homeTo="/shopkeeper/dashboard"
         accountTo="/shopkeeper/settings"
         searchTo="/shopkeeper/products"
+        showSearch={false}
         leading={
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
