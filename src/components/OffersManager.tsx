@@ -8,6 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Pencil, Trash2, Plus, X } from "lucide-react";
+import { ImageInput } from "@/components/ImageInput";
+
+function ImageInputWrapper(props: { value: string; onChange: (v: string) => void }) {
+  return <ImageInput value={props.value} onChange={props.onChange} bucket="offers" label="Offer image" required />;
+}
 
 type OfferScope = "global" | "shop";
 
@@ -224,14 +229,10 @@ export function OffersManager({
                   onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })}
                 />
               </Field>
-              <Field label="Image URL">
-                <Input
-                  value={editing.image_url}
-                  onChange={(e) => setEditing({ ...editing, image_url: e.target.value })}
-                  placeholder="https://…"
-                  required
-                />
-              </Field>
+              <ImageInputWrapper
+                value={editing.image_url}
+                onChange={(url) => setEditing({ ...editing, image_url: url })}
+              />
               <Field label="Link URL (e.g. /category/dairy)">
                 <Input
                   value={editing.link_url ?? ""}

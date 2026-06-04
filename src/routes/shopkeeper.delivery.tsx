@@ -6,10 +6,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { RoleShell } from "@/components/RoleShell";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Circle } from "lucide-react";
+import { Truck, Activity, BarChart3, Circle, UserPlus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/shopkeeper/delivery")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
@@ -75,15 +78,35 @@ function Page() {
 
   const partnerById = (id: string | null) => (partners.data ?? []).find((p: any) => p.id === id);
 
+  const [addOpen, setAddOpen] = useState(false);
+  const [confirmDel, setConfirmDel] = useState<any | null>(null);
+
+  const deletePartner = async (id: string) => {
+    const { error } = await supabase.rpc("delete_delivery_partner", { _partner_id: id });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Partner removed");
+    setConfirmDel(null);
+    qc.invalidateQueries({ queryKey: ["online-partners"] });
+    qc.invalidateQueries({ queryKey: ["shop-perf", shopId] });
+  };
+
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
       <div className="p-4 md:p-6 space-y-6">
-        <header>
-          <h1 className="font-display text-3xl font-extrabold flex items-center gap-2">
-            <Truck className="h-7 w-7 text-primary" />
-            Delivery Management
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">Assign delivery partners, track active orders, view performance.</p>
+        <header className="flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="font-display text-3xl font-extrabold flex items-center gap-2">
+              <Truck className="h-7 w-7 text-primary" />
+              Delivery Management
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">Add or remove delivery boys, assign live orders, and track performance.</p>
+          </div>
+          <Dialog open={addOpen} onOpenChange={setAddOpen}>
+            <DialogTrigger asChild>
+              <Button><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
+            </DialogTrigger>
+            <AddPartnerDialog onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["online-partners"] }); qc.invalidateQueries({ queryKey: ["shop-perf", shopId] }); }} />
+          </Dialog>
         </header>
 
         <section>
@@ -147,14 +170,73 @@ function Page() {
                     <td className="px-3 py-2 text-right">{Number(r.avg_minutes_today).toFixed(1)}</td>
                     <td className="px-3 py-2 text-right">{Number(r.on_time_pct).toFixed(0)}%</td>
                     <td className="px-3 py-2 text-right">{Number(r.hours_today).toFixed(2)}</td>
+                    <td className="px-3 py-2 text-right">
+                      <Button size="icon" variant="ghost" onClick={() => setConfirmDel(r)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </td>
                   </tr>
                 ))}
-                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
+                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
               </tbody>
             </table>
           </div>
         </section>
+
+        <AlertDialog open={!!confirmDel} onOpenChange={(v) => !v && setConfirmDel(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove “{confirmDel?.name}”?</AlertDialogTitle>
+              <AlertDialogDescription>The partner profile and delivery role will be removed. Active orders block deletion.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => confirmDel && deletePartner(confirmDel.partner_id)}>Remove</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </RoleShell>
+  );
+}
+
+function AddPartnerDialog({ onDone }: { onDone: () => void }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [vehicle, setVehicle] = useState("");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (!name.trim()) { toast.error("Name required"); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("create_delivery_partner", {
+      _name: name.trim(),
+      _phone: phone.trim(),
+      _vehicle: vehicle.trim() || undefined,
+      _user_email: email.trim() || undefined,
+    });
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Partner added"); onDone(); }
+  };
+
+  return (
+    <DialogContent>
+      <DialogHeader><DialogTitle>Add delivery boy</DialogTitle></DialogHeader>
+      <div className="space-y-3">
+        <div><label className="text-xs font-bold">Name *</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+        <div><label className="text-xs font-bold">Phone</label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+        <div><label className="text-xs font-bold">Vehicle</label><Input value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="Bike / Scooter / EV" /></div>
+        <div>
+          <label className="text-xs font-bold">Account email (optional)</label>
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Existing signed-up email to grant login" />
+          <p className="text-[11px] text-muted-foreground mt-1">Leave blank to create a profile-only partner without login.</p>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button onClick={submit} disabled={busy}>{busy ? "Adding…" : "Add partner"}</Button>
+      </DialogFooter>
+    </DialogContent>
   );
 }
