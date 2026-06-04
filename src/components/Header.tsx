@@ -20,7 +20,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 glass border-b border-border">
+      <header className="glass border-b border-border">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:gap-6">
           <Link to="/" className="shrink-0">
             <Logo />
@@ -81,7 +81,7 @@ export function Header() {
         </div>
       </header>
 
-      <div className="md:hidden px-4 py-2 bg-background border-b border-border">
+      <div className="md:hidden sticky top-0 z-40 px-4 py-2 bg-background/95 backdrop-blur border-b border-border">
         <div className="flex items-center gap-2 rounded-xl bg-card border border-border px-3 py-2.5">
           <Search className="h-4 w-4 text-muted-foreground shrink-0" />
           <input
