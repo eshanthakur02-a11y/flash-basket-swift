@@ -6,10 +6,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { RoleShell } from "@/components/RoleShell";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Circle } from "lucide-react";
+import { Truck, Activity, BarChart3, Circle, UserPlus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/shopkeeper/delivery")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
