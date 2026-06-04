@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { rupees } from "@/lib/format";
 import { ADMIN_NAV } from "./admin.dashboard";
+import { OrderAuditLog } from "@/components/OrderAuditLog";
 
 export const Route = createFileRoute("/admin/orders/$id")({ component: Page });
 
@@ -21,10 +22,12 @@ function Page() {
   const o = q.data;
   return (
     <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}>
-      <div className="p-6 max-w-3xl">
-        <h1 className="font-display text-2xl font-bold">{o.order_number}</h1>
-        <div className="text-sm text-muted-foreground mt-1">{o.status} • {rupees(o.total)}</div>
-        <div className="mt-5 rounded-2xl border border-border bg-card divide-y divide-border">
+      <div className="p-6 max-w-3xl space-y-5">
+        <div>
+          <h1 className="font-display text-2xl font-bold">{o.order_number}</h1>
+          <div className="text-sm text-muted-foreground mt-1">{o.status} • {rupees(o.total)}</div>
+        </div>
+        <div className="rounded-2xl border border-border bg-card divide-y divide-border">
           {o.items.map((it: any) => (
             <div key={it.id} className="flex justify-between px-4 py-3 text-sm">
               <span>{it.name} × {it.quantity}</span>
@@ -32,6 +35,7 @@ function Page() {
             </div>
           ))}
         </div>
+        <OrderAuditLog orderId={o.id} />
       </div>
     </RoleShell>
   );
