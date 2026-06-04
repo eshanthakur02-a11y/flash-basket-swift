@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { Home, LayoutGrid, Heart, Package, User, ShoppingCart, Bell, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Home, LayoutGrid, Heart, Package, User, ShoppingCart, Bell, Zap, Search } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { cn } from "@/lib/utils";
@@ -37,30 +37,52 @@ function CustomerShell() {
 
   if (pathname === "/customer") return <Navigate to="/customer/home" replace />;
 
+  const [search, setSearch] = useState("");
+  const nav = useNavigate();
+
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (search.trim()) nav({ to: "/products", search: { q: search.trim() } as any });
+    else nav({ to: "/customer/categories" });
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top app bar */}
       <header className="sticky top-0 z-40 glass border-b border-border">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <Link to="/customer/home" className="flex items-center gap-2 font-display font-extrabold text-lg">
-            <span className="grid h-8 w-8 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
-              <Zap className="h-4 w-4 fill-current" />
+        <div className="flex items-center gap-2 px-3 py-2">
+          <Link to="/customer/home" className="flex items-center gap-1.5 font-display font-extrabold text-base">
+            <span className="grid h-7 w-7 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
+              <Zap className="h-3.5 w-3.5 fill-current" />
             </span>
             Flash<span className="text-primary">Basket</span>
           </Link>
           <div className="flex-1" />
-          <Link to="/customer/notifications" className="grid h-10 w-10 place-items-center rounded-full bg-secondary">
-            <Bell className="h-5 w-5" />
+          <Link to="/customer/notifications" className="grid h-9 w-9 place-items-center rounded-full bg-secondary">
+            <Bell className="h-4 w-4" />
           </Link>
-          <Link to="/customer/cart" className="relative grid h-10 w-10 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
-            <ShoppingCart className="h-5 w-5" />
+          <Link to="/customer/cart" className="relative grid h-9 w-9 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
+            <ShoppingCart className="h-4 w-4" />
             {totalQty > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 min-w-5 px-1 grid place-items-center rounded-full bg-foreground text-background text-[10px] font-bold">
+              <span className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 grid place-items-center rounded-full bg-foreground text-background text-[9px] font-bold">
                 {totalQty}
               </span>
             )}
           </Link>
         </div>
+
+        {/* Search bar */}
+        <form onSubmit={onSearch} className="px-3 pb-2">
+          <div className="flex items-center gap-2 rounded-xl bg-card border border-border px-3 py-2">
+            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder='Search "milk", "bread", "atta"…'
+              className="bg-transparent text-sm outline-none placeholder:text-muted-foreground w-full"
+            />
+          </div>
+        </form>
       </header>
 
       {/* Page content */}

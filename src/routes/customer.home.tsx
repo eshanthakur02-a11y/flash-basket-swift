@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Search, Zap, Clock, Truck, ShieldCheck } from "lucide-react";
+import { Zap, Clock, Truck, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -69,15 +69,6 @@ function CustomerHome() {
         <p className="mt-1 text-xs text-muted-foreground">Fresh groceries delivered to your door.</p>
         <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
       </motion.section>
-
-      {/* Search */}
-      <Link
-        to="/customer/categories"
-        className="flex items-center gap-2 rounded-2xl bg-card border border-border px-4 py-3 shadow-card"
-      >
-        <Search className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Search for "milk", "rice"…</span>
-      </Link>
 
       {/* Promise strip */}
       <div className="grid grid-cols-3 gap-2">
