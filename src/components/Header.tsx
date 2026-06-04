@@ -84,23 +84,25 @@ export function Header() {
         </div>
       </header>
 
-      <div className="md:hidden sticky top-0 z-40 px-4 py-2 bg-background/95 backdrop-blur border-b border-border">
-        <div className="flex items-center gap-2 rounded-xl bg-card border border-border px-3 py-2.5">
-          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
-          <input
-            type="text"
-            placeholder="Search for products..."
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && query.trim()) {
-                navigate({ to: "/products", search: { q: query.trim() } });
-              }
-            }}
-          />
+      {!hideSearch && (
+        <div className="md:hidden sticky top-0 z-40 px-4 py-2 bg-background/95 backdrop-blur border-b border-border">
+          <div className="flex items-center gap-2 rounded-xl bg-card border border-border px-3 py-2.5">
+            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+            <input
+              type="text"
+              placeholder="Search for products..."
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && query.trim()) {
+                  navigate({ to: "/products", search: { q: query.trim() } });
+                }
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
