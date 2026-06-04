@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Zap, Clock, Truck, ShieldCheck } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Zap, Clock, Truck, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hero3D } from "@/components/Hero3D";
 import { useAuth } from "@/hooks/useAuth";
+
+type SortKey = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 
 export const Route = createFileRoute("/")({
   head: () => ({
