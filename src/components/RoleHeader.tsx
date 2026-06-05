@@ -59,9 +59,6 @@ export function RoleHeader({ homeTo, accountTo, searchTo = "/products", showSear
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => nav({ to: "/dashboard" })}>
-                Dashboard
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => nav({ to: accountTo as any })}>
                 Account
               </DropdownMenuItem>
