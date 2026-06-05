@@ -342,16 +342,37 @@ function CheckoutPage() {
           <h3 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
             <Tag className="h-4 w-4 text-primary" /> Apply coupon
           </h3>
-          <div className="flex gap-2">
-            <Input value={coupon} onChange={(e) => setCoupon(e.target.value.toUpperCase())} placeholder="FLASH50" className="rounded-xl uppercase" />
-            <Button variant="outline" className="rounded-xl" onClick={() => toast.info("Coupon will be applied at checkout")}>Apply</Button>
-          </div>
-          <div className="mt-2 text-xs text-muted-foreground">Try FLASH50, SAVE10, or WELCOME</div>
+          {appliedCoupon ? (
+            <div className="flex items-center justify-between rounded-xl border-2 border-primary/40 bg-primary/10 px-3 py-2">
+              <div>
+                <div className="font-bold text-sm">{appliedCoupon.code} applied</div>
+                <div className="text-xs text-muted-foreground">You saved {rupees(appliedCoupon.discount)}</div>
+              </div>
+              <Button variant="ghost" size="sm" className="text-destructive" onClick={removeCoupon}>Remove</Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                value={coupon}
+                onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+                placeholder="FLASH50"
+                className="rounded-xl uppercase"
+                onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+              />
+              <Button variant="outline" className="rounded-xl" onClick={applyCoupon} disabled={applyingCoupon}>
+                {applyingCoupon ? "…" : "Apply"}
+              </Button>
+            </div>
+          )}
+          <div className="mt-2 text-xs text-muted-foreground">Try FLASH50 (₹299+), SAVE10 (₹199+), or WELCOME (₹99+)</div>
         </div>
 
         <div className="rounded-3xl border border-border bg-card p-5 shadow-card">
           <h3 className="font-display text-lg font-bold mb-3">Bill summary</h3>
           <Row label={`Item total (${items.length})`} value={rupees(subtotal)} />
+          {appliedCoupon && (
+            <Row label={`Coupon (${appliedCoupon.code})`} value={`- ${rupees(appliedCoupon.discount)}`} />
+          )}
           <Row label="Delivery" value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
           <Row label="Handling" value={rupees(handling)} />
           <div className="my-3 h-px bg-border" />
