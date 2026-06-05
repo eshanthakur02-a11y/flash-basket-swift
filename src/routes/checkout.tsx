@@ -75,7 +75,46 @@ function CheckoutPage() {
 
   const deliveryFee = subtotal >= 199 ? 0 : 25;
   const handling = 5;
-  const total = subtotal + deliveryFee + handling;
+  const discount = appliedCoupon?.discount ?? 0;
+  const total = Math.max(0, subtotal - discount) + deliveryFee + handling;
+
+  // Re-validate coupon when subtotal changes (cart updates)
+  useEffect(() => {
+    if (appliedCoupon && subtotal === 0) setAppliedCoupon(null);
+  }, [subtotal, appliedCoupon]);
+
+  const applyCoupon = async () => {
+    const code = coupon.trim().toUpperCase();
+    if (!code) return toast.error("Enter a coupon code");
+    setApplyingCoupon(true);
+    const { data, error } = await supabase
+      .from("coupons")
+      .select("*")
+      .eq("code", code)
+      .eq("active", true)
+      .maybeSingle();
+    setApplyingCoupon(false);
+    if (error || !data) return toast.error("Invalid coupon code");
+    if (data.expires_at && new Date(data.expires_at) < new Date())
+      return toast.error("Coupon expired");
+    if (data.usage_limit && data.times_used >= data.usage_limit)
+      return toast.error("Coupon usage limit reached");
+    if (subtotal < Number(data.min_order))
+      return toast.error(`Add ₹${(Number(data.min_order) - subtotal).toFixed(0)} more to use ${code}`);
+    let disc = 0;
+    if (data.type === "flat") disc = Math.min(Number(data.value), subtotal);
+    else {
+      disc = (subtotal * Number(data.value)) / 100;
+      if (data.max_discount) disc = Math.min(disc, Number(data.max_discount));
+    }
+    setAppliedCoupon({ code, discount: Math.round(disc * 100) / 100 });
+    toast.success(`${code} applied — you saved ₹${disc.toFixed(0)}`);
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCoupon("");
+  };
 
   useEffect(() => {
     if (!selectedAddr && (addresses.data?.length ?? 0) > 0) {
