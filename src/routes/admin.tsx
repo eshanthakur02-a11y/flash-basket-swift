@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
   LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet,
-  Package, Tag, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings, Megaphone,
+  Package, Tag, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings, Megaphone, Ticket,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
