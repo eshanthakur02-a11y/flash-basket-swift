@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ShopkeeperRouteImport } from './routes/shopkeeper'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FavouritesRouteImport } from './routes/favourites'
 import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomerRouteImport } from './routes/customer'
@@ -91,6 +92,11 @@ const ProductsRoute = ProductsRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavouritesRoute = FavouritesRouteImport.update({
+  id: '/favourites',
+  path: '/favourites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeliveryRoute = DeliveryRouteImport.update({
@@ -402,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/delivery': typeof DeliveryRouteWithChildren
+  '/favourites': typeof FavouritesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
@@ -467,6 +474,7 @@ export interface FileRoutesByTo {
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/delivery': typeof DeliveryRouteWithChildren
+  '/favourites': typeof FavouritesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
@@ -533,6 +541,7 @@ export interface FileRoutesById {
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/delivery': typeof DeliveryRouteWithChildren
+  '/favourites': typeof FavouritesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
@@ -600,6 +609,7 @@ export interface FileRouteTypes {
     | '/customer'
     | '/dashboard'
     | '/delivery'
+    | '/favourites'
     | '/login'
     | '/products'
     | '/shopkeeper'
@@ -665,6 +675,7 @@ export interface FileRouteTypes {
     | '/customer'
     | '/dashboard'
     | '/delivery'
+    | '/favourites'
     | '/login'
     | '/products'
     | '/shopkeeper'
@@ -730,6 +741,7 @@ export interface FileRouteTypes {
     | '/customer'
     | '/dashboard'
     | '/delivery'
+    | '/favourites'
     | '/login'
     | '/products'
     | '/shopkeeper'
@@ -796,6 +808,7 @@ export interface RootRouteChildren {
   CustomerRoute: typeof CustomerRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   DeliveryRoute: typeof DeliveryRouteWithChildren
+  FavouritesRoute: typeof FavouritesRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
   ShopkeeperRoute: typeof ShopkeeperRouteWithChildren
@@ -836,6 +849,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favourites': {
+      id: '/favourites'
+      path: '/favourites'
+      fullPath: '/favourites'
+      preLoaderRoute: typeof FavouritesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/delivery': {
@@ -1418,6 +1438,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomerRoute: CustomerRouteWithChildren,
   DashboardRoute: DashboardRoute,
   DeliveryRoute: DeliveryRouteWithChildren,
+  FavouritesRoute: FavouritesRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
   ShopkeeperRoute: ShopkeeperRouteWithChildren,
@@ -1433,13 +1454,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
