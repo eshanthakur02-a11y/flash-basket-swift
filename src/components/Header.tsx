@@ -52,9 +52,6 @@ export function Header() {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>
-                    Dashboard
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate({ to: "/orders" })}>
                     My Orders
                   </DropdownMenuItem>
