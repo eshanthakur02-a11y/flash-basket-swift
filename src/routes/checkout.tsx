@@ -46,6 +46,8 @@ function CheckoutPage() {
   });
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [coupon, setCoupon] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
   const [placing, setPlacing] = useState(false);
@@ -73,7 +75,46 @@ function CheckoutPage() {
 
   const deliveryFee = subtotal >= 199 ? 0 : 25;
   const handling = 5;
-  const total = subtotal + deliveryFee + handling;
+  const discount = appliedCoupon?.discount ?? 0;
+  const total = Math.max(0, subtotal - discount) + deliveryFee + handling;
+
+  // Re-validate coupon when subtotal changes (cart updates)
+  useEffect(() => {
+    if (appliedCoupon && subtotal === 0) setAppliedCoupon(null);
+  }, [subtotal, appliedCoupon]);
+
+  const applyCoupon = async () => {
+    const code = coupon.trim().toUpperCase();
+    if (!code) return toast.error("Enter a coupon code");
+    setApplyingCoupon(true);
+    const { data, error } = await supabase
+      .from("coupons")
+      .select("*")
+      .eq("code", code)
+      .eq("active", true)
+      .maybeSingle();
+    setApplyingCoupon(false);
+    if (error || !data) return toast.error("Invalid coupon code");
+    if (data.expires_at && new Date(data.expires_at) < new Date())
+      return toast.error("Coupon expired");
+    if (data.usage_limit && data.times_used >= data.usage_limit)
+      return toast.error("Coupon usage limit reached");
+    if (subtotal < Number(data.min_order))
+      return toast.error(`Add ₹${(Number(data.min_order) - subtotal).toFixed(0)} more to use ${code}`);
+    let disc = 0;
+    if (data.type === "flat") disc = Math.min(Number(data.value), subtotal);
+    else {
+      disc = (subtotal * Number(data.value)) / 100;
+      if (data.max_discount) disc = Math.min(disc, Number(data.max_discount));
+    }
+    setAppliedCoupon({ code, discount: Math.round(disc * 100) / 100 });
+    toast.success(`${code} applied — you saved ₹${disc.toFixed(0)}`);
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCoupon("");
+  };
 
   useEffect(() => {
     if (!selectedAddr && (addresses.data?.length ?? 0) > 0) {
@@ -100,8 +141,12 @@ function CheckoutPage() {
   };
 
   const place = async () => {
-    const addr =
-      selectedAddr && addresses.data?.find((a) => a.id === selectedAddr);
+    if (!selectedAddr || !addresses.data?.length) {
+      toast.error("Please add a delivery address");
+      setShowNew(true);
+      return;
+    }
+    const addr = addresses.data.find((a) => a.id === selectedAddr);
     if (!addr) return toast.error("Please add a delivery address");
 
     const addressWithCoords: any = {
@@ -114,11 +159,15 @@ function CheckoutPage() {
     const { data, error } = await supabase.rpc("place_order", {
       _address: addressWithCoords,
       _payment_method: method,
-      _coupon_code: coupon || undefined,
+      _coupon_code: appliedCoupon?.code ?? undefined,
       _delivery_instruction: instruction || undefined,
     });
 
-    if (error) { setPlacing(false); return toast.error(error.message); }
+    if (error) {
+      setPlacing(false);
+      console.error("place_order error:", error);
+      return toast.error(error.message || "Could not place order");
+    }
     const orderId = data as string;
 
     if (method === "cod") {
@@ -293,16 +342,37 @@ function CheckoutPage() {
           <h3 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
             <Tag className="h-4 w-4 text-primary" /> Apply coupon
           </h3>
-          <div className="flex gap-2">
-            <Input value={coupon} onChange={(e) => setCoupon(e.target.value.toUpperCase())} placeholder="FLASH50" className="rounded-xl uppercase" />
-            <Button variant="outline" className="rounded-xl" onClick={() => toast.info("Coupon will be applied at checkout")}>Apply</Button>
-          </div>
-          <div className="mt-2 text-xs text-muted-foreground">Try FLASH50, SAVE10, or WELCOME</div>
+          {appliedCoupon ? (
+            <div className="flex items-center justify-between rounded-xl border-2 border-primary/40 bg-primary/10 px-3 py-2">
+              <div>
+                <div className="font-bold text-sm">{appliedCoupon.code} applied</div>
+                <div className="text-xs text-muted-foreground">You saved {rupees(appliedCoupon.discount)}</div>
+              </div>
+              <Button variant="ghost" size="sm" className="text-destructive" onClick={removeCoupon}>Remove</Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                value={coupon}
+                onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+                placeholder="FLASH50"
+                className="rounded-xl uppercase"
+                onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+              />
+              <Button variant="outline" className="rounded-xl" onClick={applyCoupon} disabled={applyingCoupon}>
+                {applyingCoupon ? "…" : "Apply"}
+              </Button>
+            </div>
+          )}
+          <div className="mt-2 text-xs text-muted-foreground">Try FLASH50 (₹299+), SAVE10 (₹199+), or WELCOME (₹99+)</div>
         </div>
 
         <div className="rounded-3xl border border-border bg-card p-5 shadow-card">
           <h3 className="font-display text-lg font-bold mb-3">Bill summary</h3>
           <Row label={`Item total (${items.length})`} value={rupees(subtotal)} />
+          {appliedCoupon && (
+            <Row label={`Coupon (${appliedCoupon.code})`} value={`- ${rupees(appliedCoupon.discount)}`} />
+          )}
           <Row label="Delivery" value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
           <Row label="Handling" value={rupees(handling)} />
           <div className="my-3 h-px bg-border" />
