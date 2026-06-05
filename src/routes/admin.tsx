@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
   LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet,
-  Package, Tag, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings, Megaphone,
+  Package, Tag, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings, Megaphone, Ticket,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -34,6 +34,7 @@ const DRAWER_NAV = [
   { to: "/admin/categories", label: "Categories", icon: Tag },
   
   { to: "/admin/offers", label: "Offers", icon: Megaphone },
+  { to: "/admin/coupons", label: "Coupons", icon: Ticket },
   { to: "/admin/products?filter=low-stock", label: "Stock Alerts", icon: AlertTriangle },
   { to: "/admin/reports", label: "Reports", icon: BarChart },
   { to: "/admin/delivery-partners", label: "Partners", icon: Truck },

@@ -34,6 +34,7 @@ import { Route as ShopkeeperNotificationsRouteImport } from './routes/shopkeeper
 import { Route as ShopkeeperEarningsRouteImport } from './routes/shopkeeper.earnings'
 import { Route as ShopkeeperDeliveryRouteImport } from './routes/shopkeeper.delivery'
 import { Route as ShopkeeperDashboardRouteImport } from './routes/shopkeeper.dashboard'
+import { Route as ShopkeeperCouponsRouteImport } from './routes/shopkeeper.coupons'
 import { Route as ShopkeeperCategoriesRouteImport } from './routes/shopkeeper.categories'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
@@ -64,6 +65,7 @@ import { Route as AdminNotificationsRouteImport } from './routes/admin.notificat
 import { Route as AdminDeliveryPartnersRouteImport } from './routes/admin.delivery-partners'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminComplaintsRouteImport } from './routes/admin.complaints'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as ShopkeeperOrdersIdRouteImport } from './routes/shopkeeper.orders.$id'
@@ -197,6 +199,11 @@ const ShopkeeperDeliveryRoute = ShopkeeperDeliveryRouteImport.update({
 const ShopkeeperDashboardRoute = ShopkeeperDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => ShopkeeperRoute,
+} as any)
+const ShopkeeperCouponsRoute = ShopkeeperCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
   getParentRoute: () => ShopkeeperRoute,
 } as any)
 const ShopkeeperCategoriesRoute = ShopkeeperCategoriesRouteImport.update({
@@ -349,6 +356,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCouponsRoute = AdminCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminComplaintsRoute = AdminComplaintsRouteImport.update({
   id: '/complaints',
   path: '/complaints',
@@ -415,6 +427,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
@@ -445,6 +458,7 @@ export interface FileRoutesByFullPath {
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
+  '/shopkeeper/coupons': typeof ShopkeeperCouponsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
@@ -481,6 +495,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
@@ -511,6 +526,7 @@ export interface FileRoutesByTo {
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
+  '/shopkeeper/coupons': typeof ShopkeeperCouponsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
@@ -548,6 +564,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
@@ -578,6 +595,7 @@ export interface FileRoutesById {
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
+  '/shopkeeper/coupons': typeof ShopkeeperCouponsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
@@ -616,6 +634,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/categories'
     | '/admin/complaints'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
@@ -646,6 +665,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/categories'
+    | '/shopkeeper/coupons'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
@@ -682,6 +702,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/categories'
     | '/admin/complaints'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
@@ -712,6 +733,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/categories'
+    | '/shopkeeper/coupons'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
@@ -748,6 +770,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/categories'
     | '/admin/complaints'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
@@ -778,6 +801,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/categories'
+    | '/shopkeeper/coupons'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
@@ -998,6 +1022,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopkeeperDashboardRouteImport
       parentRoute: typeof ShopkeeperRoute
     }
+    '/shopkeeper/coupons': {
+      id: '/shopkeeper/coupons'
+      path: '/coupons'
+      fullPath: '/shopkeeper/coupons'
+      preLoaderRoute: typeof ShopkeeperCouponsRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
     '/shopkeeper/categories': {
       id: '/shopkeeper/categories'
       path: '/categories'
@@ -1208,6 +1239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/coupons': {
+      id: '/admin/coupons'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminCouponsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/complaints': {
       id: '/admin/complaints'
       path: '/complaints'
@@ -1289,6 +1327,7 @@ const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminComplaintsRoute: typeof AdminComplaintsRoute
+  AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDeliveryPartnersRoute: typeof AdminDeliveryPartnersRoute
@@ -1305,6 +1344,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminComplaintsRoute: AdminComplaintsRoute,
+  AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDeliveryPartnersRoute: AdminDeliveryPartnersRoute,
@@ -1399,6 +1439,7 @@ const ShopkeeperOrdersRouteWithChildren =
 
 interface ShopkeeperRouteChildren {
   ShopkeeperCategoriesRoute: typeof ShopkeeperCategoriesRoute
+  ShopkeeperCouponsRoute: typeof ShopkeeperCouponsRoute
   ShopkeeperDashboardRoute: typeof ShopkeeperDashboardRoute
   ShopkeeperDeliveryRoute: typeof ShopkeeperDeliveryRoute
   ShopkeeperEarningsRoute: typeof ShopkeeperEarningsRoute
@@ -1412,6 +1453,7 @@ interface ShopkeeperRouteChildren {
 
 const ShopkeeperRouteChildren: ShopkeeperRouteChildren = {
   ShopkeeperCategoriesRoute: ShopkeeperCategoriesRoute,
+  ShopkeeperCouponsRoute: ShopkeeperCouponsRoute,
   ShopkeeperDashboardRoute: ShopkeeperDashboardRoute,
   ShopkeeperDeliveryRoute: ShopkeeperDeliveryRoute,
   ShopkeeperEarningsRoute: ShopkeeperEarningsRoute,
