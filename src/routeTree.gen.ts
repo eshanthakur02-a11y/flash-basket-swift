@@ -34,6 +34,7 @@ import { Route as ShopkeeperNotificationsRouteImport } from './routes/shopkeeper
 import { Route as ShopkeeperEarningsRouteImport } from './routes/shopkeeper.earnings'
 import { Route as ShopkeeperDeliveryRouteImport } from './routes/shopkeeper.delivery'
 import { Route as ShopkeeperDashboardRouteImport } from './routes/shopkeeper.dashboard'
+import { Route as ShopkeeperCouponsRouteImport } from './routes/shopkeeper.coupons'
 import { Route as ShopkeeperCategoriesRouteImport } from './routes/shopkeeper.categories'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
@@ -198,6 +199,11 @@ const ShopkeeperDeliveryRoute = ShopkeeperDeliveryRouteImport.update({
 const ShopkeeperDashboardRoute = ShopkeeperDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => ShopkeeperRoute,
+} as any)
+const ShopkeeperCouponsRoute = ShopkeeperCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
   getParentRoute: () => ShopkeeperRoute,
 } as any)
 const ShopkeeperCategoriesRoute = ShopkeeperCategoriesRouteImport.update({
@@ -452,6 +458,7 @@ export interface FileRoutesByFullPath {
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
+  '/shopkeeper/coupons': typeof ShopkeeperCouponsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
@@ -519,6 +526,7 @@ export interface FileRoutesByTo {
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
+  '/shopkeeper/coupons': typeof ShopkeeperCouponsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
@@ -587,6 +595,7 @@ export interface FileRoutesById {
   '/orders/$id': typeof OrdersIdRoute
   '/product/$slug': typeof ProductSlugRoute
   '/shopkeeper/categories': typeof ShopkeeperCategoriesRoute
+  '/shopkeeper/coupons': typeof ShopkeeperCouponsRoute
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
@@ -656,6 +665,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/categories'
+    | '/shopkeeper/coupons'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
@@ -723,6 +733,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/categories'
+    | '/shopkeeper/coupons'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
@@ -790,6 +801,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/product/$slug'
     | '/shopkeeper/categories'
+    | '/shopkeeper/coupons'
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
@@ -1008,6 +1020,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/shopkeeper/dashboard'
       preLoaderRoute: typeof ShopkeeperDashboardRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
+    '/shopkeeper/coupons': {
+      id: '/shopkeeper/coupons'
+      path: '/coupons'
+      fullPath: '/shopkeeper/coupons'
+      preLoaderRoute: typeof ShopkeeperCouponsRouteImport
       parentRoute: typeof ShopkeeperRoute
     }
     '/shopkeeper/categories': {
@@ -1420,6 +1439,7 @@ const ShopkeeperOrdersRouteWithChildren =
 
 interface ShopkeeperRouteChildren {
   ShopkeeperCategoriesRoute: typeof ShopkeeperCategoriesRoute
+  ShopkeeperCouponsRoute: typeof ShopkeeperCouponsRoute
   ShopkeeperDashboardRoute: typeof ShopkeeperDashboardRoute
   ShopkeeperDeliveryRoute: typeof ShopkeeperDeliveryRoute
   ShopkeeperEarningsRoute: typeof ShopkeeperEarningsRoute
@@ -1433,6 +1453,7 @@ interface ShopkeeperRouteChildren {
 
 const ShopkeeperRouteChildren: ShopkeeperRouteChildren = {
   ShopkeeperCategoriesRoute: ShopkeeperCategoriesRoute,
+  ShopkeeperCouponsRoute: ShopkeeperCouponsRoute,
   ShopkeeperDashboardRoute: ShopkeeperDashboardRoute,
   ShopkeeperDeliveryRoute: ShopkeeperDeliveryRoute,
   ShopkeeperEarningsRoute: ShopkeeperEarningsRoute,
@@ -1475,3 +1496,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
