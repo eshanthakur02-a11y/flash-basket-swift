@@ -141,8 +141,12 @@ function CheckoutPage() {
   };
 
   const place = async () => {
-    const addr =
-      selectedAddr && addresses.data?.find((a) => a.id === selectedAddr);
+    if (!selectedAddr || !addresses.data?.length) {
+      toast.error("Please add a delivery address");
+      setShowNew(true);
+      return;
+    }
+    const addr = addresses.data.find((a) => a.id === selectedAddr);
     if (!addr) return toast.error("Please add a delivery address");
 
     const addressWithCoords: any = {
@@ -155,11 +159,15 @@ function CheckoutPage() {
     const { data, error } = await supabase.rpc("place_order", {
       _address: addressWithCoords,
       _payment_method: method,
-      _coupon_code: coupon || undefined,
+      _coupon_code: appliedCoupon?.code ?? undefined,
       _delivery_instruction: instruction || undefined,
     });
 
-    if (error) { setPlacing(false); return toast.error(error.message); }
+    if (error) {
+      setPlacing(false);
+      console.error("place_order error:", error);
+      return toast.error(error.message || "Could not place order");
+    }
     const orderId = data as string;
 
     if (method === "cod") {
