@@ -64,6 +64,7 @@ import { Route as AdminNotificationsRouteImport } from './routes/admin.notificat
 import { Route as AdminDeliveryPartnersRouteImport } from './routes/admin.delivery-partners'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminComplaintsRouteImport } from './routes/admin.complaints'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as ShopkeeperOrdersIdRouteImport } from './routes/shopkeeper.orders.$id'
@@ -349,6 +350,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCouponsRoute = AdminCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminComplaintsRoute = AdminComplaintsRouteImport.update({
   id: '/complaints',
   path: '/complaints',
@@ -415,6 +421,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
@@ -481,6 +488,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
@@ -548,6 +556,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
+  '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
@@ -616,6 +625,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/categories'
     | '/admin/complaints'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
@@ -682,6 +692,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/categories'
     | '/admin/complaints'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
@@ -748,6 +759,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/categories'
     | '/admin/complaints'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
@@ -1208,6 +1220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/coupons': {
+      id: '/admin/coupons'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminCouponsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/complaints': {
       id: '/admin/complaints'
       path: '/complaints'
@@ -1289,6 +1308,7 @@ const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminComplaintsRoute: typeof AdminComplaintsRoute
+  AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDeliveryPartnersRoute: typeof AdminDeliveryPartnersRoute
@@ -1305,6 +1325,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminComplaintsRoute: AdminComplaintsRoute,
+  AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDeliveryPartnersRoute: AdminDeliveryPartnersRoute,
