@@ -1,4 +1,4 @@
-import { Outlet, useRouterState } from "@tanstack/react-router";
+import { Outlet, useRouterState, Link } from "@tanstack/react-router";
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 import { Toaster } from "./ui/sonner";
@@ -31,7 +31,10 @@ export function Layout() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>© {new Date().getFullYear()} FlashBasket. Groceries delivered at lightning speed.</div>
             <div className="flex gap-4">
-              <span>About</span><span>Help</span><span>Privacy</span><span>Terms</span>
+              <Link to="/about" className="hover:text-foreground transition">About</Link>
+              <Link to="/help" className="hover:text-foreground transition">Help</Link>
+              <Link to="/privacy" className="hover:text-foreground transition">Privacy</Link>
+              <Link to="/terms" className="hover:text-foreground transition">Terms</Link>
             </div>
           </div>
         </div>

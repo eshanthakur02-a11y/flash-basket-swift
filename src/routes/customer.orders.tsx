@@ -18,6 +18,10 @@ const statusColor: Record<string, string> = {
   out_for_delivery: "bg-primary/20 text-primary",
   delivered: "bg-success/30 text-success-foreground",
   cancelled: "bg-destructive/20 text-destructive",
+  awaiting_shop: "bg-yellow-100 text-yellow-800",
+  accepted_by_shop: "bg-blue-100 text-blue-800",
+  payment_confirmed: "bg-purple-100 text-purple-800",
+  no_shop_available: "bg-red-100 text-red-800",
 };
 
 function AppOrders() {
