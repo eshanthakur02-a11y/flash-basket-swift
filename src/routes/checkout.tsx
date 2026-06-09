@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { MapPin, Plus, Wallet, CreditCard, Tag, Zap } from "lucide-react";
@@ -51,6 +51,9 @@ function CheckoutPage() {
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
   const [placing, setPlacing] = useState(false);
+  const mounted = useRef(true);
+  useEffect(() => () => { mounted.current = false; }, []);
+  const safeSetPlacing = (v: boolean) => { if (mounted.current) setPlacing(v); };
 
   const useMyLocation = () => {
     if (!navigator.geolocation) return toast.error("Geolocation not available");
@@ -206,18 +209,18 @@ function CheckoutPage() {
             navigate({ to: "/orders/$id", params: { id: orderId } });
           } catch (e: any) {
             toast.error(e.message ?? "Payment verification failed");
-          } finally { setPlacing(false); }
+          } finally { safeSetPlacing(false); }
         },
         onFailure: async (err) => {
           await recordFail({
             data: { razorpayOrderId: rzp.razorpayOrderId, code: err.code, description: err.description },
           }).catch(() => {});
           toast.error(err.description ?? "Payment failed");
-          setPlacing(false);
+          safeSetPlacing(false);
         },
         onDismiss: () => {
           toast.info("Payment cancelled. You can pay from your orders page.");
-          setPlacing(false);
+          safeSetPlacing(false);
           navigate({ to: "/orders/$id", params: { id: orderId } });
         },
       });

@@ -60,7 +60,7 @@ function AppOrders() {
           {orders.data?.map((o) => (
             <Link
               key={o.id}
-              to="/orders/$id"
+              to="/customer/orders/$id"
               params={{ id: o.id }}
               className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-card hover:shadow-glow transition"
             >
