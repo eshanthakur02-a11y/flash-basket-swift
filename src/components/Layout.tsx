@@ -4,7 +4,7 @@ import { BottomNav } from "./BottomNav";
 import { Toaster } from "./ui/sonner";
 import { useNotifications } from "@/hooks/useNotifications";
 
-const DEMO_PREFIXES = ["/customer", "/shopkeeper", "/delivery", "/admin", "/login", "/signup", "/app"];
+const DEMO_PREFIXES = ["/customer", "/shopkeeper", "/delivery", "/admin", "/login", "/signup", "/app", "/checkout", "/orders", "/support"];
 
 export function Layout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
