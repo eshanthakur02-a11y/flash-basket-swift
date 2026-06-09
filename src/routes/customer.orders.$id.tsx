@@ -1,7 +1,10 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { OrderDetailView } from "@/components/OrderDetailView";
+
 export const Route = createFileRoute("/customer/orders/$id")({
-  component: function R() {
+  head: ({ params }) => ({ meta: [{ title: `Order #${params.id.slice(0, 8)} — FlashBasket` }] }),
+  component: function Page() {
     const { id } = Route.useParams();
-    return <Navigate to="/orders/$id" params={{ id }} />;
+    return <OrderDetailView id={id} />;
   },
 });
