@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { SupportTicketForm } from "@/components/SupportTicketForm";
 
 export const Route = createFileRoute("/customer/profile")({
   head: () => ({ meta: [{ title: "Account — FlashBasket" }] }),
@@ -20,6 +21,7 @@ function AppProfile() {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const profile = useQuery({
     queryKey: ["app-profile", user?.id],
@@ -91,8 +93,10 @@ function AppProfile() {
         <Row to="/account" icon={<MapPin className="h-5 w-5" />} label={`Addresses (${addresses.data?.length ?? 0})`} />
         <Row to="/customer/notifications" icon={<Bell className="h-5 w-5" />} label="Notifications" />
         {isAdmin && <Row to="/admin/dashboard" icon={<Shield className="h-5 w-5" />} label="Admin panel" />}
-        <Row to="/" icon={<Headphones className="h-5 w-5" />} label="Help & support" />
+        <RowButton onClick={() => setSupportOpen(true)} icon={<Headphones className="h-5 w-5" />} label="Help & support" />
       </div>
+
+      <SupportTicketForm open={supportOpen} onOpenChange={setSupportOpen} />
 
       <button
         onClick={async () => { await signOut(); navigate({ to: "/login" }); }}
@@ -113,5 +117,15 @@ function Row({ to, icon, label }: { to: string; icon: React.ReactNode; label: st
       <span className="flex-1 font-semibold text-sm">{label}</span>
       <ChevronRight className="h-4 w-4 text-muted-foreground" />
     </Link>
+  );
+}
+
+function RowButton({ onClick, icon, label }: { onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button onClick={onClick} className="w-full text-left flex items-center gap-3 px-4 py-3.5 border-b border-border last:border-0 hover:bg-secondary/40 transition">
+      <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary">{icon}</span>
+      <span className="flex-1 font-semibold text-sm">{label}</span>
+      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+    </button>
   );
 }
