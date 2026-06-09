@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { LayoutDashboard, ListOrdered, Package, Wallet, Bell, Star, Settings, Check, X, PackageCheck, Truck, Tag } from "lucide-react";
+import { SupportFab } from "@/components/SupportFab";
+
 
 const NAV = [
   { to: "/shopkeeper/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -125,9 +127,11 @@ function Page() {
           </>
         )}
       </div>
+      <SupportFab />
     </RoleShell>
   );
 }
+
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (

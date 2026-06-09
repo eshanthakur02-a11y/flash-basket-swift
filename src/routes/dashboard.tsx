@@ -16,12 +16,14 @@ function DashboardRedirect() {
     if (!user) { navigate({ to: "/login", replace: true }); return; }
     const r: string[] = roles ?? [];
     if (r.includes("admin")) navigate({ to: "/admin/dashboard", replace: true });
+    else if (r.includes("support")) navigate({ to: "/support/dashboard" as any, replace: true });
     else if (r.includes("shopkeeper")) navigate({ to: "/shopkeeper/dashboard", replace: true });
     else if (r.includes("delivery")) navigate({ to: "/delivery/dashboard", replace: true });
   }, [user, loading, rolesLoading, roles, navigate]);
 
   if (loading || rolesLoading || !user) return null;
   const r: string[] = roles ?? [];
-  if (r.includes("admin") || r.includes("shopkeeper") || r.includes("delivery")) return null;
+  if (r.includes("admin") || r.includes("shopkeeper") || r.includes("delivery") || r.includes("support")) return null;
   return <Navigate to="/customer/home" replace />;
 }
+
