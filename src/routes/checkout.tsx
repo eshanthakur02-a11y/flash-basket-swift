@@ -60,10 +60,7 @@ function CheckoutPage() {
     );
   };
 
-  if (!user) {
-    navigate({ to: "/auth" });
-    return null;
-  }
+  if (!user) return <Navigate to="/auth" />;
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
