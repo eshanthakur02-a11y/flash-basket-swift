@@ -87,7 +87,8 @@ export function useCart() {
 
   const clear = async () => {
     if (!user) return;
-    await supabase.from("cart_items").delete().eq("user_id", user.id);
+    const { error } = await supabase.from("cart_items").delete().eq("user_id", user.id);
+    if (error) { toast.error("Could not clear cart: " + error.message); return; }
     qc.invalidateQueries({ queryKey: ["cart", user.id] });
   };
 

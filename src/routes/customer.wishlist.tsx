@@ -1,32 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export const Route = createFileRoute("/customer/wishlist")({
   head: () => ({ meta: [{ title: "Favourites — FlashBasket" }] }),
   component: WishlistPage,
 });
 
-const KEY = "fb_favourites_v1";
-
-function readFavs(): string[] {
-  if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(KEY) ?? "[]"); } catch { return []; }
-}
-
 function WishlistPage() {
-  const [ids, setIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    setIds(readFavs());
-    const onStorage = () => setIds(readFavs());
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  const { ids, loading: wlLoading } = useWishlist();
 
   const products = useQuery({
     queryKey: ["fav-products", ids],
@@ -38,7 +24,6 @@ function WishlistPage() {
         .in("id", ids);
       return (data ?? []) as ProductCardData[];
     },
-    enabled: true,
   });
 
   return (
@@ -47,7 +32,11 @@ function WishlistPage() {
         <Heart className="h-6 w-6 text-primary fill-primary" /> Favourites
       </h1>
 
-      {ids.length === 0 ? (
+      {wlLoading ? (
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />)}
+        </div>
+      ) : ids.length === 0 ? (
         <div className="text-center py-16">
           <div className="mx-auto h-16 w-16 grid place-items-center rounded-3xl bg-primary/10">
             <Heart className="h-8 w-8 text-primary" />
