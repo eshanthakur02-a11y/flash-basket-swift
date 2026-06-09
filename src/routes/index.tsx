@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 
@@ -27,7 +27,17 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { user } = useAuth();
+  const { user, roles, loading, rolesLoading } = useAuth() as any;
+
+  // Logged-in customers get the mobile customer app shell at "/"
+  if (!loading && !rolesLoading && user) {
+    const r: string[] = roles ?? [];
+    if (r.includes("shopkeeper")) return <Navigate to="/shopkeeper/dashboard" replace />;
+    if (r.includes("delivery")) return <Navigate to="/delivery/dashboard" replace />;
+    if (r.includes("admin")) return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/customer/home" replace />;
+  }
+
   const categories = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
