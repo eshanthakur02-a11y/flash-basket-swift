@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
   LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet,
-  Package, Tag, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings, Megaphone, Ticket,
+  Package, Tag, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings, Megaphone, Ticket, LifeBuoy,
 } from "lucide-react";
+
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -39,9 +40,11 @@ const DRAWER_NAV = [
   { to: "/admin/reports", label: "Reports", icon: BarChart },
   { to: "/admin/delivery-partners", label: "Partners", icon: Truck },
   { to: "/admin/complaints", label: "Complaints", icon: MessageSquareWarning },
+  { to: "/admin/support", label: "Support", icon: LifeBuoy },
   { to: "/admin/notifications", label: "Notifications", icon: Bell },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ] as const;
+
 
 function AdminShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

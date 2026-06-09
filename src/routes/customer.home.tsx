@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { SupportFab } from "@/components/SupportFab";
+
 
 export const Route = createFileRoute("/customer/home")({
   head: () => ({ meta: [{ title: "Home — FlashBasket" }] }),
@@ -109,9 +111,11 @@ function CustomerHome() {
 
       <ProductRow title="✨ Featured today" query={featured} />
       <ProductRow title="🔥 Bestsellers" query={bestsellers} />
+      <SupportFab />
     </div>
   );
 }
+
 
 function Promise({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (

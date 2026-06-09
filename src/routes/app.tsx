@@ -21,9 +21,11 @@ function AppEntry() {
     const r: string[] = roles ?? [];
     if (r.includes("shopkeeper")) navigate({ to: "/shopkeeper/dashboard", replace: true });
     else if (r.includes("delivery")) navigate({ to: "/delivery/dashboard", replace: true });
+    else if (r.includes("support")) navigate({ to: "/support/dashboard" as any, replace: true });
     else if (r.includes("admin")) navigate({ to: "/admin/dashboard", replace: true });
     else navigate({ to: "/customer/home", replace: true });
   }, [user, loading, roles, navigate]);
+
 
   return (
     <div className="min-h-screen grid place-items-center bg-background">
