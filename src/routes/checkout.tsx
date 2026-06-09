@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
@@ -60,10 +60,7 @@ function CheckoutPage() {
     );
   };
 
-  if (!user) {
-    navigate({ to: "/auth" });
-    return null;
-  }
+  if (!user) return <Navigate to="/auth" />;
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
