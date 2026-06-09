@@ -433,39 +433,6 @@ function ProductSection({
   );
 }
 
-function FloatingBasket() {
-  return (
-    <div className="relative h-full w-full">
-      <motion.div
-        animate={{ y: [0, -16, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute inset-0 grid place-items-center"
-      >
-        <div className="relative h-64 w-64 md:h-80 md:w-80">
-          <div className="absolute inset-0 rounded-full gradient-primary blur-3xl opacity-40" />
-          <div className="absolute inset-4 rounded-[3rem] bg-card border-4 border-foreground shadow-glow rotate-3 grid grid-cols-3 grid-rows-3 gap-2 p-4 text-5xl place-items-center">
-            <span>🍎</span><span>🥕</span><span>🍞</span>
-            <span>🥛</span><span>🥬</span><span>🍌</span>
-            <span>🧃</span><span>🥚</span><span>🧀</span>
-          </div>
-        </div>
-      </motion.div>
-      <motion.div
-        animate={{ rotate: [0, 360] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        className="absolute top-4 right-4 h-20 w-20 rounded-full border-2 border-dashed border-primary/40"
-      />
-      <motion.div
-        animate={{ y: [0, 10, 0], rotate: [0, 10, 0] }}
-        transition={{ duration: 3, repeat: Infinity }}
-        className="absolute bottom-6 left-6 rounded-2xl bg-foreground text-background px-4 py-2 font-bold shadow-glow"
-      >
-        <Zap className="inline h-4 w-4 fill-primary text-primary mr-1" /> 10 min
-      </motion.div>
-    </div>
-  );
-}
-
 type OfferRow = {
   id: string;
   title: string;

@@ -35,11 +35,12 @@ function Page() {
     return () => { supabase.removeChannel(ch); };
   }, [qc]);
 
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const stats = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
       const [orders, shops, partners] = await Promise.all([
-        supabase.from("orders").select("status, total"),
+        supabase.from("orders").select("status, total").gte("placed_at", sevenDaysAgo),
         supabase.from("shops").select("id"),
         supabase.from("delivery_partners").select("id"),
       ]);
