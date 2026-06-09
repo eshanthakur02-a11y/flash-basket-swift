@@ -149,11 +149,13 @@ function CheckoutPage() {
     const addr = addresses.data.find((a) => a.id === selectedAddr);
     if (!addr) return toast.error("Please add a delivery address");
 
-    const addressWithCoords: any = {
-      ...addr,
-      lat: coords?.lat ?? (addr as any).lat ?? 12.95,
-      lng: coords?.lng ?? (addr as any).lng ?? 77.64,
-    };
+    const lat = coords?.lat ?? (addr as any).lat;
+    const lng = coords?.lng ?? (addr as any).lng;
+    if (lat == null || lng == null) {
+      toast.error("Please pin your delivery location on the map to continue.");
+      return;
+    }
+    const addressWithCoords: any = { ...addr, lat, lng };
 
     setPlacing(true);
     const { data, error } = await supabase.rpc("place_order", {
