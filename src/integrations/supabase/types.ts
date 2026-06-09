@@ -1437,7 +1437,7 @@ export type Database = {
     }
     Enums: {
       address_type: "home" | "work" | "other"
-      app_role: "admin" | "customer" | "shopkeeper" | "delivery"
+      app_role: "admin" | "customer" | "shopkeeper" | "delivery" | "support"
       coupon_type: "percent" | "flat"
       offer_scope: "global" | "shop"
       order_status:
@@ -1587,7 +1587,7 @@ export const Constants = {
   public: {
     Enums: {
       address_type: ["home", "work", "other"],
-      app_role: ["admin", "customer", "shopkeeper", "delivery"],
+      app_role: ["admin", "customer", "shopkeeper", "delivery", "support"],
       coupon_type: ["percent", "flat"],
       offer_scope: ["global", "shop"],
       order_status: [
