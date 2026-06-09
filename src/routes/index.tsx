@@ -61,6 +61,14 @@ function HomePage() {
     },
   });
 
+  if (!loading && !rolesLoading && user) {
+    const r: string[] = roles ?? [];
+    if (r.includes("shopkeeper")) return <Navigate to="/shopkeeper/dashboard" replace />;
+    if (r.includes("delivery")) return <Navigate to="/delivery/dashboard" replace />;
+    if (r.includes("admin")) return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/customer/home" replace />;
+  }
+
   return (
     <div>
       {/* HERO */}
