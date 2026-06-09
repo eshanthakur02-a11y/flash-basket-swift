@@ -2,6 +2,13 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Logo } from "@/components/Logo";
+import { toast } from "sonner";
+import { Zap } from "lucide-react";
 
 async function redirectByRole(navigate: ReturnType<typeof useNavigate>, userId: string) {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
@@ -11,13 +18,6 @@ async function redirectByRole(navigate: ReturnType<typeof useNavigate>, userId: 
   else if (roles.includes("delivery")) navigate({ to: "/delivery/dashboard" });
   else navigate({ to: "/customer/home" });
 }
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Logo } from "@/components/Logo";
-import { toast } from "sonner";
-import { Zap } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — FlashBasket" }, { name: "description", content: "Sign in or create your FlashBasket account." }] }),
