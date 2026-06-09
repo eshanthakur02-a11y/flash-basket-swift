@@ -209,18 +209,18 @@ function CheckoutPage() {
             navigate({ to: "/orders/$id", params: { id: orderId } });
           } catch (e: any) {
             toast.error(e.message ?? "Payment verification failed");
-          } finally { setPlacing(false); }
+          } finally { safeSetPlacing(false); }
         },
         onFailure: async (err) => {
           await recordFail({
             data: { razorpayOrderId: rzp.razorpayOrderId, code: err.code, description: err.description },
           }).catch(() => {});
           toast.error(err.description ?? "Payment failed");
-          setPlacing(false);
+          safeSetPlacing(false);
         },
         onDismiss: () => {
           toast.info("Payment cancelled. You can pay from your orders page.");
-          setPlacing(false);
+          safeSetPlacing(false);
           navigate({ to: "/orders/$id", params: { id: orderId } });
         },
       });
