@@ -51,6 +51,9 @@ function CheckoutPage() {
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
   const [placing, setPlacing] = useState(false);
+  const mounted = useRef(true);
+  useEffect(() => () => { mounted.current = false; }, []);
+  const safeSetPlacing = (v: boolean) => { if (mounted.current) setPlacing(v); };
 
   const useMyLocation = () => {
     if (!navigator.geolocation) return toast.error("Geolocation not available");
