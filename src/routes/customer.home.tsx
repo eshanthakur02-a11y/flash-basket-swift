@@ -117,22 +117,6 @@ function CustomerHome() {
       <ProductRow title="✨ Featured today" query={featured} />
       <ProductRow title="🔥 Bestsellers" query={bestsellers} />
 
-      {/* Help & Support card */}
-      <button
-        onClick={() => setSupportOpen(true)}
-        className="w-full flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-card hover:bg-secondary/40 transition text-left"
-      >
-        <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/15 text-primary">
-          <Headphones className="h-5 w-5" />
-        </span>
-        <span className="flex-1">
-          <span className="block font-bold">Help & support</span>
-          <span className="block text-xs text-muted-foreground">Raise a ticket — we'll get back fast</span>
-        </span>
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      </button>
-
-      <SupportTicketForm open={supportOpen} onOpenChange={setSupportOpen} />
     </div>
   );
 }
