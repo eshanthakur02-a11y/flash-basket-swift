@@ -47,11 +47,11 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       <button
         onClick={toggleFav}
         className="absolute top-2 right-2 z-10 h-8 w-8 grid place-items-center rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-sm"
-        aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+        aria-label={fav ? "Remove from favourites" : "Add to favourites"}
       >
         <Heart
-          className={isFav ? "text-primary" : "text-muted-foreground"}
-          fill={isFav ? "currentColor" : "none"}
+          className={fav ? "text-primary" : "text-muted-foreground"}
+          fill={fav ? "currentColor" : "none"}
           size={16}
         />
       </button>
