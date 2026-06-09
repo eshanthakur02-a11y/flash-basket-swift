@@ -1156,6 +1156,239 @@ export type Database = {
         }
         Relationships: []
       }
+      support_agents: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          is_active: boolean
+          max_concurrent: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          is_active?: boolean
+          max_concurrent?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          is_active?: boolean
+          max_concurrent?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_internal_note: boolean
+          sender_id: string
+          sender_role: string
+          ticket_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_internal_note?: boolean
+          sender_id: string
+          sender_role: string
+          ticket_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_internal_note?: boolean
+          sender_id?: string
+          sender_role?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: Database["public"]["Enums"]["ticket_category"]
+          closed_at: string | null
+          created_at: string
+          description: string
+          first_response_at: string | null
+          id: string
+          order_id: string | null
+          partner_id: string | null
+          priority: Database["public"]["Enums"]["ticket_priority"]
+          resolved_at: string | null
+          role_at_creation: string
+          shop_id: string | null
+          status: Database["public"]["Enums"]["ticket_status"]
+          ticket_number: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: Database["public"]["Enums"]["ticket_category"]
+          closed_at?: string | null
+          created_at?: string
+          description: string
+          first_response_at?: string | null
+          id?: string
+          order_id?: string | null
+          partner_id?: string | null
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          resolved_at?: string | null
+          role_at_creation: string
+          shop_id?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          ticket_number?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["ticket_category"]
+          closed_at?: string | null
+          created_at?: string
+          description?: string
+          first_response_at?: string | null
+          id?: string
+          order_id?: string | null
+          partner_id?: string | null
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          resolved_at?: string | null
+          role_at_creation?: string
+          shop_id?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          ticket_number?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          assigned_to: string
+          id: string
+          ticket_id: string
+          unassigned_at: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          assigned_to: string
+          id?: string
+          ticket_id: string
+          unassigned_at?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          assigned_to?: string
+          id?: string
+          ticket_id?: string
+          unassigned_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_assignments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_attachments: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          file_url: string
+          id: string
+          message_id: string | null
+          mime: string | null
+          ticket_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          file_url: string
+          id?: string
+          message_id?: string | null
+          mime?: string | null
+          ticket_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          file_url?: string
+          id?: string
+          message_id?: string | null
+          mime?: string | null
+          ticket_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "support_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_attachments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1295,11 +1528,24 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_remove_support_agent: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
+      admin_set_support_agent: {
+        Args: { _is_active?: boolean; _user_email: string }
+        Returns: string
+      }
+      admin_support_stats: { Args: never; Returns: Json }
       admin_update_order_status: {
         Args: {
           _order_id: string
           _status: Database["public"]["Enums"]["order_status"]
         }
+        Returns: undefined
+      }
+      assign_ticket: {
+        Args: { _agent_id: string; _ticket_id: string }
         Returns: undefined
       }
       cancel_order: {
@@ -1312,6 +1558,17 @@ export type Database = {
           _phone: string
           _user_email?: string
           _vehicle?: string
+        }
+        Returns: string
+      }
+      create_support_ticket: {
+        Args: {
+          _category: Database["public"]["Enums"]["ticket_category"]
+          _description: string
+          _order_id?: string
+          _partner_id?: string
+          _shop_id?: string
+          _title: string
         }
         Returns: string
       }
@@ -1402,6 +1659,10 @@ export type Database = {
         }
         Returns: string
       }
+      post_ticket_message: {
+        Args: { _body: string; _is_internal?: boolean; _ticket_id: string }
+        Returns: string
+      }
       reassign_stale_orders: { Args: never; Returns: number }
       restore_order_stock: { Args: { _order_id: string }; Returns: undefined }
       send_onesignal_push: {
@@ -1430,6 +1691,14 @@ export type Database = {
         }[]
       }
       shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
+      support_ticket_context: { Args: { _ticket_id: string }; Returns: Json }
+      update_ticket_status: {
+        Args: {
+          _status: Database["public"]["Enums"]["ticket_status"]
+          _ticket_id: string
+        }
+        Returns: undefined
+      }
       user_owns_shop_for_order: {
         Args: { _order_id: string }
         Returns: boolean
@@ -1459,6 +1728,17 @@ export type Database = {
         | "refund_initiated"
         | "refunded"
         | "cod"
+      ticket_category:
+        | "order_issue"
+        | "payment_issue"
+        | "refund_issue"
+        | "delivery_issue"
+        | "product_issue"
+        | "shop_issue"
+        | "account_issue"
+        | "technical_issue"
+      ticket_priority: "low" | "normal" | "high"
+      ticket_status: "open" | "assigned" | "in_progress" | "resolved" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1611,6 +1891,18 @@ export const Constants = {
         "refunded",
         "cod",
       ],
+      ticket_category: [
+        "order_issue",
+        "payment_issue",
+        "refund_issue",
+        "delivery_issue",
+        "product_issue",
+        "shop_issue",
+        "account_issue",
+        "technical_issue",
+      ],
+      ticket_priority: ["low", "normal", "high"],
+      ticket_status: ["open", "assigned", "in_progress", "resolved", "closed"],
     },
   },
 } as const
