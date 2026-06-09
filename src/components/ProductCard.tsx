@@ -1,21 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Plus, Minus, Clock, Heart } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 import { rupees, pct } from "@/lib/format";
-
-const FAV_KEY = "fb_favourites_v1";
-
-function readFavIds(): string[] {
-  if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(FAV_KEY) ?? "[]"); } catch { return []; }
-}
-
-function writeFavIds(ids: string[]) {
-  localStorage.setItem(FAV_KEY, JSON.stringify(ids));
-}
 
 export interface ProductCardData {
   id: string;
@@ -31,26 +20,18 @@ export interface ProductCardData {
 
 export function ProductCard({ product }: { product: ProductCardData }) {
   const { items, add, setQty } = useCart();
+  const { isFav, toggle } = useWishlist();
   const line = items.find((l) => l.product_id === product.id);
   const discount = pct(product.price, product.mrp);
   const outOfStock = product.stock <= 0;
-
-  const [isFav, setIsFav] = useState(false);
-
-  useEffect(() => {
-    setIsFav(readFavIds().includes(product.id));
-  }, [product.id]);
+  const fav = isFav(product.id);
 
   const toggleFav = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const ids = readFavIds();
-    const next = ids.includes(product.id)
-      ? ids.filter((id) => id !== product.id)
-      : [...ids, product.id];
-    writeFavIds(next);
-    setIsFav(next.includes(product.id));
+    toggle(product.id);
   };
+
 
   return (
     <motion.div
