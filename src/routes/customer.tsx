@@ -64,7 +64,7 @@ function CustomerShell() {
       />
 
       {/* Page content */}
-      <main className="flex-1 min-w-0 pb-24"><Outlet /></main>
+      <main className="flex-1 min-w-0 pb-32"><Outlet /></main>
 
       {/* Bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 glass border-t border-border">
