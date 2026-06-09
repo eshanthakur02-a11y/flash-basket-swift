@@ -27,16 +27,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { user, roles, loading, rolesLoading } = useAuth() as any;
-
-  // Logged-in customers get the mobile customer app shell at "/"
-  if (!loading && !rolesLoading && user) {
-    const r: string[] = roles ?? [];
-    if (r.includes("shopkeeper")) return <Navigate to="/shopkeeper/dashboard" replace />;
-    if (r.includes("delivery")) return <Navigate to="/delivery/dashboard" replace />;
-    if (r.includes("admin")) return <Navigate to="/admin/dashboard" replace />;
-    return <Navigate to="/customer/home" replace />;
-  }
+  const { user, roles, loading, rolesLoading } = useAuth();
 
   const categories = useQuery({
     queryKey: ["categories"],
@@ -69,6 +60,14 @@ function HomePage() {
       return (data ?? []) as ProductCardData[];
     },
   });
+
+  if (!loading && !rolesLoading && user) {
+    const r: string[] = roles ?? [];
+    if (r.includes("shopkeeper")) return <Navigate to="/shopkeeper/dashboard" replace />;
+    if (r.includes("delivery")) return <Navigate to="/delivery/dashboard" replace />;
+    if (r.includes("admin")) return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/customer/home" replace />;
+  }
 
   return (
     <div>
