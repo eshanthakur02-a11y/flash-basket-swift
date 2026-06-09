@@ -63,7 +63,7 @@ function Page() {
         )}
       </div>
 
-      <SupportTicketForm open={open} onOpenChange={setOpen} onCreated={(id) => nav({ to: "/support/ticket/$id" as any, params: { id } })} />
+      <SupportTicketForm open={open} onOpenChange={setOpen} onCreated={(id) => nav({ to: "/support/ticket/$id" as any, params: { id } as any })} />
     </div>
   );
 }

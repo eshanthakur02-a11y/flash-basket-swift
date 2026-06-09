@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ShopkeeperRouteImport } from './routes/shopkeeper'
 import { Route as ProductsRouteImport } from './routes/products'
@@ -25,6 +26,10 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as SupportTicketsRouteImport } from './routes/support.tickets'
+import { Route as SupportProfileRouteImport } from './routes/support.profile'
+import { Route as SupportMyTicketsRouteImport } from './routes/support.my-tickets'
+import { Route as SupportDashboardRouteImport } from './routes/support.dashboard'
 import { Route as ShopkeeperSettingsRouteImport } from './routes/shopkeeper.settings'
 import { Route as ShopkeeperReviewsRouteImport } from './routes/shopkeeper.reviews'
 import { Route as ShopkeeperProductsRouteImport } from './routes/shopkeeper.products'
@@ -54,6 +59,7 @@ import { Route as CustomerCheckoutRouteImport } from './routes/customer.checkout
 import { Route as CustomerCategoriesRouteImport } from './routes/customer.categories'
 import { Route as CustomerCartRouteImport } from './routes/customer.cart'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminShopsRouteImport } from './routes/admin.shops'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
@@ -68,6 +74,8 @@ import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminComplaintsRouteImport } from './routes/admin.complaints'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as SupportTicketsIdRouteImport } from './routes/support.tickets.$id'
+import { Route as SupportTicketIdRouteImport } from './routes/support.ticket.$id'
 import { Route as ShopkeeperOrdersIdRouteImport } from './routes/shopkeeper.orders.$id'
 import { Route as DeliveryTaskIdRouteImport } from './routes/delivery.task.$id'
 import { Route as CustomerProductIdRouteImport } from './routes/customer.product.$id'
@@ -76,6 +84,11 @@ import { Route as ApiPublicOneSignalSDKWorkerDotjsRouteImport } from './routes/a
 import { Route as ApiPublicOneSignalSDKUpdaterWorkerDotjsRouteImport } from './routes/api/public/OneSignalSDKUpdaterWorker[.]js'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
 
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -155,6 +168,26 @@ const OrdersIndexRoute = OrdersIndexRouteImport.update({
   id: '/orders/',
   path: '/orders/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SupportTicketsRoute = SupportTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => SupportRoute,
+} as any)
+const SupportProfileRoute = SupportProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => SupportRoute,
+} as any)
+const SupportMyTicketsRoute = SupportMyTicketsRouteImport.update({
+  id: '/my-tickets',
+  path: '/my-tickets',
+  getParentRoute: () => SupportRoute,
+} as any)
+const SupportDashboardRoute = SupportDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => SupportRoute,
 } as any)
 const ShopkeeperSettingsRoute = ShopkeeperSettingsRouteImport.update({
   id: '/settings',
@@ -301,6 +334,11 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSupportRoute = AdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminShopsRoute = AdminShopsRouteImport.update({
   id: '/shops',
   path: '/shops',
@@ -371,6 +409,16 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const SupportTicketsIdRoute = SupportTicketsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SupportTicketsRoute,
+} as any)
+const SupportTicketIdRoute = SupportTicketIdRouteImport.update({
+  id: '/ticket/$id',
+  path: '/ticket/$id',
+  getParentRoute: () => SupportRoute,
+} as any)
 const ShopkeeperOrdersIdRoute = ShopkeeperOrdersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -425,6 +473,7 @@ export interface FileRoutesByFullPath {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -439,6 +488,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
+  '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
@@ -468,6 +518,10 @@ export interface FileRoutesByFullPath {
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
+  '/support/dashboard': typeof SupportDashboardRoute
+  '/support/my-tickets': typeof SupportMyTicketsRoute
+  '/support/profile': typeof SupportProfileRoute
+  '/support/tickets': typeof SupportTicketsRouteWithChildren
   '/orders/': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
@@ -476,6 +530,8 @@ export interface FileRoutesByFullPath {
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
+  '/support/ticket/$id': typeof SupportTicketIdRoute
+  '/support/tickets/$id': typeof SupportTicketsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -493,6 +549,7 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -507,6 +564,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
+  '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
@@ -536,6 +594,10 @@ export interface FileRoutesByTo {
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
+  '/support/dashboard': typeof SupportDashboardRoute
+  '/support/my-tickets': typeof SupportMyTicketsRoute
+  '/support/profile': typeof SupportProfileRoute
+  '/support/tickets': typeof SupportTicketsRouteWithChildren
   '/orders': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
@@ -544,6 +606,8 @@ export interface FileRoutesByTo {
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
+  '/support/ticket/$id': typeof SupportTicketIdRoute
+  '/support/tickets/$id': typeof SupportTicketsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -562,6 +626,7 @@ export interface FileRoutesById {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -576,6 +641,7 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
+  '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
@@ -605,6 +671,10 @@ export interface FileRoutesById {
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
+  '/support/dashboard': typeof SupportDashboardRoute
+  '/support/my-tickets': typeof SupportMyTicketsRoute
+  '/support/profile': typeof SupportProfileRoute
+  '/support/tickets': typeof SupportTicketsRouteWithChildren
   '/orders/': typeof OrdersIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
@@ -613,6 +683,8 @@ export interface FileRoutesById {
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
+  '/support/ticket/$id': typeof SupportTicketIdRoute
+  '/support/tickets/$id': typeof SupportTicketsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -632,6 +704,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/support'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -646,6 +719,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/shops'
+    | '/admin/support'
     | '/category/$slug'
     | '/customer/cart'
     | '/customer/categories'
@@ -675,6 +749,10 @@ export interface FileRouteTypes {
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
+    | '/support/dashboard'
+    | '/support/my-tickets'
+    | '/support/profile'
+    | '/support/tickets'
     | '/orders/'
     | '/admin/orders/$id'
     | '/api/public/OneSignalSDKUpdaterWorker.js'
@@ -683,6 +761,8 @@ export interface FileRouteTypes {
     | '/customer/product/$id'
     | '/delivery/task/$id'
     | '/shopkeeper/orders/$id'
+    | '/support/ticket/$id'
+    | '/support/tickets/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -700,6 +780,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/support'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -714,6 +795,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/shops'
+    | '/admin/support'
     | '/category/$slug'
     | '/customer/cart'
     | '/customer/categories'
@@ -743,6 +825,10 @@ export interface FileRouteTypes {
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
+    | '/support/dashboard'
+    | '/support/my-tickets'
+    | '/support/profile'
+    | '/support/tickets'
     | '/orders'
     | '/admin/orders/$id'
     | '/api/public/OneSignalSDKUpdaterWorker.js'
@@ -751,6 +837,8 @@ export interface FileRouteTypes {
     | '/customer/product/$id'
     | '/delivery/task/$id'
     | '/shopkeeper/orders/$id'
+    | '/support/ticket/$id'
+    | '/support/tickets/$id'
   id:
     | '__root__'
     | '/'
@@ -768,6 +856,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/support'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -782,6 +871,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/shops'
+    | '/admin/support'
     | '/category/$slug'
     | '/customer/cart'
     | '/customer/categories'
@@ -811,6 +901,10 @@ export interface FileRouteTypes {
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
+    | '/support/dashboard'
+    | '/support/my-tickets'
+    | '/support/profile'
+    | '/support/tickets'
     | '/orders/'
     | '/admin/orders/$id'
     | '/api/public/OneSignalSDKUpdaterWorker.js'
@@ -819,6 +913,8 @@ export interface FileRouteTypes {
     | '/customer/product/$id'
     | '/delivery/task/$id'
     | '/shopkeeper/orders/$id'
+    | '/support/ticket/$id'
+    | '/support/tickets/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -837,6 +933,7 @@ export interface RootRouteChildren {
   ProductsRoute: typeof ProductsRoute
   ShopkeeperRoute: typeof ShopkeeperRouteWithChildren
   SignupRoute: typeof SignupRoute
+  SupportRoute: typeof SupportRouteWithChildren
   CategorySlugRoute: typeof CategorySlugRoute
   OrdersIdRoute: typeof OrdersIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -847,6 +944,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -958,6 +1062,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/orders/'
       preLoaderRoute: typeof OrdersIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/support/tickets': {
+      id: '/support/tickets'
+      path: '/tickets'
+      fullPath: '/support/tickets'
+      preLoaderRoute: typeof SupportTicketsRouteImport
+      parentRoute: typeof SupportRoute
+    }
+    '/support/profile': {
+      id: '/support/profile'
+      path: '/profile'
+      fullPath: '/support/profile'
+      preLoaderRoute: typeof SupportProfileRouteImport
+      parentRoute: typeof SupportRoute
+    }
+    '/support/my-tickets': {
+      id: '/support/my-tickets'
+      path: '/my-tickets'
+      fullPath: '/support/my-tickets'
+      preLoaderRoute: typeof SupportMyTicketsRouteImport
+      parentRoute: typeof SupportRoute
+    }
+    '/support/dashboard': {
+      id: '/support/dashboard'
+      path: '/dashboard'
+      fullPath: '/support/dashboard'
+      preLoaderRoute: typeof SupportDashboardRouteImport
+      parentRoute: typeof SupportRoute
     }
     '/shopkeeper/settings': {
       id: '/shopkeeper/settings'
@@ -1162,6 +1294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/support': {
+      id: '/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/shops': {
       id: '/admin/shops'
       path: '/shops'
@@ -1260,6 +1399,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/support/tickets/$id': {
+      id: '/support/tickets/$id'
+      path: '/$id'
+      fullPath: '/support/tickets/$id'
+      preLoaderRoute: typeof SupportTicketsIdRouteImport
+      parentRoute: typeof SupportTicketsRoute
+    }
+    '/support/ticket/$id': {
+      id: '/support/ticket/$id'
+      path: '/ticket/$id'
+      fullPath: '/support/ticket/$id'
+      preLoaderRoute: typeof SupportTicketIdRouteImport
+      parentRoute: typeof SupportRoute
+    }
     '/shopkeeper/orders/$id': {
       id: '/shopkeeper/orders/$id'
       path: '/$id'
@@ -1339,6 +1492,7 @@ interface AdminRouteChildren {
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminShopsRoute: typeof AdminShopsRoute
+  AdminSupportRoute: typeof AdminSupportRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1356,6 +1510,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminShopsRoute: AdminShopsRoute,
+  AdminSupportRoute: AdminSupportRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -1469,6 +1624,37 @@ const ShopkeeperRouteWithChildren = ShopkeeperRoute._addFileChildren(
   ShopkeeperRouteChildren,
 )
 
+interface SupportTicketsRouteChildren {
+  SupportTicketsIdRoute: typeof SupportTicketsIdRoute
+}
+
+const SupportTicketsRouteChildren: SupportTicketsRouteChildren = {
+  SupportTicketsIdRoute: SupportTicketsIdRoute,
+}
+
+const SupportTicketsRouteWithChildren = SupportTicketsRoute._addFileChildren(
+  SupportTicketsRouteChildren,
+)
+
+interface SupportRouteChildren {
+  SupportDashboardRoute: typeof SupportDashboardRoute
+  SupportMyTicketsRoute: typeof SupportMyTicketsRoute
+  SupportProfileRoute: typeof SupportProfileRoute
+  SupportTicketsRoute: typeof SupportTicketsRouteWithChildren
+  SupportTicketIdRoute: typeof SupportTicketIdRoute
+}
+
+const SupportRouteChildren: SupportRouteChildren = {
+  SupportDashboardRoute: SupportDashboardRoute,
+  SupportMyTicketsRoute: SupportMyTicketsRoute,
+  SupportProfileRoute: SupportProfileRoute,
+  SupportTicketsRoute: SupportTicketsRouteWithChildren,
+  SupportTicketIdRoute: SupportTicketIdRoute,
+}
+
+const SupportRouteWithChildren =
+  SupportRoute._addFileChildren(SupportRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -1485,6 +1671,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsRoute: ProductsRoute,
   ShopkeeperRoute: ShopkeeperRouteWithChildren,
   SignupRoute: SignupRoute,
+  SupportRoute: SupportRouteWithChildren,
   CategorySlugRoute: CategorySlugRoute,
   OrdersIdRoute: OrdersIdRoute,
   ProductSlugRoute: ProductSlugRoute,
