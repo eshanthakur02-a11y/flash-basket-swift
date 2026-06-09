@@ -100,15 +100,22 @@ function Page() {
 
             <Card className="p-4">
               <p className="text-xs uppercase text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> Deliver to</p>
-              <p className="font-semibold mt-1">{data.address?.full_name || "Customer"}</p>
-              <p className="text-sm text-muted-foreground">
-                {[data.address?.line1, data.address?.line2, data.address?.city, data.address?.pincode].filter(Boolean).join(", ")}
-              </p>
-              {data.address?.phone && (
-                <a href={`tel:${data.address.phone}`} className="mt-2 inline-flex items-center gap-1 text-sm text-primary">
-                  <Phone className="h-3 w-3" /> {data.address.phone}
-                </a>
-              )}
+              {(() => {
+                const addr = (data.address ?? {}) as Record<string, any>;
+                return (
+                  <>
+                    <p className="font-semibold mt-1">{addr.full_name || "Customer"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {[addr.line1, addr.line2, addr.city, addr.pincode].filter(Boolean).join(", ")}
+                    </p>
+                    {addr.phone && (
+                      <a href={`tel:${addr.phone}`} className="mt-2 inline-flex items-center gap-1 text-sm text-primary">
+                        <Phone className="h-3 w-3" /> {addr.phone}
+                      </a>
+                    )}
+                  </>
+                );
+              })()}
               {data.delivery_instruction && (
                 <p className="mt-2 text-xs italic text-muted-foreground">Note: {data.delivery_instruction}</p>
               )}
