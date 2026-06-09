@@ -79,8 +79,8 @@ function Page() {
             {data.shops && Number.isFinite(data.shops.latitude) && Number.isFinite(data.delivery_lat) && (
               <RouteMap
                 points={[
-                  { lat: data.shops.latitude, lng: data.shops.longitude, label: "Shop", color: "#16a34a" },
-                  { lat: data.delivery_lat, lng: data.delivery_lng, label: "Drop", color: "#dc2626" },
+                  { lat: data.shops.latitude as number, lng: data.shops.longitude as number, label: "Shop", color: "#16a34a" },
+                  { lat: data.delivery_lat as number, lng: data.delivery_lng as number, label: "Drop", color: "#dc2626" },
                 ]}
               />
             )}
