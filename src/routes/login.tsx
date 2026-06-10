@@ -243,7 +243,12 @@ function LoginPage() {
                   type="button"
                   key={r.key}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setRole(r.key)}
+                  onClick={() => {
+                    setRole(r.key);
+                    const creds = DEMO_CREDS[r.key];
+                    setEmail(creds.email);
+                    setPassword(creds.password);
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-1.5 rounded-2xl border-2 p-2.5 text-center transition-all",
                     active
