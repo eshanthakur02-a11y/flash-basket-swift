@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { LayoutDashboard, ListOrdered, Package, Wallet, Bell, Star, Settings, Check, X, PackageCheck, Truck, Tag } from "lucide-react";
-import { SupportFab } from "@/components/SupportFab";
+
 
 
 const NAV = [
@@ -127,8 +127,8 @@ function Page() {
           </>
         )}
       </div>
-      <SupportFab />
     </RoleShell>
+
   );
 }
 
