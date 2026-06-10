@@ -130,7 +130,7 @@ function Page() {
             <Button size="sm" variant="outline" onClick={() => setStatus("in_progress")}>Mark in progress</Button>
             <Button size="sm" variant="outline" onClick={() => setStatus("resolved")}>Resolve</Button>
             <Button size="sm" variant="outline" onClick={() => setStatus("closed")}>Close</Button>
-            <Button size="sm" variant="outline" onClick={() => assign(user!.id)}>Assign to me</Button>
+            <Button size="sm" variant="outline" disabled={!user} onClick={() => user && assign(user.id)}>Assign to me</Button>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold">Reassign:</span>
