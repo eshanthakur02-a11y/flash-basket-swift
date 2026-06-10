@@ -1466,6 +1466,28 @@ export type Database = {
         }
         Returns: string
       }
+      admin_list_complaints: {
+        Args: never
+        Returns: {
+          address_line: string
+          category: string
+          city: string
+          created_at: string
+          description: string
+          full_name: string
+          id: string
+          phone: string
+          pincode: string
+          role_at_creation: string
+          shop_address: string
+          shop_name: string
+          shop_phone: string
+          status: string
+          ticket_number: string
+          title: string
+          user_id: string
+        }[]
+      }
       admin_list_payments: {
         Args: {
           _limit?: number
