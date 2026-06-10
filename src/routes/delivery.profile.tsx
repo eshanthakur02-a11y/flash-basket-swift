@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { DELIVERY_NAV } from "./delivery.dashboard";
 import { Truck, User as UserIcon, LogOut, Star, CheckCircle2, Clock, Mail, Power, ShieldCheck, Bike, LifeBuoy, MessageCircle, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { SupportTicketForm } from "@/components/SupportTicketForm";
 
 export const Route = createFileRoute("/delivery/profile")({ component: Page });
 
@@ -23,6 +24,7 @@ function Page() {
   const [profile, setProfile] = useState<any>(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPartner, setSavingPartner] = useState(false);
+  const [ticketOpen, setTicketOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -198,7 +200,11 @@ function Page() {
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </Link>
-            <Link to="/support" className="flex items-center justify-between rounded-2xl border border-border bg-background hover:bg-secondary transition p-3">
+            <button
+              type="button"
+              onClick={() => setTicketOpen(true)}
+              className="flex w-full items-center justify-between rounded-2xl border border-border bg-background hover:bg-secondary transition p-3 text-left"
+            >
               <div className="flex items-center gap-3">
                 <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary"><LifeBuoy className="h-4 w-4" /></span>
                 <div>
@@ -207,9 +213,10 @@ function Page() {
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
+            </button>
           </div>
         </section>
+        <SupportTicketForm open={ticketOpen} onOpenChange={setTicketOpen} />
 
         <Separator />
 
