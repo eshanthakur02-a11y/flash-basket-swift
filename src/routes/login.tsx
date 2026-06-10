@@ -33,6 +33,13 @@ const ROLES: Array<{
   { key: "customer", title: "Customer", subtitle: "Browse & Order Products", icon: User, iconBg: "bg-violet-100", iconColor: "text-violet-600", dashboard: "/customer/dashboard" },
 ];
 
+const DEMO_CREDS: Record<RoleKey, { email: string; password: string }> = {
+  admin: { email: "admin@example.com", password: "password123" },
+  shopkeeper: { email: "shop@example.com", password: "password123" },
+  delivery: { email: "delivery@example.com", password: "password123" },
+  customer: { email: "customer@example.com", password: "password123" },
+};
+
 function LoginPage() {
   const [role, setRole] = useState<RoleKey | null>(null);
   const [email, setEmail] = useState("");
