@@ -247,7 +247,7 @@ function Page() {
           </div>
           {(attendance.data?.rows.length ?? 0) > 0 && (
             <div className="mt-3 border-t border-border pt-3 text-xs space-y-1">
-              {attendance.data!.rows.map((r: any) => {
+              {(attendance.data?.rows ?? []).map((r: any) => {
                 const inT = new Date(r.check_in_at);
                 const outT = r.check_out_at ? new Date(r.check_out_at) : null;
                 const hrs = ((outT ?? new Date()).getTime() - inT.getTime()) / 3.6e6;

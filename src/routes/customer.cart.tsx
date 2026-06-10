@@ -92,6 +92,7 @@ function AppCart() {
       <div className="fixed bottom-16 left-0 right-0 z-20 px-4 pb-3">
         <Button
           onClick={() => navigate({ to: "/checkout" })}
+          disabled={loading || items.length === 0}
           className="w-full h-12 rounded-2xl gradient-primary text-primary-foreground font-bold shadow-glow"
         >
           <Zap className="h-4 w-4 mr-2 fill-current" /> Checkout · {rupees(total)}
