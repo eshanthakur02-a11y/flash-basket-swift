@@ -78,12 +78,17 @@ function Page() {
           <h2 className="font-bold mb-3">Recent orders</h2>
           <div className="rounded-2xl border border-border bg-card overflow-hidden">
             {(recent.data ?? []).map(o => (
-              <div key={o.id} className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border last:border-0 text-sm">
+              <Link
+                key={o.id}
+                to="/admin/orders/$id"
+                params={{ id: o.id }}
+                className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border last:border-0 text-sm hover:bg-secondary/50 transition"
+              >
                 <span className="font-semibold">{o.order_number}</span>
                 <span className="text-xs text-muted-foreground">{new Date(o.placed_at).toLocaleString()}</span>
                 <span className="text-xs uppercase rounded-full bg-secondary px-2 py-1 font-bold">{o.status.replace(/_/g, " ")}</span>
                 <span className="font-bold">{rupees(o.total)}</span>
-              </div>
+              </Link>
             ))}
             {(recent.data?.length ?? 0) === 0 && <div className="p-6 text-sm text-muted-foreground">No orders yet.</div>}
           </div>
