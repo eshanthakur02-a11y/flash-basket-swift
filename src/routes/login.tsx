@@ -33,6 +33,13 @@ const ROLES: Array<{
   { key: "customer", title: "Customer", subtitle: "Browse & Order Products", icon: User, iconBg: "bg-violet-100", iconColor: "text-violet-600", dashboard: "/customer/dashboard" },
 ];
 
+const DEMO_CREDS: Record<RoleKey, { email: string; password: string }> = {
+  admin: { email: "admin@example.com", password: "password123" },
+  shopkeeper: { email: "shop@example.com", password: "password123" },
+  delivery: { email: "delivery@example.com", password: "password123" },
+  customer: { email: "customer@example.com", password: "password123" },
+};
+
 function LoginPage() {
   const [role, setRole] = useState<RoleKey | null>(null);
   const [email, setEmail] = useState("");
@@ -236,7 +243,12 @@ function LoginPage() {
                   type="button"
                   key={r.key}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setRole(r.key)}
+                  onClick={() => {
+                    setRole(r.key);
+                    const creds = DEMO_CREDS[r.key];
+                    setEmail(creds.email);
+                    setPassword(creds.password);
+                  }}
                   className={cn(
                     "flex flex-col items-center gap-1.5 rounded-2xl border-2 p-2.5 text-center transition-all",
                     active
