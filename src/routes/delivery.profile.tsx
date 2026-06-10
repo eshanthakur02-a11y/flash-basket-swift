@@ -11,7 +11,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { DELIVERY_NAV } from "./delivery.dashboard";
-import { Truck, User as UserIcon, LogOut, Star, CheckCircle2, Clock, Mail, Power, ShieldCheck, Bike } from "lucide-react";
+import { Truck, User as UserIcon, LogOut, Star, CheckCircle2, Clock, Mail, Power, ShieldCheck, Bike, LifeBuoy, MessageCircle, ChevronRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/delivery/profile")({ component: Page });
 
@@ -182,6 +183,33 @@ function Page() {
             </div>
           </section>
         )}
+
+        {/* Help & Support */}
+        <section className="rounded-3xl border border-border bg-card p-5 shadow-card">
+          <h2 className="font-display text-lg font-bold flex items-center gap-2 mb-4"><LifeBuoy className="h-5 w-5 text-primary" /> Help & Support</h2>
+          <div className="grid gap-2">
+            <Link to="/support/my-tickets" className="flex items-center justify-between rounded-2xl border border-border bg-background hover:bg-secondary transition p-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary"><MessageCircle className="h-4 w-4" /></span>
+                <div>
+                  <div className="text-sm font-bold">My tickets</div>
+                  <div className="text-xs text-muted-foreground">View your past support requests</div>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </Link>
+            <Link to="/support" className="flex items-center justify-between rounded-2xl border border-border bg-background hover:bg-secondary transition p-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary"><LifeBuoy className="h-4 w-4" /></span>
+                <div>
+                  <div className="text-sm font-bold">Contact support</div>
+                  <div className="text-xs text-muted-foreground">Raise a new ticket for any issue</div>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </Link>
+          </div>
+        </section>
 
         <Separator />
 
