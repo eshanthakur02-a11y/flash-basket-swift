@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { LayoutDashboard, PackageOpen, History, Wallet, User, Check, MapPin } from "lucide-react";
 import { rupees } from "@/lib/format";
 import { RouteMap } from "@/components/maps/RouteMap";
-import { SupportFab } from "@/components/SupportFab";
+
 
 
 const NAV = [
@@ -326,10 +326,10 @@ function Page() {
           </div>
         </section>
       </div>
-      <SupportFab />
     </RoleShell>
   );
 }
+
 
 
 export { NAV as DELIVERY_NAV };
