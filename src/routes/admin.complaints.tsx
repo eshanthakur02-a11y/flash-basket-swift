@@ -1,4 +1,150 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
-export const Route = createFileRoute("/admin/complaints")({ component: () => <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}><div className="p-6"><h1 className="font-display text-2xl font-bold">Complaints</h1><p className="text-muted-foreground mt-2">Coming soon.</p></div></RoleShell> });
+import { Phone, MapPin, Store, User, ExternalLink } from "lucide-react";
+
+export const Route = createFileRoute("/admin/complaints")({
+  head: () => ({ meta: [{ title: "Complaints — FlashBasket Admin" }] }),
+  component: () => (
+    <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}>
+      <Page />
+    </RoleShell>
+  ),
+});
+
+const STATUS_TONE: Record<string, string> = {
+  open: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-300",
+  assigned: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+  in_progress: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+  resolved: "bg-green-500/15 text-green-700 dark:text-green-300",
+  closed: "bg-muted text-muted-foreground",
+};
+
+function Page() {
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("admin-complaints")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "support_tickets" },
+        () => qc.invalidateQueries({ queryKey: ["admin-complaints"] }),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-complaints"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc("admin_list_complaints");
+      if (error) throw error;
+      return (data ?? []) as any[];
+    },
+    refetchInterval: 20000,
+  });
+
+  return (
+    <div className="p-4 md:p-6 space-y-6">
+      <div>
+        <h1 className="font-display text-3xl font-extrabold">Complaints</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Help & Support tickets raised by customers and shopkeepers.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="text-sm text-muted-foreground">Loading…</div>
+      ) : (data ?? []).length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
+          No complaints yet.
+        </div>
+      ) : (
+        <div className="grid gap-3">
+          {data!.map((t) => (
+            <article
+              key={t.id}
+              className="rounded-2xl border border-border bg-card p-4 space-y-3"
+            >
+              <header className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-base truncate">{t.title}</span>
+                    <span className={`text-[10px] uppercase rounded-full px-2 py-0.5 font-bold ${STATUS_TONE[t.status] ?? "bg-secondary"}`}>
+                      {t.status.replace(/_/g, " ")}
+                    </span>
+                    <span className="text-[10px] uppercase rounded-full bg-secondary px-2 py-0.5 font-bold">
+                      {t.role_at_creation}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+                    <span>{t.ticket_number}</span>·
+                    <span>{t.category.replace(/_/g, " ")}</span>·
+                    <span>{new Date(t.created_at).toLocaleString()}</span>
+                  </div>
+                </div>
+                <Link
+                  to="/support/tickets/$id"
+                  params={{ id: t.id }}
+                  className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                >
+                  Open <ExternalLink className="h-3 w-3" />
+                </Link>
+              </header>
+
+              <p className="text-sm text-foreground/90 whitespace-pre-wrap">
+                {t.description}
+              </p>
+
+              <div className="grid sm:grid-cols-2 gap-2 text-xs">
+                <div className="rounded-xl bg-secondary/40 p-3 space-y-1">
+                  <div className="font-bold uppercase text-[10px] text-muted-foreground flex items-center gap-1">
+                    <User className="h-3 w-3" /> Raised by
+                  </div>
+                  <div className="font-semibold">{t.full_name || "—"}</div>
+                  {t.phone && (
+                    <a href={`tel:${t.phone}`} className="flex items-center gap-1 text-primary">
+                      <Phone className="h-3 w-3" /> {t.phone}
+                    </a>
+                  )}
+                  {(t.address_line || t.city || t.pincode) && (
+                    <div className="flex items-start gap-1 text-muted-foreground">
+                      <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
+                      <span>
+                        {[t.address_line, t.city, t.pincode].filter(Boolean).join(", ")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {t.role_at_creation === "shopkeeper" && (t.shop_name || t.shop_address) && (
+                  <div className="rounded-xl bg-secondary/40 p-3 space-y-1">
+                    <div className="font-bold uppercase text-[10px] text-muted-foreground flex items-center gap-1">
+                      <Store className="h-3 w-3" /> Shop
+                    </div>
+                    <div className="font-semibold">{t.shop_name || "—"}</div>
+                    {t.shop_phone && (
+                      <a href={`tel:${t.shop_phone}`} className="flex items-center gap-1 text-primary">
+                        <Phone className="h-3 w-3" /> {t.shop_phone}
+                      </a>
+                    )}
+                    {t.shop_address && (
+                      <div className="flex items-start gap-1 text-muted-foreground">
+                        <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
+                        <span>{t.shop_address}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
