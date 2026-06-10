@@ -55,6 +55,7 @@ import { Route as CustomerProfileRouteImport } from './routes/customer.profile'
 import { Route as CustomerOrdersRouteImport } from './routes/customer.orders'
 import { Route as CustomerNotificationsRouteImport } from './routes/customer.notifications'
 import { Route as CustomerHomeRouteImport } from './routes/customer.home'
+import { Route as CustomerDashboardRouteImport } from './routes/customer.dashboard'
 import { Route as CustomerCheckoutRouteImport } from './routes/customer.checkout'
 import { Route as CustomerCategoriesRouteImport } from './routes/customer.categories'
 import { Route as CustomerCartRouteImport } from './routes/customer.cart'
@@ -314,6 +315,11 @@ const CustomerHomeRoute = CustomerHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => CustomerRoute,
 } as any)
+const CustomerDashboardRoute = CustomerDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => CustomerRoute,
+} as any)
 const CustomerCheckoutRoute = CustomerCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -493,6 +499,7 @@ export interface FileRoutesByFullPath {
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
+  '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
   '/customer/orders': typeof CustomerOrdersRouteWithChildren
@@ -569,6 +576,7 @@ export interface FileRoutesByTo {
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
+  '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
   '/customer/orders': typeof CustomerOrdersRouteWithChildren
@@ -646,6 +654,7 @@ export interface FileRoutesById {
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
+  '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
   '/customer/orders': typeof CustomerOrdersRouteWithChildren
@@ -724,6 +733,7 @@ export interface FileRouteTypes {
     | '/customer/cart'
     | '/customer/categories'
     | '/customer/checkout'
+    | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
     | '/customer/orders'
@@ -800,6 +810,7 @@ export interface FileRouteTypes {
     | '/customer/cart'
     | '/customer/categories'
     | '/customer/checkout'
+    | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
     | '/customer/orders'
@@ -876,6 +887,7 @@ export interface FileRouteTypes {
     | '/customer/cart'
     | '/customer/categories'
     | '/customer/checkout'
+    | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
     | '/customer/orders'
@@ -1266,6 +1278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerHomeRouteImport
       parentRoute: typeof CustomerRoute
     }
+    '/customer/dashboard': {
+      id: '/customer/dashboard'
+      path: '/dashboard'
+      fullPath: '/customer/dashboard'
+      preLoaderRoute: typeof CustomerDashboardRouteImport
+      parentRoute: typeof CustomerRoute
+    }
     '/customer/checkout': {
       id: '/customer/checkout'
       path: '/checkout'
@@ -1531,6 +1550,7 @@ interface CustomerRouteChildren {
   CustomerCartRoute: typeof CustomerCartRoute
   CustomerCategoriesRoute: typeof CustomerCategoriesRoute
   CustomerCheckoutRoute: typeof CustomerCheckoutRoute
+  CustomerDashboardRoute: typeof CustomerDashboardRoute
   CustomerHomeRoute: typeof CustomerHomeRoute
   CustomerNotificationsRoute: typeof CustomerNotificationsRoute
   CustomerOrdersRoute: typeof CustomerOrdersRouteWithChildren
@@ -1544,6 +1564,7 @@ const CustomerRouteChildren: CustomerRouteChildren = {
   CustomerCartRoute: CustomerCartRoute,
   CustomerCategoriesRoute: CustomerCategoriesRoute,
   CustomerCheckoutRoute: CustomerCheckoutRoute,
+  CustomerDashboardRoute: CustomerDashboardRoute,
   CustomerHomeRoute: CustomerHomeRoute,
   CustomerNotificationsRoute: CustomerNotificationsRoute,
   CustomerOrdersRoute: CustomerOrdersRouteWithChildren,
