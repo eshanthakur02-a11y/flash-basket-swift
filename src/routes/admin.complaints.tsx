@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
-import { Phone, MapPin, Store, User, ExternalLink } from "lucide-react";
+import { Phone, MapPin, Store, User, ExternalLink, CheckCircle2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/complaints")({
   head: () => ({ meta: [{ title: "Complaints — FlashBasket Admin" }] }),
