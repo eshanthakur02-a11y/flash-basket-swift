@@ -90,13 +90,18 @@ function Page() {
                     <span>{new Date(t.created_at).toLocaleString()}</span>
                   </div>
                 </div>
-                <Link
-                  to="/support/tickets/$id"
-                  params={{ id: t.id }}
-                  className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
-                >
-                  Open <ExternalLink className="h-3 w-3" />
-                </Link>
+                <div className="flex items-center gap-2">
+                  {t.status !== "resolved" && t.status !== "closed" && (
+                    <ResolveButton ticketId={t.id} onDone={() => qc.invalidateQueries({ queryKey: ["admin-complaints"] })} />
+                  )}
+                  <Link
+                    to="/support/tickets/$id"
+                    params={{ id: t.id }}
+                    className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    Open <ExternalLink className="h-3 w-3" />
+                  </Link>
+                </div>
               </header>
 
               <p className="text-sm text-foreground/90 whitespace-pre-wrap">
