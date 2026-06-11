@@ -109,7 +109,7 @@ function LoginPage() {
     <div className="min-h-screen bg-muted/30 flex items-start md:items-center justify-center p-0 md:p-6">
       <div className="w-full max-w-md bg-card md:rounded-3xl md:border md:border-border md:shadow-xl overflow-hidden">
         {/* Hero illustration */}
-        <div className="relative h-44 md:h-52 overflow-hidden" style={{ background: "linear-gradient(135deg, #0e3b2a 0%, #134e35 60%, #1a6b48 100%)" }}>
+        <div className="relative h-44 md:h-52 overflow-hidden" style={{ background: "linear-gradient(135deg, #bbf7d0 0%, #86efac 60%, #4ade80 100%)" }}>
           {/* Skyline silhouette */}
           <div className="absolute inset-x-0 bottom-0 h-20 opacity-30" style={{
             background: "repeating-linear-gradient(90deg, transparent 0 24px, rgba(255,255,255,0.08) 24px 56px)",
