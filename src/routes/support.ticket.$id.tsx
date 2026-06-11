@@ -34,7 +34,7 @@ function Page() {
     queryKey: ["my-ticket", id],
     queryFn: async () => {
       const { data, error } = await (supabase as any).from("support_tickets")
-        .select("id, ticket_number, title, description, category, status, created_at, user_id")
+        .select("id, ticket_number, title, description, category, status, created_at, user_id, resolved_at, resolution_notes, resolved_by")
         .eq("id", id).maybeSingle();
       if (error) throw error;
       return data as any;
