@@ -80,8 +80,10 @@ function Page() {
     else { setReply(""); qc.invalidateQueries({ queryKey: ["ticket-messages", id] }); }
   };
 
-  const setStatus = async (s: string) => {
-    const { error } = await (supabase as any).rpc("update_ticket_status", { _ticket_id: id, _status: s });
+  const setStatus = async (s: string, notes?: string) => {
+    const payload: any = { _ticket_id: id, _status: s };
+    if (notes !== undefined) payload._notes = notes;
+    const { error } = await (supabase as any).rpc("update_ticket_status", payload);
     if (error) toast.error(error.message);
     else { toast.success("Status updated"); qc.invalidateQueries({ queryKey: ["ticket-context", id] }); }
   };
