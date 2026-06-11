@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
-import { Phone, MapPin, Store, User, ExternalLink } from "lucide-react";
+import { Phone, MapPin, Store, User, ExternalLink, CheckCircle2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/complaints")({
   head: () => ({ meta: [{ title: "Complaints — FlashBasket Admin" }] }),
@@ -87,13 +90,18 @@ function Page() {
                     <span>{new Date(t.created_at).toLocaleString()}</span>
                   </div>
                 </div>
-                <Link
-                  to="/support/tickets/$id"
-                  params={{ id: t.id }}
-                  className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
-                >
-                  Open <ExternalLink className="h-3 w-3" />
-                </Link>
+                <div className="flex items-center gap-2">
+                  {t.status !== "resolved" && t.status !== "closed" && (
+                    <ResolveButton ticketId={t.id} onDone={() => qc.invalidateQueries({ queryKey: ["admin-complaints"] })} />
+                  )}
+                  <Link
+                    to="/support/tickets/$id"
+                    params={{ id: t.id }}
+                    className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    Open <ExternalLink className="h-3 w-3" />
+                  </Link>
+                </div>
               </header>
 
               <p className="text-sm text-foreground/90 whitespace-pre-wrap">
@@ -145,6 +153,49 @@ function Page() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function ResolveButton({ ticketId, onDone }: { ticketId: string; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const resolve = async () => {
+    setBusy(true);
+    const { error } = await (supabase as any).rpc("update_ticket_status", {
+      _ticket_id: ticketId,
+      _status: "resolved",
+      _notes: notes.trim() || null,
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Ticket resolved. User notified.");
+    setOpen(false); setNotes("");
+    onDone();
+  };
+
+  if (!open) {
+    return (
+      <Button size="sm" onClick={() => setOpen(true)}
+        className="h-8 bg-green-600 hover:bg-green-700 text-white text-xs font-bold gap-1">
+        <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
+      </Button>
+    );
+  }
+  return (
+    <div className="w-full mt-2 space-y-2 rounded-xl border border-green-500/30 bg-green-500/5 p-3">
+      <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)}
+        placeholder="Resolution notes (optional) — sent to user" />
+      <div className="flex justify-end gap-2">
+        <Button size="sm" variant="ghost" onClick={() => { setOpen(false); setNotes(""); }}>Cancel</Button>
+        <Button size="sm" onClick={resolve} disabled={busy}
+          className="bg-green-600 hover:bg-green-700 text-white gap-1">
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+          Mark resolved
+        </Button>
+      </div>
     </div>
   );
 }
