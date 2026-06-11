@@ -1,10 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
-import { Phone, MapPin, Store, User, ExternalLink, CheckCircle2, Loader2 } from "lucide-react";
+import { Phone, MapPin, Store, User, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -94,13 +94,6 @@ function Page() {
                   {t.status !== "resolved" && t.status !== "closed" && (
                     <ResolveButton ticketId={t.id} onDone={() => qc.invalidateQueries({ queryKey: ["admin-complaints"] })} />
                   )}
-                  <Link
-                    to="/support/tickets/$id"
-                    params={{ id: t.id }}
-                    className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
-                  >
-                    Open <ExternalLink className="h-3 w-3" />
-                  </Link>
                 </div>
               </header>
 
