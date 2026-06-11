@@ -25,6 +25,8 @@ function Page() {
   const qc = useQueryClient();
   const [reply, setReply] = useState("");
   const [internal, setInternal] = useState(false);
+  const [resolveNotes, setResolveNotes] = useState("");
+  const [showResolve, setShowResolve] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
