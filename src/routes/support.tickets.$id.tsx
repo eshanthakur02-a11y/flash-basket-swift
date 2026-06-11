@@ -25,6 +25,8 @@ function Page() {
   const qc = useQueryClient();
   const [reply, setReply] = useState("");
   const [internal, setInternal] = useState(false);
+  const [resolveNotes, setResolveNotes] = useState("");
+  const [showResolve, setShowResolve] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -78,8 +80,10 @@ function Page() {
     else { setReply(""); qc.invalidateQueries({ queryKey: ["ticket-messages", id] }); }
   };
 
-  const setStatus = async (s: string) => {
-    const { error } = await (supabase as any).rpc("update_ticket_status", { _ticket_id: id, _status: s });
+  const setStatus = async (s: string, notes?: string) => {
+    const payload: any = { _ticket_id: id, _status: s };
+    if (notes !== undefined) payload._notes = notes;
+    const { error } = await (supabase as any).rpc("update_ticket_status", payload);
     if (error) toast.error(error.message);
     else { toast.success("Status updated"); qc.invalidateQueries({ queryKey: ["ticket-context", id] }); }
   };
@@ -121,6 +125,15 @@ function Page() {
               ))}
             </div>
           )}
+          {t.status === "resolved" && (
+            <div className="mt-3 rounded-xl bg-green-500/10 border border-green-500/30 p-3 text-sm space-y-1">
+              <div className="text-[10px] uppercase font-bold text-green-700 dark:text-green-300">Resolution</div>
+              {t.resolution_notes && <div className="whitespace-pre-wrap">{t.resolution_notes}</div>}
+              <div className="text-xs text-muted-foreground">
+                Resolved {t.resolved_at ? new Date(t.resolved_at).toLocaleString() : ""}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -128,10 +141,23 @@ function Page() {
           <div className="text-xs font-bold text-muted-foreground uppercase">Actions</div>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={() => setStatus("in_progress")}>Mark in progress</Button>
-            <Button size="sm" variant="outline" onClick={() => setStatus("resolved")}>Resolve</Button>
+            <Button size="sm" variant="outline" onClick={() => setShowResolve(v => !v)}>Resolve…</Button>
             <Button size="sm" variant="outline" onClick={() => setStatus("closed")}>Close</Button>
             <Button size="sm" variant="outline" disabled={!user} onClick={() => user && assign(user.id)}>Assign to me</Button>
           </div>
+          {showResolve && (
+            <div className="space-y-2 rounded-xl border border-border p-3 bg-secondary/30">
+              <div className="text-xs font-semibold">Resolution notes (sent to the user)</div>
+              <Textarea rows={3} value={resolveNotes} onChange={(e) => setResolveNotes(e.target.value)} placeholder="Describe how the issue was resolved…" />
+              <div className="flex justify-end gap-2">
+                <Button size="sm" variant="ghost" onClick={() => { setShowResolve(false); setResolveNotes(""); }}>Cancel</Button>
+                <Button size="sm" className="gradient-primary text-primary-foreground" onClick={async () => {
+                  await setStatus("resolved", resolveNotes.trim() || undefined);
+                  setShowResolve(false); setResolveNotes("");
+                }}>Mark resolved</Button>
+              </div>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold">Reassign:</span>
             <Select onValueChange={assign}>

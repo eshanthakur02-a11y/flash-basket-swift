@@ -1233,7 +1233,9 @@ export type Database = {
           order_id: string | null
           partner_id: string | null
           priority: Database["public"]["Enums"]["ticket_priority"]
+          resolution_notes: string | null
           resolved_at: string | null
+          resolved_by: string | null
           role_at_creation: string
           shop_id: string | null
           status: Database["public"]["Enums"]["ticket_status"]
@@ -1253,7 +1255,9 @@ export type Database = {
           order_id?: string | null
           partner_id?: string | null
           priority?: Database["public"]["Enums"]["ticket_priority"]
+          resolution_notes?: string | null
           resolved_at?: string | null
+          resolved_by?: string | null
           role_at_creation: string
           shop_id?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
@@ -1273,7 +1277,9 @@ export type Database = {
           order_id?: string | null
           partner_id?: string | null
           priority?: Database["public"]["Enums"]["ticket_priority"]
+          resolution_notes?: string | null
           resolved_at?: string | null
+          resolved_by?: string | null
           role_at_creation?: string
           shop_id?: string | null
           status?: Database["public"]["Enums"]["ticket_status"]
@@ -1714,13 +1720,22 @@ export type Database = {
       }
       shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
       support_ticket_context: { Args: { _ticket_id: string }; Returns: Json }
-      update_ticket_status: {
-        Args: {
-          _status: Database["public"]["Enums"]["ticket_status"]
-          _ticket_id: string
-        }
-        Returns: undefined
-      }
+      update_ticket_status:
+        | {
+            Args: {
+              _status: Database["public"]["Enums"]["ticket_status"]
+              _ticket_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _notes?: string
+              _status: Database["public"]["Enums"]["ticket_status"]
+              _ticket_id: string
+            }
+            Returns: undefined
+          }
       user_owns_shop_for_order: {
         Args: { _order_id: string }
         Returns: boolean

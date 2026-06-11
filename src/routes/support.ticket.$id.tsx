@@ -34,7 +34,7 @@ function Page() {
     queryKey: ["my-ticket", id],
     queryFn: async () => {
       const { data, error } = await (supabase as any).from("support_tickets")
-        .select("id, ticket_number, title, description, category, status, created_at, user_id")
+        .select("id, ticket_number, title, description, category, status, created_at, user_id, resolved_at, resolution_notes, resolved_by")
         .eq("id", id).maybeSingle();
       if (error) throw error;
       return data as any;
@@ -96,6 +96,17 @@ function Page() {
                 <img src={a.file_url} alt={a.file_name ?? ""} className="h-20 w-20 object-cover rounded-lg border border-border" />
               </a>
             ))}
+          </div>
+        )}
+        {ticket.data.status === "resolved" && (
+          <div className="mt-3 rounded-xl bg-green-500/10 border border-green-500/30 p-3 text-sm space-y-1">
+            <div className="text-[10px] uppercase font-bold text-green-700 dark:text-green-300">Resolution</div>
+            {ticket.data.resolution_notes
+              ? <div className="whitespace-pre-wrap">{ticket.data.resolution_notes}</div>
+              : <div className="text-muted-foreground">Marked resolved by our team.</div>}
+            <div className="text-xs text-muted-foreground">
+              Resolved {ticket.data.resolved_at ? new Date(ticket.data.resolved_at).toLocaleString() : ""}
+            </div>
           </div>
         )}
       </div>
