@@ -94,13 +94,6 @@ function Page() {
                   {t.status !== "resolved" && t.status !== "closed" && (
                     <ResolveButton ticketId={t.id} onDone={() => qc.invalidateQueries({ queryKey: ["admin-complaints"] })} />
                   )}
-                  <Link
-                    to="/support/tickets/$id"
-                    params={{ id: t.id }}
-                    className="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1"
-                  >
-                    Open <ExternalLink className="h-3 w-3" />
-                  </Link>
                 </div>
               </header>
 
