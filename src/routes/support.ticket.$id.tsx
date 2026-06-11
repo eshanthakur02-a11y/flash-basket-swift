@@ -98,6 +98,17 @@ function Page() {
             ))}
           </div>
         )}
+        {ticket.data.status === "resolved" && (
+          <div className="mt-3 rounded-xl bg-green-500/10 border border-green-500/30 p-3 text-sm space-y-1">
+            <div className="text-[10px] uppercase font-bold text-green-700 dark:text-green-300">Resolution</div>
+            {ticket.data.resolution_notes
+              ? <div className="whitespace-pre-wrap">{ticket.data.resolution_notes}</div>
+              : <div className="text-muted-foreground">Marked resolved by our team.</div>}
+            <div className="text-xs text-muted-foreground">
+              Resolved {ticket.data.resolved_at ? new Date(ticket.data.resolved_at).toLocaleString() : ""}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-4 space-y-2">
