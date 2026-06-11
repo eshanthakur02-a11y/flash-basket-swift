@@ -78,9 +78,41 @@ function LoginPage() {
       if (remember) localStorage.setItem("flashbasket.auth", JSON.stringify({ email, role }));
       else localStorage.removeItem("flashbasket.auth");
     } catch {}
-    toast.success(`Welcome back, ${role}`);
-    const target = ROLES.find((r) => r.key === role)!.dashboard;
-    navigate({ to: target });
+
+    // Fetch actual roles from DB to enforce RBAC and pick the right dashboard.
+    const { data: { user } } = await supabase.auth.getUser();
+    let actualRoles: string[] = [];
+    if (user) {
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      actualRoles = (data ?? []).map((r: any) => r.role);
+    }
+
+    // Map the chosen role-card to allowed actual roles.
+    const allowedFor: Record<RoleKey, string[]> = {
+      admin: ["admin", "support"], // Admin card accepts admin OR support accounts
+      shopkeeper: ["shopkeeper"],
+      delivery: ["delivery"],
+      customer: ["customer"],
+    };
+    const allowed = allowedFor[role];
+    const matched = allowed.find((r) => actualRoles.includes(r));
+
+    if (!matched) {
+      setSubmitting(false);
+      await supabase.auth.signOut();
+      toast.error(`This account does not have ${role} access`);
+      return;
+    }
+
+    const dashboardByRole: Record<string, string> = {
+      admin: "/admin/dashboard",
+      support: "/support/dashboard",
+      shopkeeper: "/shopkeeper/dashboard",
+      delivery: "/delivery/dashboard",
+      customer: "/customer/dashboard",
+    };
+    toast.success(`Welcome back`);
+    navigate({ to: dashboardByRole[matched] as any });
   }
 
   async function handleGoogle() {
