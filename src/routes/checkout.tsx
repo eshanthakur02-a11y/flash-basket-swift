@@ -50,6 +50,7 @@ function CheckoutPage() {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
+  const [deliveryType, setDeliveryType] = useState<"fast_delivery" | "standard_delivery" | "pickup">("standard_delivery");
   const [placing, setPlacing] = useState(false);
   const mounted = useRef(true);
   useEffect(() => () => { mounted.current = false; }, []);
@@ -73,7 +74,7 @@ function CheckoutPage() {
     );
   }
 
-  const deliveryFee = subtotal >= 199 ? 0 : 25;
+  const deliveryFee = deliveryType === "fast_delivery" ? 100 : 0;
   const handling = 5;
   const discount = appliedCoupon?.discount ?? 0;
   const total = Math.max(0, subtotal - discount) + deliveryFee + handling;
@@ -163,7 +164,8 @@ function CheckoutPage() {
       _payment_method: method,
       _coupon_code: appliedCoupon?.code ?? undefined,
       _delivery_instruction: instruction || undefined,
-    });
+      _delivery_type: deliveryType,
+    } as any);
 
     if (error) {
       setPlacing(false);
@@ -298,6 +300,38 @@ function CheckoutPage() {
           </div>
         </section>
 
+        {/* Delivery option */}
+        <section className="rounded-3xl border border-border bg-card p-5 shadow-card">
+          <h2 className="font-display text-xl font-bold">Delivery option</h2>
+          <div className="mt-3 grid gap-3">
+            {[
+              { id: "fast_delivery", icon: "⚡", title: "Fast Delivery", sub: "Delivery in 15–30 minutes", fee: "+₹100" },
+              { id: "standard_delivery", icon: "🚚", title: "Standard Delivery", sub: "Delivery in 30–60 minutes", fee: "Free" },
+              { id: "pickup", icon: "🏪", title: "Store Pickup", sub: "Pick up from the shop yourself", fee: "Free" },
+            ].map((o) => (
+              <label
+                key={o.id}
+                className={`flex items-center gap-3 rounded-2xl border-2 p-4 cursor-pointer ${deliveryType === o.id ? "border-primary bg-primary/5" : "border-border"}`}
+              >
+                <input
+                  type="radio"
+                  name="delivery_type"
+                  checked={deliveryType === (o.id as any)}
+                  onChange={() => setDeliveryType(o.id as any)}
+                />
+                <span className="text-2xl leading-none">{o.icon}</span>
+                <div className="flex-1">
+                  <div className="font-bold flex items-center justify-between">
+                    <span>{o.title}</span>
+                    <span className={`text-sm ${o.fee === "Free" ? "text-primary" : "text-foreground"}`}>{o.fee}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">{o.sub}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+        </section>
+
         {/* Instruction */}
         <section className="rounded-3xl border border-border bg-card p-5 shadow-card">
           <h2 className="font-display text-xl font-bold">Delivery instructions</h2>
@@ -375,7 +409,7 @@ function CheckoutPage() {
           {appliedCoupon && (
             <Row label={`Coupon (${appliedCoupon.code})`} value={`- ${rupees(appliedCoupon.discount)}`} />
           )}
-          <Row label="Delivery" value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
+          <Row label={deliveryType === "pickup" ? "Pickup" : deliveryType === "fast_delivery" ? "Fast delivery" : "Delivery"} value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
           <Row label="Handling" value={rupees(handling)} />
           <div className="my-3 h-px bg-border" />
           <Row label="To pay" value={rupees(total)} bold />

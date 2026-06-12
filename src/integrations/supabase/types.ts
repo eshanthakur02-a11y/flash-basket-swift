@@ -569,7 +569,9 @@ export type Database = {
           delivery_instruction: string | null
           delivery_lat: number | null
           delivery_lng: number | null
+          delivery_type: string
           discount: number
+          fast_delivery_fee: number
           handling_fee: number
           id: string
           order_number: string
@@ -578,6 +580,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           placed_at: string
+          ready_for_pickup_at: string | null
           rejected_shop_ids: string[]
           shop_id: string | null
           status: Database["public"]["Enums"]["order_status"]
@@ -597,7 +600,9 @@ export type Database = {
           delivery_instruction?: string | null
           delivery_lat?: number | null
           delivery_lng?: number | null
+          delivery_type?: string
           discount?: number
+          fast_delivery_fee?: number
           handling_fee?: number
           id?: string
           order_number?: string
@@ -606,6 +611,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           placed_at?: string
+          ready_for_pickup_at?: string | null
           rejected_shop_ids?: string[]
           shop_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -625,7 +631,9 @@ export type Database = {
           delivery_instruction?: string | null
           delivery_lat?: number | null
           delivery_lng?: number | null
+          delivery_type?: string
           discount?: number
+          fast_delivery_fee?: number
           handling_fee?: number
           id?: string
           order_number?: string
@@ -634,6 +642,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           placed_at?: string
+          ready_for_pickup_at?: string | null
           rejected_shop_ids?: string[]
           shop_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -1683,6 +1692,7 @@ export type Database = {
           _address: Json
           _coupon_code?: string
           _delivery_instruction?: string
+          _delivery_type?: string
           _payment_method: Database["public"]["Enums"]["payment_method"]
         }
         Returns: string
@@ -1702,6 +1712,7 @@ export type Database = {
         Args: { _order_id: string; _partner_id: string }
         Returns: undefined
       }
+      shop_mark_collected: { Args: { _order_id: string }; Returns: undefined }
       shop_mark_packed: { Args: { _order_id: string }; Returns: undefined }
       shop_partner_performance: {
         Args: { _shop_id: string }
