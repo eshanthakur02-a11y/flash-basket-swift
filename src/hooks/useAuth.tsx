@@ -56,8 +56,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadRoles(userId: string) {
     try {
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-      setRoles((data ?? []).map((r) => r.role as Role));
+      const [rolesRes, profileRes] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId),
+        supabase.from("profiles").select("status").eq("id", userId).maybeSingle(),
+      ]);
+      if (profileRes.data?.status === "disabled") {
+        await supabase.auth.signOut();
+        setRoles([]);
+        if (typeof window !== "undefined") {
+          const { toast } = await import("sonner");
+          toast.error("Your account has been disabled. Contact support.");
+        }
+        return;
+      }
+      setRoles((rolesRes.data ?? []).map((r) => r.role as Role));
     } finally {
       setRolesLoading(false);
     }
