@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Shield, Store as StoreIcon, Truck, User as UserIcon, X } from "lucide-react";
+import { Shield, Store as StoreIcon, Truck, User as UserIcon, LifeBuoy, X } from "lucide-react";
 import { toast } from "sonner";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
@@ -15,9 +15,9 @@ export const Route = createFileRoute("/admin/customers")({
   ),
 });
 
-type AppRole = "admin" | "customer" | "shopkeeper" | "delivery";
-const ROLES: AppRole[] = ["admin", "shopkeeper", "delivery", "customer"];
-const ICONS: Record<AppRole, any> = { admin: Shield, shopkeeper: StoreIcon, delivery: Truck, customer: UserIcon };
+type AppRole = "admin" | "customer" | "shopkeeper" | "delivery" | "support";
+const ROLES: AppRole[] = ["admin", "shopkeeper", "delivery", "support", "customer"];
+const ICONS: Record<AppRole, any> = { admin: Shield, shopkeeper: StoreIcon, delivery: Truck, support: LifeBuoy, customer: UserIcon };
 
 function CustomersPage() {
   const qc = useQueryClient();
