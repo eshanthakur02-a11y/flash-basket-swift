@@ -80,6 +80,18 @@ function SignupPage() {
               <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 rounded-xl mt-1" />
             </div>
             <div>
+              <Label>Phone number</Label>
+              <Input
+                type="tel"
+                required
+                inputMode="tel"
+                placeholder="+91 98765 43210"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="h-11 rounded-xl mt-1"
+              />
+            </div>
+            <div>
               <Label>Password</Label>
               <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl mt-1" />
             </div>
