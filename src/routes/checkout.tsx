@@ -164,7 +164,8 @@ function CheckoutPage() {
       _payment_method: method,
       _coupon_code: appliedCoupon?.code ?? undefined,
       _delivery_instruction: instruction || undefined,
-    });
+      _delivery_type: deliveryType,
+    } as any);
 
     if (error) {
       setPlacing(false);
