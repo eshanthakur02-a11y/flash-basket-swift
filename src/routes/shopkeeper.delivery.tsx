@@ -156,7 +156,14 @@ function Page() {
               {(team.data ?? []).map((p) => {
                 const b = badgeFor(p);
                 return (
-                  <div key={p.partner_id} className="rounded-2xl border border-border bg-card p-4">
+              <div key={p.partner_id} className="rounded-2xl border border-border bg-card p-4 relative group">
+                    <button
+                      onClick={() => removePartner(p.partner_id)}
+                      className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      title="Remove from shop"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="font-bold truncate">{p.name}</div>
