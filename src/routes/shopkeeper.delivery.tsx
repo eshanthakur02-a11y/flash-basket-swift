@@ -191,12 +191,31 @@ function Page() {
                       </div>
                       <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase font-bold ${b.cls}`}>{b.label}</span>
                     </div>
+                    {(p.current_order_number || p.eta_minutes != null) && (
+                      <div className="mt-3 rounded-xl bg-secondary/40 px-3 py-2 text-xs">
+                        {p.current_order_number && (
+                          <div>Order <span className="font-bold">{p.current_order_number}</span></div>
+                        )}
+                        {p.eta_minutes != null && (
+                          <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
+                            <Clock className="h-3 w-3" /> ETA {p.eta_minutes} min
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <div className="grid grid-cols-3 gap-2 mt-3 text-center">
                       <Mini label="Active" value={String(p.active_order_count ?? 0)} />
                       <Mini label="7d" value={String(perfByPartner[p.partner_id]?.orders_7d ?? 0)} />
                       <Mini label="Rating" value={p.rating != null ? Number(p.rating).toFixed(1) : "—"} />
                     </div>
+                    <div className="mt-2 text-[11px] text-muted-foreground">Updated {timeAgo(p.status_updated_at)}</div>
                   </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
                 );
               })}
             </div>
