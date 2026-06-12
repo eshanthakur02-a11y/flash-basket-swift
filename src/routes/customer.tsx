@@ -1,22 +1,24 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Home, LayoutGrid, Heart, Package, User, ShoppingCart, Bell } from "lucide-react";
+import { Home, LayoutGrid, ShoppingCart, Package, User } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { cn } from "@/lib/utils";
-import { RoleHeader } from "@/components/RoleHeader";
+import { CustomerHeader } from "@/components/customer/CustomerHeader";
+import { FloatingCartBar } from "@/components/customer/FloatingCartBar";
 
 export const Route = createFileRoute("/customer")({
-  head: () => ({ meta: [{ title: "FlashBasket App" }] }),
+  head: () => ({ meta: [{ title: "FlashBasket — 10-min grocery delivery" }] }),
   component: CustomerShell,
 });
 
 const NAV = [
   { to: "/customer/home", label: "Home", icon: Home },
   { to: "/customer/categories", label: "Categories", icon: LayoutGrid },
-  { to: "/customer/wishlist", label: "Favourites", icon: Heart },
+  { to: "/customer/cart", label: "Cart", icon: ShoppingCart, badge: true as const },
   { to: "/customer/orders", label: "Orders", icon: Package },
-  { to: "/customer/profile", label: "Account", icon: User },
+  { to: "/customer/profile", label: "Profile", icon: User },
 ] as const;
 
 function CustomerShell() {
@@ -38,37 +40,21 @@ function CustomerShell() {
 
   if (pathname === "/customer") return <Navigate to="/customer/home" replace />;
 
+  const showHeader = pathname === "/customer/home";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <RoleHeader
-        homeTo="/customer/home"
-        accountTo="/customer/profile"
-        searchTo="/products"
-        showSearch={!pathname.startsWith("/customer/orders") && !pathname.startsWith("/customer/profile")}
-        trailing={
-          <>
-            <Link to="/customer/notifications" aria-label="Notifications" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition">
-              <Bell className="h-5 w-5" />
-            </Link>
-            <Link to="/customer/cart" aria-label="Cart" className="relative grid h-10 w-10 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
-              <ShoppingCart className="h-5 w-5" />
-              {totalQty > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 min-w-4 px-0.5 grid place-items-center rounded-full bg-foreground text-background text-[9px] font-bold">
-                  {totalQty}
-                </span>
-              )}
-            </Link>
-          </>
-        }
-      />
+      {showHeader && <CustomerHeader />}
 
-      {/* Page content */}
-      <main className="flex-1 min-w-0 pb-32"><Outlet /></main>
+      <main className="flex-1 min-w-0 pb-32">
+        <Outlet />
+      </main>
 
-      {/* Bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 glass border-t border-border">
-        <div className="grid grid-cols-5">
+      <FloatingCartBar />
+
+      {/* Floating bottom nav */}
+      <nav className="fixed bottom-3 left-3 right-3 z-30">
+        <div className="rounded-2xl glass shadow-float border border-border/60 grid grid-cols-5">
           {NAV.map((n) => {
             const active = pathname === n.to || pathname.startsWith(n.to + "/");
             const Icon = n.icon;
@@ -77,19 +63,26 @@ function CustomerShell() {
                 key={n.to}
                 to={n.to}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-bold transition",
+                  "relative flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-bold transition",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
-                <span
-                  className={cn(
-                    "grid h-9 w-9 place-items-center rounded-2xl transition",
-                    active ? "gradient-primary text-primary-foreground shadow-glow" : "",
+                {active && (
+                  <motion.span
+                    layoutId="navActive"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 h-1 w-8 rounded-b-full bg-primary"
+                    transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                  />
+                )}
+                <span className="relative">
+                  <Icon className={cn("h-[22px] w-[22px] transition", active && "stroke-[2.5]")} />
+                  {"badge" in n && n.badge && totalQty > 0 && (
+                    <span className="absolute -top-1.5 -right-2 h-4 min-w-4 px-1 grid place-items-center rounded-full bg-accent text-accent-foreground text-[9px] font-extrabold">
+                      {totalQty}
+                    </span>
                   )}
-                >
-                  <Icon className="h-5 w-5" />
                 </span>
-                {n.label}
+                <span>{n.label}</span>
               </Link>
             );
           })}

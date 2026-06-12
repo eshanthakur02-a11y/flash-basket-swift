@@ -1,36 +1,31 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { Zap, Clock, Truck, ShieldCheck, Headphones, ChevronRight } from "lucide-react";
+import { Clock, ShieldCheck, Truck, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { ProductCard, type ProductCardData } from "@/components/ProductCard";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/hooks/useAuth";
-import { SupportTicketForm } from "@/components/SupportTicketForm";
-
-
-
+import type { ProductCardData } from "@/components/ProductCard";
+import { HeroBannerCarousel } from "@/components/customer/HeroBannerCarousel";
+import { QuickServices } from "@/components/customer/QuickServices";
+import { CategoryGrid, type CategoryLite } from "@/components/customer/CategoryGrid";
+import { ProductRail } from "@/components/customer/ProductRail";
 
 export const Route = createFileRoute("/customer/home")({
-  head: () => ({ meta: [{ title: "Home — FlashBasket" }] }),
+  head: () => ({
+    meta: [
+      { title: "FlashBasket — 10-min grocery delivery" },
+      { name: "description", content: "Fresh groceries, snacks and daily essentials delivered to your door in 10 minutes." },
+    ],
+  }),
   component: CustomerHome,
 });
 
 function CustomerHome() {
-  const { user } = useAuth();
-  const [supportOpen, setSupportOpen] = useState(false);
-
-  const profile = useQuery({
-    queryKey: ["mini-profile", user?.id],
-    queryFn: async () =>
-      user ? (await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle()).data : null,
-    enabled: !!user,
-  });
-
   const categories = useQuery({
     queryKey: ["app-categories"],
-    queryFn: async () => (await supabase.from("categories").select("*").order("display_order")).data ?? [],
+    queryFn: async () => {
+      const { data } = await supabase.from("categories").select("id, slug, name, icon, color").order("display_order");
+      return (data ?? []) as CategoryLite[];
+    },
   });
 
   const featured = useQuery({
@@ -57,99 +52,110 @@ function CustomerHome() {
     },
   });
 
-  const name = profile.data?.full_name?.split(" ")[0] ?? "there";
+  const deals = useQuery({
+    queryKey: ["app-deals"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
+        .order("price", { ascending: true })
+        .limit(10);
+      return (data ?? []) as ProductCardData[];
+    },
+  });
 
   return (
-    <div className="px-4 py-4 space-y-6">
-      {/* Hero */}
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl gradient-hero p-5 border border-border shadow-card"
-      >
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-2.5 py-1 text-[10px] font-bold">
-          <Zap className="h-3 w-3 fill-primary text-primary" /> 10-min delivery
-        </div>
-        <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight">
-          Hi {name}, <span className="text-primary">stock up</span> in a flash.
-        </h1>
-        <p className="mt-1 text-xs text-muted-foreground">Fresh groceries delivered to your door.</p>
-        <div className="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-primary/30 blur-3xl" />
-      </motion.section>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="space-y-6 pt-4"
+    >
+      <HeroBannerCarousel />
 
       {/* Promise strip */}
-      <div className="grid grid-cols-3 gap-2">
-        <Promise icon={<Clock className="h-4 w-4" />} label="10-min" />
-        <Promise icon={<Truck className="h-4 w-4" />} label="Free ₹199+" />
-        <Promise icon={<ShieldCheck className="h-4 w-4" />} label="Authentic" />
+      <div className="px-4 grid grid-cols-3 gap-2">
+        <Promise icon={<Clock className="h-4 w-4" />} label="10-min" sub="delivery" />
+        <Promise icon={<Truck className="h-4 w-4" />} label="Free" sub="above ₹199" />
+        <Promise icon={<ShieldCheck className="h-4 w-4" />} label="100%" sub="authentic" />
       </div>
 
-      {/* Categories */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-lg font-bold">Shop by category</h2>
-          <Link to="/customer/categories" className="text-xs font-bold text-primary">See all →</Link>
-        </div>
-        <div className="-mx-4 px-4 overflow-x-auto pb-2 scrollbar-hide">
-          <div className="grid grid-rows-2 grid-flow-col auto-cols-[28%] gap-3 snap-x">
-            {categories.isLoading
-              ? Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="aspect-square rounded-2xl" />)
-              : categories.data?.map((c) => (
-                  <Link
-                    key={c.id}
-                    to="/category/$slug"
-                    params={{ slug: c.slug }}
-                    className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card p-2 shadow-card snap-start"
-                  >
-                    <div
-                      className="grid h-14 w-14 place-items-center rounded-xl text-2xl"
-                      style={{ backgroundColor: (c.color ?? "#A3E635") + "55" }}
-                    >
-                      {c.icon}
-                    </div>
-                    <div className="text-[10px] font-semibold text-center leading-tight line-clamp-2">{c.name}</div>
-                  </Link>
-                ))}
+      {/* Quick services */}
+      <SectionHeader title="Shop in seconds" emoji="⚡" />
+      <QuickServices />
+
+      {/* Categories grid */}
+      <SectionHeader title="Categories" emoji="🛍️" subtitle="Pick what you need" />
+      <CategoryGrid categories={categories.data} loading={categories.isLoading} />
+
+      {/* Deals */}
+      <ProductRail
+        title="Best deals today"
+        emoji="🔥"
+        subtitle="Lowest prices on essentials"
+        loading={deals.isLoading}
+        products={deals.data}
+      />
+
+      {/* Featured banner strip */}
+      <div className="px-4">
+        <div className="rounded-2xl overflow-hidden gradient-banner-night text-white p-4 flex items-center gap-3 shadow-card">
+          <div className="grid h-12 w-12 place-items-center rounded-xl bg-white/15 backdrop-blur">
+            <Zap className="h-6 w-6 fill-accent text-accent" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-display font-extrabold leading-tight">Late-night cravings?</div>
+            <div className="text-[12px] opacity-90">We deliver till 2 AM in your area</div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <ProductRow title="✨ Featured today" query={featured} />
-      <ProductRow title="🔥 Bestsellers" query={bestsellers} />
+      {/* Trending */}
+      <ProductRail
+        title="Trending near you"
+        emoji="📈"
+        subtitle="Most ordered this week"
+        loading={bestsellers.isLoading}
+        products={bestsellers.data}
+      />
 
+      {/* Recommended */}
+      <ProductRail
+        title="Recommended for you"
+        emoji="⭐"
+        subtitle="Picked just for you"
+        loading={featured.isLoading}
+        products={featured.data}
+      />
+
+      {/* Bottom safe area is handled by parent pb-32 + floating cart */}
+      <div className="px-4 pt-2 text-center text-[11px] text-muted-foreground">
+        FlashBasket · Delivered with ⚡
+      </div>
+    </motion.div>
+  );
+}
+
+function SectionHeader({ title, emoji, subtitle }: { title: string; emoji?: string; subtitle?: string }) {
+  return (
+    <div className="px-4">
+      <h2 className="font-display text-[17px] font-extrabold leading-tight flex items-center gap-1.5">
+        {emoji && <span className="text-xl">{emoji}</span>}
+        <span>{title}</span>
+      </h2>
+      {subtitle && <p className="text-[11px] text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
 
-
-
-function Promise({ icon, label }: { icon: React.ReactNode; label: string }) {
+function Promise({ icon, label, sub }: { icon: React.ReactNode; label: string; sub: string }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 rounded-2xl bg-card border border-border p-2 shadow-card">
-      <span className="text-primary">{icon}</span>
-      <span className="text-[10px] font-bold">{label}</span>
+    <div className="flex items-center gap-2 rounded-2xl bg-card border border-border p-2.5 shadow-soft">
+      <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">{icon}</span>
+      <div className="leading-tight min-w-0">
+        <div className="text-[12px] font-extrabold truncate">{label}</div>
+        <div className="text-[10px] text-muted-foreground truncate">{sub}</div>
+      </div>
     </div>
-  );
-}
-
-function ProductRow({ title, query }: { title: string; query: ReturnType<typeof useQuery<ProductCardData[]>> }) {
-  return (
-    <section>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-lg font-bold">{title}</h2>
-        <Link to="/products" className="text-xs font-bold text-primary">See all →</Link>
-      </div>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x">
-        {query.isLoading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="w-40 shrink-0 aspect-[3/4] rounded-2xl" />
-            ))
-          : query.data?.map((p) => (
-              <div key={p.id} className="w-40 shrink-0 snap-start">
-                <ProductCard product={p} />
-              </div>
-            ))}
-      </div>
-    </section>
   );
 }
