@@ -81,13 +81,30 @@ function Page() {
     queryKey: ["shop-team", shopId],
     queryFn: async () => {
       if (!shopId) return [] as TeamPartner[];
-      const { data, error } = await supabase.rpc("shop_list_team", { _shop_id: shopId });
+      const { data, error } = await supabase.rpc("shop_live_team" as any, { _shop_id: shopId });
       if (error) throw error;
       return (data ?? []) as TeamPartner[];
     },
     enabled: !!shopId,
     refetchInterval: 10000,
   });
+
+  // Realtime updates: any change to a delivery partner or to our shop's orders refreshes the view
+  useEffect(() => {
+    if (!shopId) return;
+    const ch = supabase
+      .channel(`shop-live-${shopId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "delivery_partners" }, () => {
+        qc.invalidateQueries({ queryKey: ["shop-team", shopId] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `shop_id=eq.${shopId}` }, () => {
+        qc.invalidateQueries({ queryKey: ["shop-delivery-orders", shopId] });
+        qc.invalidateQueries({ queryKey: ["shop-team", shopId] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [shopId, qc]);
+
 
   const perf = useQuery({
     queryKey: ["shop-perf", shopId],
