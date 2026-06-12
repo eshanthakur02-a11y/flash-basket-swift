@@ -47,14 +47,17 @@ function Page() {
   });
 
   const partners = useQuery({
-    queryKey: ["online-partners"],
+    queryKey: ["shop-partners", shopId],
     queryFn: async () => {
+      if (!shopId) return [];
       const { data } = await supabase
         .from("delivery_partners")
-        .select("id, name, phone, is_online, current_lat, current_lng, rating")
+        .select("id, name, phone, is_online, current_lat, current_lng, rating, availability_status, active_order_count, shop_id")
+        .eq("shop_id", shopId)
         .order("is_online", { ascending: false });
       return data ?? [];
     },
+    enabled: !!shopId,
     refetchInterval: 10000,
   });
 
