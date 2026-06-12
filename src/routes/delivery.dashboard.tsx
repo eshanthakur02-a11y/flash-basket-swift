@@ -33,17 +33,26 @@ function Page() {
   const [myPos, setMyPos] = useState<{ lat: number; lng: number } | null>(null);
   const watchRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("delivery_partners").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => {
-      if (data) {
-        setPartner(data);
-        if (data.current_lat && data.current_lng) setMyPos({ lat: data.current_lat, lng: data.current_lng });
-      } else {
-        supabase.from("delivery_partners").insert({ user_id: user.id, name: user.email ?? "Partner", is_online: false }).select().single().then(({ data: created }) => setPartner(created));
-      }
-    });
-  }, [user]);
+  const ensurePartner = async () => {
+    if (!user) return null;
+    const { data, error } = await supabase.from("delivery_partners").select("*").eq("user_id", user.id).maybeSingle();
+    if (error) { console.error("load partner:", error); toast.error(error.message); return null; }
+    if (data) {
+      setPartner(data);
+      if (data.current_lat && data.current_lng) setMyPos({ lat: data.current_lat, lng: data.current_lng });
+      return data;
+    }
+    const { data: created, error: insErr } = await supabase
+      .from("delivery_partners")
+      .insert({ user_id: user.id, name: user.email ?? "Partner", is_online: false })
+      .select()
+      .single();
+    if (insErr) { console.error("create partner:", insErr); toast.error(insErr.message); return null; }
+    setPartner(created);
+    return created;
+  };
+
+  useEffect(() => { ensurePartner(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
 
   useEffect(() => {
     const ch = supabase
