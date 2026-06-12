@@ -18,13 +18,19 @@ function SignupPage() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 10) {
+      toast.error("Enter a valid phone number");
+      return;
+    }
     setSubmitting(true);
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(email, password, fullName, `+${digits}`);
     setSubmitting(false);
     if (error) {
       toast.error(error.message || "Signup failed");
