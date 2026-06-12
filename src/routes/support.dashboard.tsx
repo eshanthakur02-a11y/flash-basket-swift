@@ -46,10 +46,13 @@ function Page() {
         resolved: rows.filter(r => r.status === "resolved").length,
         mine: rows.filter(r => r.assigned_to === user?.id && r.status !== "closed").slice(0, 10),
         queue: rows.filter(r => !r.assigned_to && r.status === "open").slice(0, 10),
+        active: rows.filter(r => r.status !== "resolved" && r.status !== "closed").slice(0, 30),
       };
     },
     refetchInterval: 15000,
   });
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["support-dash-complaints"] });
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -63,9 +66,11 @@ function Page() {
       </section>
 
       <section className="grid lg:grid-cols-2 gap-4">
-        <TicketList title="Assigned to me" items={data.data?.mine ?? []} onDone={() => qc.invalidateQueries({ queryKey: ["support-dash-complaints"] })} />
-        <TicketList title="Unassigned queue" items={data.data?.queue ?? []} onDone={() => qc.invalidateQueries({ queryKey: ["support-dash-complaints"] })} />
+        <TicketList title="Assigned to me" items={data.data?.mine ?? []} onDone={invalidate} />
+        <TicketList title="Unassigned queue" items={data.data?.queue ?? []} onDone={invalidate} />
       </section>
+
+      <TicketList title="All active complaints" items={data.data?.active ?? []} onDone={invalidate} />
     </div>
   );
 }
