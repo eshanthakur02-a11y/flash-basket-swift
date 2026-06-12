@@ -179,6 +179,15 @@ function CustomersPage() {
                     </div>
                   </div>
                 )}
+                {u.status === "disabled" ? (
+                  <Button size="sm" variant="outline" className="w-full h-8 text-xs" onClick={() => setStatus.mutate({ user_id: u.id, status: "active" })}>
+                    <Check className="h-3 w-3 mr-1"/>Enable user
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="outline" className="w-full h-8 text-xs text-destructive border-destructive/30" onClick={() => setStatus.mutate({ user_id: u.id, status: "disabled" })}>
+                    <Ban className="h-3 w-3 mr-1"/>Disable user
+                  </Button>
+                )}
               </div>
             ))}
           </div>
