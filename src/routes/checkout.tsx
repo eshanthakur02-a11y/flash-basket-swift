@@ -64,16 +64,6 @@ function CheckoutPage() {
     );
   };
 
-  if (!user) return <Navigate to="/auth" />;
-  if (items.length === 0) {
-    return (
-      <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <p className="text-muted-foreground">Your cart is empty.</p>
-        <Link to="/products" className="mt-4 inline-block text-primary font-bold">Shop now →</Link>
-      </div>
-    );
-  }
-
   const deliveryFee = deliveryType === "fast_delivery" ? 100 : 0;
   const handling = 5;
   const discount = appliedCoupon?.discount ?? 0;
@@ -123,6 +113,18 @@ function CheckoutPage() {
       setSelectedAddr(def.id);
     }
   }, [addresses.data, selectedAddr]);
+
+  if (!user) return <Navigate to="/auth" />;
+  if (items.length === 0) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20 text-center">
+        <p className="text-muted-foreground">Your cart is empty.</p>
+        <Link to="/products" className="mt-4 inline-block text-primary font-bold">Shop now →</Link>
+      </div>
+    );
+  }
+
+
 
   const saveNewAddress = async () => {
     if (!newAddr.line1 || !newAddr.city || !newAddr.pincode || !newAddr.phone || !newAddr.name) {
