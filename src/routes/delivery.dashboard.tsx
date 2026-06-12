@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { LayoutDashboard, PackageOpen, History, Wallet, User, Check, MapPin } from "lucide-react";
 import { rupees } from "@/lib/format";
 import { RouteMap } from "@/components/maps/RouteMap";
+import { MessageCustomerDialog } from "@/components/MessageCustomerDialog";
 
 
 
@@ -330,7 +331,10 @@ function Page() {
                       <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
                       <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
                     </div>
-                    <Button size="sm" onClick={() => markDelivered(o.id)} className="rounded-xl"><Check className="h-3 w-3 mr-1" />Mark delivered</Button>
+                    <div className="flex gap-2 flex-wrap">
+                      <MessageCustomerDialog orderId={o.id} orderNumber={o.order_number} />
+                      <Button size="sm" onClick={() => markDelivered(o.id)} className="rounded-xl"><Check className="h-3 w-3 mr-1" />Mark delivered</Button>
+                    </div>
                   </div>
                   <RouteMap points={points} height="h-56" />
                 </div>
