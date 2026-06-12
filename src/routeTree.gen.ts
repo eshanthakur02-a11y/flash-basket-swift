@@ -59,10 +59,12 @@ import { Route as CustomerDashboardRouteImport } from './routes/customer.dashboa
 import { Route as CustomerCheckoutRouteImport } from './routes/customer.checkout'
 import { Route as CustomerCategoriesRouteImport } from './routes/customer.categories'
 import { Route as CustomerCartRouteImport } from './routes/customer.cart'
+import { Route as CustomerApplyRouteImport } from './routes/customer.apply'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminShopsRouteImport } from './routes/admin.shops'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminRoleRequestsRouteImport } from './routes/admin.role-requests'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
@@ -335,6 +337,11 @@ const CustomerCartRoute = CustomerCartRouteImport.update({
   path: '/cart',
   getParentRoute: () => CustomerRoute,
 } as any)
+const CustomerApplyRoute = CustomerApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => CustomerRoute,
+} as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
   id: '/category/$slug',
   path: '/category/$slug',
@@ -353,6 +360,11 @@ const AdminShopsRoute = AdminShopsRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRoleRequestsRoute = AdminRoleRequestsRouteImport.update({
+  id: '/role-requests',
+  path: '/role-requests',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminReportsRoute = AdminReportsRouteImport.update({
@@ -492,10 +504,12 @@ export interface FileRoutesByFullPath {
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/role-requests': typeof AdminRoleRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/customer/apply': typeof CustomerApplyRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
@@ -569,10 +583,12 @@ export interface FileRoutesByTo {
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/role-requests': typeof AdminRoleRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/customer/apply': typeof CustomerApplyRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
@@ -647,10 +663,12 @@ export interface FileRoutesById {
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
+  '/admin/role-requests': typeof AdminRoleRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/customer/apply': typeof CustomerApplyRoute
   '/customer/cart': typeof CustomerCartRoute
   '/customer/categories': typeof CustomerCategoriesRoute
   '/customer/checkout': typeof CustomerCheckoutRoute
@@ -726,10 +744,12 @@ export interface FileRouteTypes {
     | '/admin/payments'
     | '/admin/products'
     | '/admin/reports'
+    | '/admin/role-requests'
     | '/admin/settings'
     | '/admin/shops'
     | '/admin/support'
     | '/category/$slug'
+    | '/customer/apply'
     | '/customer/cart'
     | '/customer/categories'
     | '/customer/checkout'
@@ -803,10 +823,12 @@ export interface FileRouteTypes {
     | '/admin/payments'
     | '/admin/products'
     | '/admin/reports'
+    | '/admin/role-requests'
     | '/admin/settings'
     | '/admin/shops'
     | '/admin/support'
     | '/category/$slug'
+    | '/customer/apply'
     | '/customer/cart'
     | '/customer/categories'
     | '/customer/checkout'
@@ -880,10 +902,12 @@ export interface FileRouteTypes {
     | '/admin/payments'
     | '/admin/products'
     | '/admin/reports'
+    | '/admin/role-requests'
     | '/admin/settings'
     | '/admin/shops'
     | '/admin/support'
     | '/category/$slug'
+    | '/customer/apply'
     | '/customer/cart'
     | '/customer/categories'
     | '/customer/checkout'
@@ -1306,6 +1330,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerCartRouteImport
       parentRoute: typeof CustomerRoute
     }
+    '/customer/apply': {
+      id: '/customer/apply'
+      path: '/apply'
+      fullPath: '/customer/apply'
+      preLoaderRoute: typeof CustomerApplyRouteImport
+      parentRoute: typeof CustomerRoute
+    }
     '/category/$slug': {
       id: '/category/$slug'
       path: '/category/$slug'
@@ -1332,6 +1363,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/role-requests': {
+      id: '/admin/role-requests'
+      path: '/role-requests'
+      fullPath: '/admin/role-requests'
+      preLoaderRoute: typeof AdminRoleRequestsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/reports': {
@@ -1509,6 +1547,7 @@ interface AdminRouteChildren {
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReportsRoute: typeof AdminReportsRoute
+  AdminRoleRequestsRoute: typeof AdminRoleRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminShopsRoute: typeof AdminShopsRoute
   AdminSupportRoute: typeof AdminSupportRoute
@@ -1527,6 +1566,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminReportsRoute: AdminReportsRoute,
+  AdminRoleRequestsRoute: AdminRoleRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminShopsRoute: AdminShopsRoute,
   AdminSupportRoute: AdminSupportRoute,
@@ -1547,6 +1587,7 @@ const CustomerOrdersRouteWithChildren = CustomerOrdersRoute._addFileChildren(
 )
 
 interface CustomerRouteChildren {
+  CustomerApplyRoute: typeof CustomerApplyRoute
   CustomerCartRoute: typeof CustomerCartRoute
   CustomerCategoriesRoute: typeof CustomerCategoriesRoute
   CustomerCheckoutRoute: typeof CustomerCheckoutRoute
@@ -1561,6 +1602,7 @@ interface CustomerRouteChildren {
 }
 
 const CustomerRouteChildren: CustomerRouteChildren = {
+  CustomerApplyRoute: CustomerApplyRoute,
   CustomerCartRoute: CustomerCartRoute,
   CustomerCategoriesRoute: CustomerCategoriesRoute,
   CustomerCheckoutRoute: CustomerCheckoutRoute,

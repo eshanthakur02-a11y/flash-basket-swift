@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Shield, Store as StoreIcon, Truck, User as UserIcon, LifeBuoy, X } from "lucide-react";
+import { Shield, Store as StoreIcon, Truck, User as UserIcon, LifeBuoy, X, Ban, Check } from "lucide-react";
 import { toast } from "sonner";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
@@ -48,6 +48,15 @@ function CustomersPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const setStatus = useMutation({
+    mutationFn: async ({ user_id, status }: { user_id: string; status: "active" | "disabled" }) => {
+      const { error } = await supabase.rpc("admin_set_user_status", { _user_id: user_id, _status: status });
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => { toast.success(v.status === "disabled" ? "User disabled" : "User enabled"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -63,17 +72,29 @@ function CustomersPage() {
             <table className="w-full text-sm">
               <thead className="bg-secondary/50 text-left">
                 <tr>
-                  <th className="p-3">Name</th>
+                  <th className="p-3">Name / Email</th>
                   <th className="p-3">Phone</th>
+                  <th className="p-3">Joined</th>
+                  <th className="p-3">Status</th>
                   <th className="p-3">Roles</th>
-                  <th className="p-3">Add role</th>
+                  <th className="p-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {(users.data ?? []).map((u: any) => (
                   <tr key={u.id} className="border-t border-border align-top">
-                    <td className="p-3 font-medium">{u.full_name || "—"}<div className="text-xs text-muted-foreground font-mono">{u.id.slice(0, 8)}</div></td>
+                    <td className="p-3 font-medium">
+                      {u.full_name || "—"}
+                      <div className="text-xs text-muted-foreground">{u.email || "—"}</div>
+                      {u.pending_request_count > 0 && <div className="text-[10px] mt-0.5 text-yellow-700 dark:text-yellow-300 font-bold">{u.pending_request_count} pending request</div>}
+                    </td>
                     <td className="p-3 text-muted-foreground">{u.phone || "—"}</td>
+                    <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{new Date(u.created_at).toLocaleDateString()}</td>
+                    <td className="p-3">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold ${u.status === "disabled" ? "bg-destructive/15 text-destructive" : "bg-green-500/15 text-green-700 dark:text-green-300"}`}>
+                        {u.status === "disabled" ? "Disabled" : "Active"}
+                      </span>
+                    </td>
                     <td className="p-3">
                       <div className="flex flex-wrap gap-1.5">
                         {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
@@ -89,16 +110,25 @@ function CustomersPage() {
                           );
                         })}
                       </div>
-                    </td>
-                    <td className="p-3">
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1.5 mt-2">
                         {ROLES.filter((r) => !(u.roles ?? []).includes(r)).map((r) => (
-                          <Button key={r} size="sm" variant="outline" className="h-7 text-xs"
+                          <Button key={r} size="sm" variant="outline" className="h-6 text-[10px] px-2"
                             onClick={() => assign.mutate({ user_id: u.id, role: r })}>
                             + {r}
                           </Button>
                         ))}
                       </div>
+                    </td>
+                    <td className="p-3">
+                      {u.status === "disabled" ? (
+                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setStatus.mutate({ user_id: u.id, status: "active" })}>
+                          <Check className="h-3 w-3 mr-1"/>Enable
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline" className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setStatus.mutate({ user_id: u.id, status: "disabled" })}>
+                          <Ban className="h-3 w-3 mr-1"/>Disable
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -109,10 +139,15 @@ function CustomersPage() {
           <div className="md:hidden space-y-3">
             {(users.data ?? []).map((u: any) => (
               <div key={u.id} className="rounded-2xl border border-border bg-card p-4 space-y-3">
-                <div>
-                  <div className="font-bold">{u.full_name || "—"}</div>
-                  <div className="text-[11px] text-muted-foreground font-mono">{u.id.slice(0, 8)}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{u.phone || "No phone"}</div>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-bold">{u.full_name || "—"}</div>
+                    <div className="text-[11px] text-muted-foreground">{u.email || "—"}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{u.phone || "No phone"}</div>
+                  </div>
+                  <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold ${u.status === "disabled" ? "bg-destructive/15 text-destructive" : "bg-green-500/15 text-green-700 dark:text-green-300"}`}>
+                    {u.status === "disabled" ? "Disabled" : "Active"}
+                  </span>
                 </div>
                 <div>
                   <div className="text-[11px] font-bold uppercase text-muted-foreground mb-1.5">Current roles</div>
@@ -143,6 +178,15 @@ function CustomersPage() {
                       ))}
                     </div>
                   </div>
+                )}
+                {u.status === "disabled" ? (
+                  <Button size="sm" variant="outline" className="w-full h-8 text-xs" onClick={() => setStatus.mutate({ user_id: u.id, status: "active" })}>
+                    <Check className="h-3 w-3 mr-1"/>Enable user
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="outline" className="w-full h-8 text-xs text-destructive border-destructive/30" onClick={() => setStatus.mutate({ user_id: u.id, status: "disabled" })}>
+                    <Ban className="h-3 w-3 mr-1"/>Disable user
+                  </Button>
                 )}
               </div>
             ))}

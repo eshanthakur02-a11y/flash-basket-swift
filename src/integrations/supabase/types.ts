@@ -887,27 +887,33 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           created_at: string
           full_name: string | null
           id: string
           phone: string | null
+          status: string
           updated_at: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
           id: string
           phone?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           phone?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
@@ -946,6 +952,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      role_requests: {
+        Row: {
+          created_at: string
+          data: Json
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          rejection_reason: string | null
+          requested_role: Database["public"]["Enums"]["app_role"]
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          rejection_reason?: string | null
+          requested_role: Database["public"]["Enums"]["app_role"]
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          rejection_reason?: string | null
+          requested_role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       shop_categories: {
         Row: {
@@ -1477,6 +1525,31 @@ export type Database = {
     }
     Functions: {
       actor_role_label: { Args: never; Returns: string }
+      admin_approve_delivery_request: {
+        Args: {
+          _name?: string
+          _phone?: string
+          _request_id: string
+          _shop_id: string
+          _vehicle?: string
+        }
+        Returns: string
+      }
+      admin_approve_shopkeeper_request: {
+        Args: {
+          _address?: string
+          _city?: string
+          _lat?: number
+          _lng?: number
+          _phone?: string
+          _pincode?: string
+          _radius?: number
+          _request_id: string
+          _shop_id?: string
+          _shop_name?: string
+        }
+        Returns: string
+      }
       admin_assign_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1540,14 +1613,34 @@ export type Database = {
           user_id: string
         }[]
       }
-      admin_list_users: {
-        Args: never
+      admin_list_role_requests: {
+        Args: { _status?: string }
         Returns: {
-          created_at: string
+          data: Json
+          decided_at: string
+          email: string
           full_name: string
           id: string
           phone: string
+          rejection_reason: string
+          requested_role: Database["public"]["Enums"]["app_role"]
+          status: string
+          submitted_at: string
+          user_id: string
+        }[]
+      }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          address: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          pending_request_count: number
+          phone: string
           roles: Database["public"]["Enums"]["app_role"][]
+          status: string
         }[]
       }
       admin_partner_performance: {
@@ -1575,6 +1668,10 @@ export type Database = {
         Args: { _amount: number; _payment_id: string; _refund_id: string }
         Returns: undefined
       }
+      admin_reject_role_request: {
+        Args: { _reason?: string; _request_id: string }
+        Returns: undefined
+      }
       admin_remove_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1589,6 +1686,10 @@ export type Database = {
       admin_set_support_agent: {
         Args: { _is_active?: boolean; _user_email: string }
         Returns: string
+      }
+      admin_set_user_status: {
+        Args: { _status: string; _user_id: string }
+        Returns: undefined
       }
       admin_support_stats: { Args: never; Returns: Json }
       admin_transfer_partner: {
@@ -1753,6 +1854,10 @@ export type Database = {
         }[]
       }
       shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
+      submit_role_request: {
+        Args: { _data: Json; _role: Database["public"]["Enums"]["app_role"] }
+        Returns: string
+      }
       support_list_complaints: {
         Args: never
         Returns: {
