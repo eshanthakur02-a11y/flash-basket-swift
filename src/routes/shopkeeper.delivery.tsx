@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Users, Star, UserCog } from "lucide-react";
+import { Truck, Activity, BarChart3, Users, Star, UserCog, X } from "lucide-react";
 
 export const Route = createFileRoute("/shopkeeper/delivery")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
