@@ -409,7 +409,7 @@ function CheckoutPage() {
           {appliedCoupon && (
             <Row label={`Coupon (${appliedCoupon.code})`} value={`- ${rupees(appliedCoupon.discount)}`} />
           )}
-          <Row label="Delivery" value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
+          <Row label={deliveryType === "pickup" ? "Pickup" : deliveryType === "fast_delivery" ? "Fast delivery" : "Delivery"} value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
           <Row label="Handling" value={rupees(handling)} />
           <div className="my-3 h-px bg-border" />
           <Row label="To pay" value={rupees(total)} bold />
