@@ -115,6 +115,16 @@ function Page() {
     qc.invalidateQueries({ queryKey: ["shop-team", shopId] });
   };
 
+  const removePartner = async (partnerId: string) => {
+    if (!shopId) return;
+    const currentIds = (team.data ?? []).map((p) => p.partner_id).filter((id) => id !== partnerId);
+    const { error } = await supabase.rpc("shop_set_team", { _shop_id: shopId, _partner_ids: currentIds });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Partner removed from shop");
+    qc.invalidateQueries({ queryKey: ["shop-team", shopId] });
+    qc.invalidateQueries({ queryKey: ["shop-perf", shopId] });
+  };
+
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
       <div className="p-4 md:p-6 space-y-6">
