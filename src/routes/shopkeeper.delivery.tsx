@@ -216,11 +216,7 @@ function Page() {
           )}
         </section>
 
-                );
-              })}
-            </div>
-          )}
-        </section>
+
 
         {/* Active orders */}
         <section>
