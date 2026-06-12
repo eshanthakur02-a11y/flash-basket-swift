@@ -1730,6 +1730,28 @@ export type Database = {
         }[]
       }
       shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
+      support_list_complaints: {
+        Args: never
+        Returns: {
+          address_line: string
+          category: string
+          city: string
+          created_at: string
+          description: string
+          full_name: string
+          id: string
+          phone: string
+          pincode: string
+          role_at_creation: string
+          shop_address: string
+          shop_name: string
+          shop_phone: string
+          status: string
+          ticket_number: string
+          title: string
+          user_id: string
+        }[]
+      }
       support_ticket_context: { Args: { _ticket_id: string }; Returns: Json }
       update_ticket_status:
         | {
