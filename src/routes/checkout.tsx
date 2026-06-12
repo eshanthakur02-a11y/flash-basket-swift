@@ -50,6 +50,7 @@ function CheckoutPage() {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
+  const [deliveryType, setDeliveryType] = useState<"fast_delivery" | "standard_delivery" | "pickup">("standard_delivery");
   const [placing, setPlacing] = useState(false);
   const mounted = useRef(true);
   useEffect(() => () => { mounted.current = false; }, []);
