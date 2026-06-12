@@ -9,6 +9,7 @@ import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RouteMap } from "@/components/maps/RouteMap";
+import { DeliveryUpdates } from "@/components/DeliveryUpdates";
 
 const STEPS = [
   { key: "awaiting_shop", label: "Finding a shop", desc: "Looking for the nearest shop with your items", icon: Search },
@@ -177,6 +178,8 @@ export function OrderDetailView({ id }: { id: string }) {
           />
         </section>
       )}
+
+      {!isCancelled && !isFailed && <DeliveryUpdates orderId={id} />}
 
       {isFailed && (
         <div className="mt-6 rounded-3xl border-2 border-destructive/30 bg-destructive/5 p-5">

@@ -229,6 +229,51 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_messages: {
+        Row: {
+          created_at: string
+          customer_id: string
+          delivery_partner_id: string
+          id: string
+          kind: string
+          message: string
+          order_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          delivery_partner_id: string
+          id?: string
+          kind: string
+          message: string
+          order_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          delivery_partner_id?: string
+          id?: string
+          kind?: string
+          message?: string
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_messages_delivery_partner_id_fkey"
+            columns: ["delivery_partner_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_messages_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_partners: {
         Row: {
           active_order_count: number
@@ -1903,6 +1948,10 @@ export type Database = {
           _kind: string
           _order_id: string
         }
+        Returns: string
+      }
+      partner_send_message: {
+        Args: { _custom_message?: string; _kind: string; _order_id: string }
         Returns: string
       }
       partner_today_hours: { Args: { _partner_id: string }; Returns: number }
