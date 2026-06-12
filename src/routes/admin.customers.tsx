@@ -72,17 +72,29 @@ function CustomersPage() {
             <table className="w-full text-sm">
               <thead className="bg-secondary/50 text-left">
                 <tr>
-                  <th className="p-3">Name</th>
+                  <th className="p-3">Name / Email</th>
                   <th className="p-3">Phone</th>
+                  <th className="p-3">Joined</th>
+                  <th className="p-3">Status</th>
                   <th className="p-3">Roles</th>
-                  <th className="p-3">Add role</th>
+                  <th className="p-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {(users.data ?? []).map((u: any) => (
                   <tr key={u.id} className="border-t border-border align-top">
-                    <td className="p-3 font-medium">{u.full_name || "—"}<div className="text-xs text-muted-foreground font-mono">{u.id.slice(0, 8)}</div></td>
+                    <td className="p-3 font-medium">
+                      {u.full_name || "—"}
+                      <div className="text-xs text-muted-foreground">{u.email || "—"}</div>
+                      {u.pending_request_count > 0 && <div className="text-[10px] mt-0.5 text-yellow-700 dark:text-yellow-300 font-bold">{u.pending_request_count} pending request</div>}
+                    </td>
                     <td className="p-3 text-muted-foreground">{u.phone || "—"}</td>
+                    <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">{new Date(u.created_at).toLocaleDateString()}</td>
+                    <td className="p-3">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-bold ${u.status === "disabled" ? "bg-destructive/15 text-destructive" : "bg-green-500/15 text-green-700 dark:text-green-300"}`}>
+                        {u.status === "disabled" ? "Disabled" : "Active"}
+                      </span>
+                    </td>
                     <td className="p-3">
                       <div className="flex flex-wrap gap-1.5">
                         {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
@@ -98,16 +110,25 @@ function CustomersPage() {
                           );
                         })}
                       </div>
-                    </td>
-                    <td className="p-3">
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1.5 mt-2">
                         {ROLES.filter((r) => !(u.roles ?? []).includes(r)).map((r) => (
-                          <Button key={r} size="sm" variant="outline" className="h-7 text-xs"
+                          <Button key={r} size="sm" variant="outline" className="h-6 text-[10px] px-2"
                             onClick={() => assign.mutate({ user_id: u.id, role: r })}>
                             + {r}
                           </Button>
                         ))}
                       </div>
+                    </td>
+                    <td className="p-3">
+                      {u.status === "disabled" ? (
+                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setStatus.mutate({ user_id: u.id, status: "active" })}>
+                          <Check className="h-3 w-3 mr-1"/>Enable
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline" className="h-7 text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setStatus.mutate({ user_id: u.id, status: "disabled" })}>
+                          <Ban className="h-3 w-3 mr-1"/>Disable
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
