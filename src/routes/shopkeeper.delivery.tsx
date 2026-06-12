@@ -10,7 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Users, Star, UserCog, X } from "lucide-react";
+import { Truck, Activity, BarChart3, Users, Star, UserCog, X, Clock } from "lucide-react";
+import { partnerStatusMeta, timeAgo } from "@/lib/partnerStatus";
 
 export const Route = createFileRoute("/shopkeeper/delivery")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
@@ -26,6 +27,10 @@ type TeamPartner = {
   rating: number | null;
   availability_status: string | null;
   active_order_count: number | null;
+  current_order_id?: string | null;
+  current_order_number?: string | null;
+  eta_minutes?: number | null;
+  status_updated_at?: string | null;
 };
 
 type AvailablePartner = {
@@ -38,12 +43,10 @@ type AvailablePartner = {
   on_team: boolean;
 };
 
-function badgeFor(p: { is_online: boolean; active_order_count?: number | null; availability_status?: string | null }) {
-  if (!p.is_online) return { label: "Offline", cls: "bg-muted text-muted-foreground" };
-  if ((p.active_order_count ?? 0) > 0 || p.availability_status === "busy")
-    return { label: "Busy", cls: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400" };
-  return { label: "Online", cls: "bg-green-500/15 text-green-700 dark:text-green-400" };
+function badgeFor(p: { is_online?: boolean; availability_status?: string | null }) {
+  return partnerStatusMeta(p.availability_status, p.is_online);
 }
+
 
 function Page() {
   const { user } = useAuth();
