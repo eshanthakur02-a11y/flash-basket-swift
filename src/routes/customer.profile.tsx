@@ -89,7 +89,7 @@ function AppProfile() {
       {/* Menu */}
       <div className="rounded-3xl border border-border bg-card shadow-card overflow-hidden">
         <Row to="/customer/orders" icon={<Package className="h-5 w-5" />} label="My orders" />
-        <Row to="/customer/wishlist" icon={<Heart className="h-5 w-5" />} label="Favourites" />
+        <Row to="/customer/wishlist" icon={<Heart className="h-5 w-5" />} label="Wishlist" />
         <Row to="/account" icon={<MapPin className="h-5 w-5" />} label={`Addresses (${addresses.data?.length ?? 0})`} />
         <Row to="/customer/notifications" icon={<Bell className="h-5 w-5" />} label="Notifications" />
         <Row to="/customer/apply" icon={<Briefcase className="h-5 w-5" />} label="Become a partner" />
