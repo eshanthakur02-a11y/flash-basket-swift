@@ -103,10 +103,6 @@ function HomePage() {
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-10 md:py-20 grid md:grid-cols-2 gap-8 md:gap-10 items-center">
-          {/* Mobile-only floating 3D scene above the headline */}
-          <div className="md:hidden">
-            <MobileHeroScene />
-          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
