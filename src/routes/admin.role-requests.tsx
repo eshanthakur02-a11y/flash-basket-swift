@@ -32,7 +32,7 @@ function RoleRequestsPage() {
   const reqs = useQuery({
     queryKey: ["admin-role-requests", filter],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("admin_list_role_requests", { _status: filter === "all" ? null : filter });
+      const { data, error } = await supabase.rpc("admin_list_role_requests", filter === "all" ? {} as any : { _status: filter });
       if (error) throw error;
       return data ?? [];
     },
@@ -272,7 +272,9 @@ function RejectDialog({ request, onClose, onDone }: any) {
   const [reason, setReason] = useState("");
   const m = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("admin_reject_role_request", { _request_id: request.id, _reason: reason || null });
+      const args: any = { _request_id: request.id };
+      if (reason) args._reason = reason;
+      const { error } = await supabase.rpc("admin_reject_role_request", args);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Rejected"); onDone(); onClose(); },
@@ -296,7 +298,7 @@ function RejectDialog({ request, onClose, onDone }: any) {
   );
 }
 
-function Field({ id, label, value, onChange }: any) {
+function Field({ id, label, value, onChange }: { id: string; label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>

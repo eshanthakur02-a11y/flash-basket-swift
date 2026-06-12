@@ -127,7 +127,7 @@ function Tab({ active, onClick, icon, label, disabled }: any) {
   );
 }
 
-function FieldText({ id, label, value, onChange, required, placeholder }: any) {
+function FieldText({ id, label, value, onChange, required, placeholder }: { id: string; label: string; value: string; onChange: (v: string) => void; required?: boolean; placeholder?: string }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
