@@ -162,14 +162,16 @@ function Page() {
                 <tr>
                   <th className="text-left px-3 py-2">Partner</th>
                   <th className="text-left px-3 py-2">Phone</th>
+                  <th className="text-left px-3 py-2">Shop</th>
                   <th className="text-left px-3 py-2">Status</th>
+                  <th className="text-right px-3 py-2">Active</th>
                   <th className="text-right px-3 py-2">Today</th>
                   <th className="text-right px-3 py-2">7d</th>
                   <th className="text-right px-3 py-2">30d</th>
                   <th className="text-right px-3 py-2">Avg min</th>
                   <th className="text-right px-3 py-2">On-time</th>
-                  <th className="text-right px-3 py-2">Hours</th>
                   <th className="text-right px-3 py-2">Rating</th>
+                  <th className="px-3 py-2">Transfer</th>
                   <th className="px-3 py-2" />
                 </tr>
               </thead>
@@ -180,14 +182,23 @@ function Page() {
                     <tr key={r.partner_id} className="border-t border-border">
                       <td className="px-3 py-2 font-semibold">{r.name}</td>
                       <td className="px-3 py-2 text-muted-foreground">{pp?.phone ?? "—"}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{shopName(pp?.shop_id ?? null)}</td>
                       <td className="px-3 py-2">{r.is_online ? <span className="text-green-600 font-bold">Online</span> : <span className="text-muted-foreground">Offline</span>}</td>
+                      <td className="px-3 py-2 text-right">{pp?.active_order_count ?? 0}</td>
                       <td className="px-3 py-2 text-right">{r.orders_today}</td>
                       <td className="px-3 py-2 text-right">{r.orders_7d}</td>
                       <td className="px-3 py-2 text-right">{r.orders_30d}</td>
                       <td className="px-3 py-2 text-right">{Number(r.avg_minutes_30d).toFixed(1)}</td>
                       <td className="px-3 py-2 text-right">{Number(r.on_time_pct_30d).toFixed(0)}%</td>
-                      <td className="px-3 py-2 text-right">{Number(r.hours_today).toFixed(2)}</td>
                       <td className="px-3 py-2 text-right">{Number(r.rating).toFixed(1)}</td>
+                      <td className="px-3 py-2">
+                        <Select value={pp?.shop_id ?? ""} onValueChange={(v) => transferPartner(r.partner_id, v)}>
+                          <SelectTrigger className="h-8 w-36 rounded-xl"><SelectValue placeholder="Transfer to…" /></SelectTrigger>
+                          <SelectContent>
+                            {(shops.data ?? []).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </td>
                       <td className="px-3 py-2 text-right">
                         <Button size="icon" variant="ghost" onClick={() => setConfirmDel(r)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
@@ -196,7 +207,7 @@ function Page() {
                     </tr>
                   );
                 })}
-                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={11} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
+                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={13} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
               </tbody>
             </table>
           </div>
