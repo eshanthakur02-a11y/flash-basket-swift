@@ -48,6 +48,15 @@ function CustomersPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const setStatus = useMutation({
+    mutationFn: async ({ user_id, status }: { user_id: string; status: "active" | "disabled" }) => {
+      const { error } = await supabase.rpc("admin_set_user_status", { _user_id: user_id, _status: status });
+      if (error) throw error;
+    },
+    onSuccess: (_d, v) => { toast.success(v.status === "disabled" ? "User disabled" : "User enabled"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   return (
     <div className="p-6 space-y-6">
       <div>
