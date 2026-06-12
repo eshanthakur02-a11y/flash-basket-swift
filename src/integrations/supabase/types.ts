@@ -1734,6 +1734,7 @@ export type Database = {
         Args: never
         Returns: {
           address_line: string
+          assigned_to: string
           category: string
           city: string
           created_at: string
