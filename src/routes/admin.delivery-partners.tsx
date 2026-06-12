@@ -254,22 +254,25 @@ function Page() {
   );
 }
 
-function AddPartnerDialog({ onDone }: { onDone: () => void }) {
+function AddPartnerDialog({ shops, onDone }: { shops: Array<{ id: string; name: string }>; onDone: () => void }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [vehicle, setVehicle] = useState("");
   const [email, setEmail] = useState("");
+  const [shopId, setShopId] = useState<string>("");
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
     if (!name.trim()) { toast.error("Name required"); return; }
+    if (!shopId) { toast.error("Pick a shop"); return; }
     setBusy(true);
     const { error } = await supabase.rpc("create_delivery_partner", {
       _name: name.trim(),
       _phone: phone.trim(),
       _vehicle: vehicle.trim() || undefined,
       _user_email: email.trim() || undefined,
-    });
+      _shop_id: shopId,
+    } as any);
     setBusy(false);
     if (error) toast.error(error.message);
     else { toast.success("Partner added"); onDone(); }
@@ -282,6 +285,15 @@ function AddPartnerDialog({ onDone }: { onDone: () => void }) {
         <div><label className="text-xs font-bold">Name *</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
         <div><label className="text-xs font-bold">Phone</label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
         <div><label className="text-xs font-bold">Vehicle</label><Input value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="Bike / Scooter / EV" /></div>
+        <div>
+          <label className="text-xs font-bold">Shop *</label>
+          <Select value={shopId} onValueChange={setShopId}>
+            <SelectTrigger><SelectValue placeholder="Select shop" /></SelectTrigger>
+            <SelectContent>
+              {shops.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
         <div>
           <label className="text-xs font-bold">Account email (optional)</label>
           <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="To grant login, user must already be signed up" />
