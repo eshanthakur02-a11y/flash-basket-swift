@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, type ProductCardData } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hero3D } from "@/components/Hero3D";
+import { MobileHeroScene } from "@/components/MobileHeroScene";
 import { useAuth } from "@/hooks/useAuth";
 
 type SortKey = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
@@ -74,19 +75,68 @@ function HomePage() {
       {/* HERO */}
       {!user && (
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-aurora pointer-events-none" />
-        <div className="relative mx-auto max-w-7xl px-4 py-12 md:py-20 grid md:grid-cols-2 gap-10 items-center">
+        {/* Animated aurora background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 gradient-aurora" />
+          <motion.div
+            aria-hidden
+            className="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full blur-3xl opacity-50"
+            style={{ background: "radial-gradient(circle, #84CC16 0%, transparent 70%)" }}
+            animate={{ x: [0, 60, 0], y: [0, 40, 0] }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            aria-hidden
+            className="absolute -bottom-32 -right-32 h-[32rem] w-[32rem] rounded-full blur-3xl opacity-40"
+            style={{ background: "radial-gradient(circle, #F59E0B 0%, transparent 70%)" }}
+            animate={{ x: [0, -50, 0], y: [0, -30, 0] }}
+            transition={{ duration: 16, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage: "radial-gradient(circle, #0F172A 1px, transparent 1px)",
+              backgroundSize: "22px 22px",
+            }}
+          />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 py-10 md:py-20 grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+          {/* Mobile-only floating 3D scene above the headline */}
+          <div className="md:hidden">
+            <MobileHeroScene />
+          </div>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-3 py-1 text-xs font-semibold">
-              <Zap className="h-3 w-3 fill-primary text-primary" />
+            <div className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-3 py-1 text-xs font-semibold shadow-float">
+              <motion.span
+                animate={{ scale: [1, 1.25, 1] }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Zap className="h-3 w-3 fill-primary text-primary" />
+              </motion.span>
               Delivery promise: 10 minutes
             </div>
             <h1 className="mt-4 font-display text-5xl md:text-7xl font-extrabold leading-[0.95] text-balance">
-              Groceries at <span className="text-primary">lightning</span> speed.
+              Groceries at{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10 bg-gradient-to-r from-[#65A30D] via-[#84CC16] to-[#F59E0B] bg-clip-text text-transparent">
+                  lightning
+                </span>
+                <motion.span
+                  aria-hidden
+                  className="absolute -inset-1 -z-0 rounded-2xl blur-xl opacity-60"
+                  style={{ background: "linear-gradient(90deg, #84CC16, #F59E0B)" }}
+                  animate={{ opacity: [0.4, 0.7, 0.4] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </span>{" "}
+              speed.
             </h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-md">
               Fresh fruits, daily essentials, snacks and more — at your door before you finish your coffee.
@@ -94,13 +144,13 @@ function HomePage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 to="/products"
-                className="rounded-xl gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow hover:opacity-95 transition"
+                className="rounded-xl gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow hover:opacity-95 hover:-translate-y-0.5 transition-all"
               >
                 Shop now
               </Link>
               <Link
                 to="/products"
-                className="rounded-xl border-2 border-foreground px-6 py-3 font-bold hover:bg-foreground hover:text-background transition"
+                className="rounded-xl border-2 border-foreground bg-background/60 backdrop-blur px-6 py-3 font-bold hover:bg-foreground hover:text-background transition"
               >
                 Browse categories
               </Link>
