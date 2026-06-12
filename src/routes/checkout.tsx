@@ -114,6 +114,18 @@ function CheckoutPage() {
     }
   }, [addresses.data, selectedAddr]);
 
+  if (!user) return <Navigate to="/auth" />;
+  if (items.length === 0) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20 text-center">
+        <p className="text-muted-foreground">Your cart is empty.</p>
+        <Link to="/products" className="mt-4 inline-block text-primary font-bold">Shop now →</Link>
+      </div>
+    );
+  }
+
+
+
   const saveNewAddress = async () => {
     if (!newAddr.line1 || !newAddr.city || !newAddr.pincode || !newAddr.phone || !newAddr.name) {
       toast.error("Please fill name, phone, line 1, city and pincode");
