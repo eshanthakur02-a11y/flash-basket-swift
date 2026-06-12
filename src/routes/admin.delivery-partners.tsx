@@ -96,6 +96,50 @@ function Page() {
 
   const partnerById = (id: string | null) => (partners.data ?? []).find((p: any) => p.id === id);
 
+  const live = useQuery({
+    queryKey: ["admin-live-partners"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_live_partners" as any);
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        partner_id: string; name: string; phone: string | null; vehicle: string | null;
+        is_online: boolean; availability_status: string | null; active_order_count: number | null;
+        current_order_id: string | null; current_order_number: string | null;
+        eta_minutes: number | null; status_updated_at: string | null;
+        shop_id: string | null; shop_name: string | null;
+      }>;
+    },
+    refetchInterval: 8000,
+  });
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("admin-live-partners")
+      .on("postgres_changes", { event: "*", schema: "public", table: "delivery_partners" }, () => {
+        qc.invalidateQueries({ queryKey: ["admin-live-partners"] });
+        qc.invalidateQueries({ queryKey: ["admin-partners"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+        qc.invalidateQueries({ queryKey: ["admin-active-deliveries"] });
+        qc.invalidateQueries({ queryKey: ["admin-live-partners"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
+
+  const liveByShop = useMemo(() => {
+    const groups = new Map<string, { shop_name: string; rows: NonNullable<typeof live.data> }>();
+    (live.data ?? []).forEach((r) => {
+      const key = r.shop_id ?? "__unassigned__";
+      const name = r.shop_name ?? "Unassigned";
+      const g = groups.get(key) ?? { shop_name: name, rows: [] as any };
+      g.rows.push(r);
+      groups.set(key, g);
+    });
+    return Array.from(groups.entries());
+  }, [live.data]);
+
+
   return (
     <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}>
       <div className="p-4 md:p-6 space-y-6">
