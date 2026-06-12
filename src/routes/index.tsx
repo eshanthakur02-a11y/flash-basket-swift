@@ -157,6 +157,11 @@ function HomePage() {
               <Feature icon={<Truck className="h-5 w-5" />} label="Free above ₹199" />
               <Feature icon={<ShieldCheck className="h-5 w-5" />} label="100% authentic" />
             </div>
+
+            {/* Mobile-only floating 3D scene below the headline */}
+            <div className="md:hidden mt-8">
+              <MobileHeroScene />
+            </div>
           </motion.div>
 
           <motion.div
