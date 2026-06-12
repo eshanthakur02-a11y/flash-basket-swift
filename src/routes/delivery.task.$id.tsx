@@ -28,6 +28,23 @@ export const Route = createFileRoute("/delivery/task/$id")({
 function Page() {
   const { id } = Route.useParams();
   const router = useRouter();
+  const [etaMin, setEtaMin] = useState<string>("10");
+  const [customMsg, setCustomMsg] = useState<string>("");
+  const [sending, setSending] = useState(false);
+
+  const sendUpdate = async (kind: "eta" | "nearby" | "delay" | "custom", minutes?: number, message?: string) => {
+    setSending(true);
+    const { error } = await supabase.rpc("partner_send_eta_update" as any, {
+      _order_id: id,
+      _kind: kind,
+      _eta_minutes: minutes ?? null,
+      _custom_message: message ?? null,
+    });
+    setSending(false);
+    if (error) return toast.error(error.message);
+    toast.success("Customer notified");
+    if (kind === "custom") setCustomMsg("");
+  };
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["delivery-task", id],
