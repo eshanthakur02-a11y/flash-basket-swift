@@ -274,50 +274,39 @@ function Page() {
   );
 }
 
-function AddPartnerDialog({ shops, onDone }: { shops: Array<{ id: string; name: string }>; onDone: () => void }) {
+function AddPartnerDialog({ onDone }: { shops: Array<{ id: string; name: string }>; onDone: () => void }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [vehicle, setVehicle] = useState("");
   const [email, setEmail] = useState("");
-  const [shopId, setShopId] = useState<string>("");
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
     if (!name.trim()) { toast.error("Name required"); return; }
-    if (!shopId) { toast.error("Pick a shop"); return; }
     setBusy(true);
-    const { error } = await supabase.rpc("create_delivery_partner", {
+    const { error } = await supabase.rpc("admin_create_delivery_partner", {
       _name: name.trim(),
       _phone: phone.trim(),
       _vehicle: vehicle.trim() || undefined,
       _user_email: email.trim() || undefined,
-      _shop_id: shopId,
     } as any);
     setBusy(false);
     if (error) toast.error(error.message);
-    else { toast.success("Partner added"); onDone(); }
+    else { toast.success("Partner added to pool"); onDone(); }
   };
 
   return (
     <DialogContent>
-      <DialogHeader><DialogTitle>Add delivery boy</DialogTitle></DialogHeader>
+      <DialogHeader><DialogTitle>Create delivery partner</DialogTitle></DialogHeader>
+      <p className="text-xs text-muted-foreground -mt-1">Partners you create here go into the pool. Shopkeepers then select their team.</p>
       <div className="space-y-3">
         <div><label className="text-xs font-bold">Name *</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
         <div><label className="text-xs font-bold">Phone</label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
-        <div><label className="text-xs font-bold">Vehicle</label><Input value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="Bike / Scooter / EV" /></div>
-        <div>
-          <label className="text-xs font-bold">Shop *</label>
-          <Select value={shopId} onValueChange={setShopId}>
-            <SelectTrigger><SelectValue placeholder="Select shop" /></SelectTrigger>
-            <SelectContent>
-              {shops.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+        <div><label className="text-xs font-bold">Vehicle type</label><Input value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="Bike / Scooter / EV" /></div>
         <div>
           <label className="text-xs font-bold">Account email (optional)</label>
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="To grant login, user must already be signed up" />
-          <p className="text-[11px] text-muted-foreground mt-1">If left blank, profile is created without login. Linked email gains the delivery role automatically.</p>
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="User must already be signed up" />
+          <p className="text-[11px] text-muted-foreground mt-1">Linked email gains the delivery role automatically.</p>
         </div>
       </div>
       <DialogFooter>
@@ -326,6 +315,7 @@ function AddPartnerDialog({ shops, onDone }: { shops: Array<{ id: string; name: 
     </DialogContent>
   );
 }
+
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
