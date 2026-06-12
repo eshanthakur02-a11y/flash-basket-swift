@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Users, Star, UserCog } from "lucide-react";
+import { Truck, Activity, BarChart3, Users, Star, UserCog, X } from "lucide-react";
 
 export const Route = createFileRoute("/shopkeeper/delivery")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
@@ -115,6 +115,16 @@ function Page() {
     qc.invalidateQueries({ queryKey: ["shop-team", shopId] });
   };
 
+  const removePartner = async (partnerId: string) => {
+    if (!shopId) return;
+    const currentIds = (team.data ?? []).map((p) => p.partner_id).filter((id) => id !== partnerId);
+    const { error } = await supabase.rpc("shop_set_team", { _shop_id: shopId, _partner_ids: currentIds });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Partner removed from shop");
+    qc.invalidateQueries({ queryKey: ["shop-team", shopId] });
+    qc.invalidateQueries({ queryKey: ["shop-perf", shopId] });
+  };
+
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
       <div className="p-4 md:p-6 space-y-6">
@@ -146,7 +156,14 @@ function Page() {
               {(team.data ?? []).map((p) => {
                 const b = badgeFor(p);
                 return (
-                  <div key={p.partner_id} className="rounded-2xl border border-border bg-card p-4">
+              <div key={p.partner_id} className="rounded-2xl border border-border bg-card p-4 relative group">
+                    <button
+                      onClick={() => removePartner(p.partner_id)}
+                      className="absolute top-2 right-2 p-1 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      title="Remove from shop"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="font-bold truncate">{p.name}</div>
