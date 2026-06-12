@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Plus, Minus, Clock, Heart } from "lucide-react";
+import { Plus, Minus, Heart, Star } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "./ui/button";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { rupees, pct } from "@/lib/format";
@@ -16,6 +15,7 @@ export interface ProductCardData {
   image_url: string | null;
   delivery_minutes: number;
   stock: number;
+  rating?: number | null;
 }
 
 export function ProductCard({ product }: { product: ProductCardData }) {
@@ -32,65 +32,79 @@ export function ProductCard({ product }: { product: ProductCardData }) {
     toggle(product.id);
   };
 
-
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="group relative flex flex-col rounded-2xl border border-border bg-card p-3 shadow-card hover:shadow-glow transition-shadow"
+      whileTap={{ scale: 0.98 }}
+      className="group relative flex flex-col rounded-2xl border border-border bg-card p-2.5 shadow-card hover:shadow-card-premium transition-shadow"
     >
+      {/* Discount chip */}
       {discount > 0 && (
-        <div className="absolute top-2 left-2 z-10 rounded-md gradient-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+        <div className="absolute top-2 left-2 z-10 rounded-md bg-accent px-1.5 py-0.5 text-[10px] font-extrabold text-accent-foreground shadow-soft">
           {discount}% OFF
         </div>
       )}
+      {/* Wishlist */}
       <button
         onClick={toggleFav}
-        className="absolute top-2 right-2 z-10 h-8 w-8 grid place-items-center rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-sm"
-        aria-label={fav ? "Remove from favourites" : "Add to favourites"}
+        className="absolute top-2 right-2 z-10 h-7 w-7 grid place-items-center rounded-full bg-card/90 backdrop-blur border border-border"
+        aria-label={fav ? "Remove from wishlist" : "Add to wishlist"}
       >
         <Heart
-          className={fav ? "text-primary" : "text-muted-foreground"}
+          className={fav ? "text-destructive" : "text-muted-foreground"}
           fill={fav ? "currentColor" : "none"}
-          size={16}
+          size={14}
         />
       </button>
+
       <Link to="/product/$slug" params={{ slug: product.slug }} className="block">
-        <div className="aspect-square w-full overflow-hidden rounded-xl bg-secondary/40">
+        <div className="aspect-square w-full overflow-hidden rounded-xl bg-secondary">
           {product.image_url ? (
             <img
               src={product.image_url}
               alt={product.name}
               loading="lazy"
-              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform group-hover:scale-[1.03]"
             />
           ) : (
             <div className="grid h-full w-full place-items-center text-4xl">🛒</div>
           )}
         </div>
       </Link>
-      <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">
-        <Clock className="h-2.5 w-2.5" /> {product.delivery_minutes} MINS
+
+      {/* Delivery ETA pill */}
+      <div className="mt-2 inline-flex items-center gap-1 rounded-md bg-secondary px-1.5 py-0.5 text-[9px] font-bold text-foreground/70 w-fit">
+        ⚡ {product.delivery_minutes} MIN
       </div>
+
       <Link
         to="/product/$slug"
         params={{ slug: product.slug }}
-        className="mt-1 line-clamp-2 text-sm font-medium leading-tight"
+        className="mt-1 line-clamp-2 text-[13px] font-semibold leading-tight"
       >
         {product.name}
       </Link>
-      <div className="text-xs text-muted-foreground">{product.unit}</div>
+      <div className="text-[11px] text-muted-foreground">{product.unit}</div>
+
+      {product.rating != null && product.rating > 0 && (
+        <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+          <Star className="h-3 w-3 fill-accent text-accent" />
+          <span className="font-semibold text-foreground">{product.rating.toFixed(1)}</span>
+        </div>
+      )}
+
       <div className="mt-auto pt-2 flex items-end justify-between gap-2">
         <div className="leading-tight">
-          <div className="font-bold">{rupees(product.price)}</div>
+          <div className="font-extrabold text-[14px]">{rupees(product.price)}</div>
           {product.mrp > product.price && (
-            <div className="text-xs text-muted-foreground line-through">{rupees(product.mrp)}</div>
+            <div className="text-[11px] text-muted-foreground line-through">{rupees(product.mrp)}</div>
           )}
         </div>
         {outOfStock ? (
-          <Button size="sm" variant="outline" disabled className="rounded-lg">Out</Button>
+          <button disabled className="h-8 rounded-lg border border-border px-3 text-[11px] font-bold text-muted-foreground">
+            Out
+          </button>
         ) : line ? (
-          <div className="flex items-center gap-0.5 rounded-lg gradient-primary text-primary-foreground">
+          <div className="flex items-center rounded-lg bg-primary text-primary-foreground">
             <button
               onClick={() => setQty(line.id, line.quantity - 1)}
               className="h-8 w-8 grid place-items-center"
@@ -98,7 +112,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             >
               <Minus className="h-3.5 w-3.5" />
             </button>
-            <span className="w-6 text-center text-sm font-bold">{line.quantity}</span>
+            <span className="w-5 text-center text-[12px] font-extrabold">{line.quantity}</span>
             <button
               onClick={() => setQty(line.id, line.quantity + 1)}
               className="h-8 w-8 grid place-items-center"
@@ -108,13 +122,13 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             </button>
           </div>
         ) : (
-          <Button
-            size="sm"
+          <motion.button
+            whileTap={{ scale: 0.92 }}
             onClick={() => add(product.id, 1)}
-            className="rounded-lg border-2 border-primary bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground font-bold"
+            className="h-8 rounded-lg border-2 border-primary bg-primary/5 px-3.5 text-[12px] font-extrabold text-primary hover:bg-primary hover:text-primary-foreground transition"
           >
             ADD
-          </Button>
+          </motion.button>
         )}
       </div>
     </motion.div>
