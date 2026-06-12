@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bell, ChevronDown, MapPin, Mic, Camera, Search, User as UserIcon } from "lucide-react";
+import { Bell, ChevronDown, MapPin, Search, User as UserIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
