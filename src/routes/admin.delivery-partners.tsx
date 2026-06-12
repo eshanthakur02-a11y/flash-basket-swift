@@ -42,12 +42,30 @@ function Page() {
     queryFn: async () => {
       const { data } = await supabase
         .from("delivery_partners")
-        .select("id, name, phone, vehicle, is_online, current_lat, current_lng, rating")
+        .select("id, name, phone, vehicle, is_online, current_lat, current_lng, rating, shop_id, availability_status, active_order_count")
         .order("is_online", { ascending: false });
       return data ?? [];
     },
     refetchInterval: 10000,
   });
+
+  const shops = useQuery({
+    queryKey: ["admin-shops-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("shops").select("id, name").order("name");
+      return data ?? [];
+    },
+  });
+
+  const transferPartner = async (partnerId: string, shopId: string) => {
+    const { error } = await supabase.rpc("admin_transfer_partner", { _partner_id: partnerId, _shop_id: shopId });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Partner transferred");
+    qc.invalidateQueries({ queryKey: ["admin-partners"] });
+    qc.invalidateQueries({ queryKey: ["admin-perf"] });
+  };
+
+  const shopName = (id: string | null) => (shops.data ?? []).find((s: any) => s.id === id)?.name ?? "—";
 
   const perf = useQuery({
     queryKey: ["admin-perf"],
