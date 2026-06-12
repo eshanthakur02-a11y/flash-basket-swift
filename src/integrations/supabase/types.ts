@@ -236,12 +236,15 @@ export type Database = {
           created_at: string
           current_lat: number | null
           current_lng: number | null
+          current_order_id: string | null
+          eta_minutes: number | null
           id: string
           is_online: boolean
           name: string
           phone: string | null
           rating: number
           shop_id: string | null
+          status_updated_at: string
           updated_at: string
           user_id: string
           vehicle: string | null
@@ -252,12 +255,15 @@ export type Database = {
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
+          current_order_id?: string | null
+          eta_minutes?: number | null
           id?: string
           is_online?: boolean
           name: string
           phone?: string | null
           rating?: number
           shop_id?: string | null
+          status_updated_at?: string
           updated_at?: string
           user_id: string
           vehicle?: string | null
@@ -268,17 +274,27 @@ export type Database = {
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
+          current_order_id?: string | null
+          eta_minutes?: number | null
           id?: string
           is_online?: boolean
           name?: string
           phone?: string | null
           rating?: number
           shop_id?: string | null
+          status_updated_at?: string
           updated_at?: string
           user_id?: string
           vehicle?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "delivery_partners_current_order_id_fkey"
+            columns: ["current_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "delivery_partners_shop_id_fkey"
             columns: ["shop_id"]
@@ -1691,6 +1707,25 @@ export type Database = {
           status: string
         }[]
       }
+      admin_live_partners: {
+        Args: never
+        Returns: {
+          active_order_count: number
+          availability_status: string
+          current_order_id: string
+          current_order_number: string
+          eta_minutes: number
+          is_online: boolean
+          name: string
+          partner_id: string
+          phone: string
+          rating: number
+          shop_id: string
+          shop_name: string
+          status_updated_at: string
+          vehicle: string
+        }[]
+      }
       admin_partner_performance: {
         Args: never
         Returns: {
@@ -1868,6 +1903,10 @@ export type Database = {
         Returns: string
       }
       partner_today_hours: { Args: { _partner_id: string }; Returns: number }
+      partner_update_status: {
+        Args: { _eta_minutes?: number; _order_id?: string; _status: string }
+        Returns: undefined
+      }
       place_order: {
         Args: {
           _address: Json
@@ -1915,6 +1954,23 @@ export type Database = {
           partner_id: string
           phone: string
           rating: number
+          vehicle: string
+        }[]
+      }
+      shop_live_team: {
+        Args: { _shop_id: string }
+        Returns: {
+          active_order_count: number
+          availability_status: string
+          current_order_id: string
+          current_order_number: string
+          eta_minutes: number
+          is_online: boolean
+          name: string
+          partner_id: string
+          phone: string
+          rating: number
+          status_updated_at: string
           vehicle: string
         }[]
       }

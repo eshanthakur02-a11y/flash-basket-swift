@@ -10,7 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Users, Star, UserCog, X } from "lucide-react";
+import { Truck, Activity, BarChart3, Users, Star, UserCog, X, Clock } from "lucide-react";
+import { partnerStatusMeta, timeAgo } from "@/lib/partnerStatus";
 
 export const Route = createFileRoute("/shopkeeper/delivery")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
@@ -26,6 +27,10 @@ type TeamPartner = {
   rating: number | null;
   availability_status: string | null;
   active_order_count: number | null;
+  current_order_id?: string | null;
+  current_order_number?: string | null;
+  eta_minutes?: number | null;
+  status_updated_at?: string | null;
 };
 
 type AvailablePartner = {
@@ -38,12 +43,10 @@ type AvailablePartner = {
   on_team: boolean;
 };
 
-function badgeFor(p: { is_online: boolean; active_order_count?: number | null; availability_status?: string | null }) {
-  if (!p.is_online) return { label: "Offline", cls: "bg-muted text-muted-foreground" };
-  if ((p.active_order_count ?? 0) > 0 || p.availability_status === "busy")
-    return { label: "Busy", cls: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400" };
-  return { label: "Online", cls: "bg-green-500/15 text-green-700 dark:text-green-400" };
+function badgeFor(p: { is_online?: boolean; availability_status?: string | null }) {
+  return partnerStatusMeta(p.availability_status, p.is_online);
 }
+
 
 function Page() {
   const { user } = useAuth();
@@ -78,13 +81,30 @@ function Page() {
     queryKey: ["shop-team", shopId],
     queryFn: async () => {
       if (!shopId) return [] as TeamPartner[];
-      const { data, error } = await supabase.rpc("shop_list_team", { _shop_id: shopId });
+      const { data, error } = await supabase.rpc("shop_live_team" as any, { _shop_id: shopId });
       if (error) throw error;
       return (data ?? []) as TeamPartner[];
     },
     enabled: !!shopId,
     refetchInterval: 10000,
   });
+
+  // Realtime updates: any change to a delivery partner or to our shop's orders refreshes the view
+  useEffect(() => {
+    if (!shopId) return;
+    const ch = supabase
+      .channel(`shop-live-${shopId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "delivery_partners" }, () => {
+        qc.invalidateQueries({ queryKey: ["shop-team", shopId] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `shop_id=eq.${shopId}` }, () => {
+        qc.invalidateQueries({ queryKey: ["shop-delivery-orders", shopId] });
+        qc.invalidateQueries({ queryKey: ["shop-team", shopId] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [shopId, qc]);
+
 
   const perf = useQuery({
     queryKey: ["shop-perf", shopId],
@@ -171,17 +191,32 @@ function Page() {
                       </div>
                       <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase font-bold ${b.cls}`}>{b.label}</span>
                     </div>
+                    {(p.current_order_number || p.eta_minutes != null) && (
+                      <div className="mt-3 rounded-xl bg-secondary/40 px-3 py-2 text-xs">
+                        {p.current_order_number && (
+                          <div>Order <span className="font-bold">{p.current_order_number}</span></div>
+                        )}
+                        {p.eta_minutes != null && (
+                          <div className="flex items-center gap-1 text-muted-foreground mt-0.5">
+                            <Clock className="h-3 w-3" /> ETA {p.eta_minutes} min
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <div className="grid grid-cols-3 gap-2 mt-3 text-center">
                       <Mini label="Active" value={String(p.active_order_count ?? 0)} />
                       <Mini label="7d" value={String(perfByPartner[p.partner_id]?.orders_7d ?? 0)} />
                       <Mini label="Rating" value={p.rating != null ? Number(p.rating).toFixed(1) : "—"} />
                     </div>
+                    <div className="mt-2 text-[11px] text-muted-foreground">Updated {timeAgo(p.status_updated_at)}</div>
                   </div>
                 );
               })}
             </div>
           )}
         </section>
+
+
 
         {/* Active orders */}
         <section>

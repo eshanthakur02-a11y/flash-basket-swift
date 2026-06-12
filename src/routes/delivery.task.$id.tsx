@@ -152,7 +152,44 @@ function Page() {
               </ul>
             </Card>
 
+            <Card className="p-4 space-y-2">
+              <p className="text-xs uppercase text-muted-foreground">Live status</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { k: "going_to_shop", label: "Going to shop" },
+                  { k: "picked_up", label: "Picked up" },
+                  { k: "out_for_delivery", label: "Out for delivery" },
+                  { k: "reached_area", label: "Reached area" },
+                  { k: "delivered", label: "Delivered" },
+                ].map((s) => (
+                  <Button
+                    key={s.k}
+                    size="sm"
+                    variant={s.k === "delivered" ? "default" : "secondary"}
+                    disabled={sending}
+                    onClick={async () => {
+                      setSending(true);
+                      const { error } = await supabase.rpc("partner_update_status" as any, {
+                        _status: s.k,
+                        _order_id: id,
+                        _eta_minutes: Number(etaMin) > 0 ? Math.min(240, Number(etaMin)) : null,
+                      });
+                      setSending(false);
+                      if (error) return toast.error(error.message);
+                      toast.success(`Status: ${s.label}`);
+                      if (s.k === "delivered") router.navigate({ to: "/delivery/dashboard" });
+                      else refetch();
+                    }}
+                  >
+                    {s.label}
+                  </Button>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">Updates shopkeeper, admin, and the customer for this order in real time.</p>
+            </Card>
+
             <Card className="p-4 space-y-3">
+
               <p className="text-xs uppercase text-muted-foreground">Notify customer</p>
               <div className="flex items-center gap-2">
                 <Input

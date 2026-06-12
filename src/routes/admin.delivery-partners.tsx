@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
@@ -11,7 +11,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Circle, Plus, Trash2, UserPlus } from "lucide-react";
+import { Truck, Activity, BarChart3, Circle, Trash2, UserPlus, Radio, Clock } from "lucide-react";
+import { partnerStatusMeta, timeAgo } from "@/lib/partnerStatus";
+
 
 export const Route = createFileRoute("/admin/delivery-partners")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket Admin" }] }),
@@ -94,6 +96,50 @@ function Page() {
 
   const partnerById = (id: string | null) => (partners.data ?? []).find((p: any) => p.id === id);
 
+  const live = useQuery({
+    queryKey: ["admin-live-partners"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_live_partners" as any);
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        partner_id: string; name: string; phone: string | null; vehicle: string | null;
+        is_online: boolean; availability_status: string | null; active_order_count: number | null;
+        current_order_id: string | null; current_order_number: string | null;
+        eta_minutes: number | null; status_updated_at: string | null;
+        shop_id: string | null; shop_name: string | null;
+      }>;
+    },
+    refetchInterval: 8000,
+  });
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("admin-live-partners")
+      .on("postgres_changes", { event: "*", schema: "public", table: "delivery_partners" }, () => {
+        qc.invalidateQueries({ queryKey: ["admin-live-partners"] });
+        qc.invalidateQueries({ queryKey: ["admin-partners"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+        qc.invalidateQueries({ queryKey: ["admin-active-deliveries"] });
+        qc.invalidateQueries({ queryKey: ["admin-live-partners"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
+
+  const liveByShop = useMemo(() => {
+    const groups = new Map<string, { shop_name: string; rows: NonNullable<typeof live.data> }>();
+    (live.data ?? []).forEach((r) => {
+      const key = r.shop_id ?? "__unassigned__";
+      const name = r.shop_name ?? "Unassigned";
+      const g = groups.get(key) ?? { shop_name: name, rows: [] as any };
+      g.rows.push(r);
+      groups.set(key, g);
+    });
+    return Array.from(groups.entries());
+  }, [live.data]);
+
+
   return (
     <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}>
       <div className="p-4 md:p-6 space-y-6">
@@ -117,6 +163,41 @@ function Page() {
           <Stat label="Active deliveries" value={String((orders.data ?? []).filter((o: any) => o.status === "out_for_delivery").length)} />
           <Stat label="Awaiting pickup" value={String((orders.data ?? []).filter((o: any) => o.status === "packed").length)} />
         </section>
+
+        <section>
+          <h2 className="font-bold mb-3 flex items-center gap-2"><Radio className="h-4 w-4 text-primary" />Live partner monitor</h2>
+          {liveByShop.length === 0 && (
+            <div className="text-sm text-muted-foreground">No delivery partners yet.</div>
+          )}
+          <div className="space-y-4">
+            {liveByShop.map(([shopId, g]) => (
+              <div key={shopId} className="rounded-2xl border border-border bg-card">
+                <div className="px-4 py-2 border-b border-border bg-secondary/30 font-bold text-sm">{g.shop_name}</div>
+                <div className="divide-y divide-border">
+                  {g.rows.map((r) => {
+                    const m = partnerStatusMeta(r.availability_status, r.is_online);
+                    return (
+                      <div key={r.partner_id} className="px-4 py-3 flex flex-wrap items-center gap-3 justify-between">
+                        <div className="min-w-0">
+                          <div className="font-semibold truncate">{r.name}{r.vehicle ? <span className="text-muted-foreground font-normal"> · {r.vehicle}</span> : null}</div>
+                          <div className="text-xs text-muted-foreground">{r.phone ?? "—"}</div>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase font-bold ${m.cls}`}>{m.label}</span>
+                          {r.current_order_number && <span>Order <span className="font-bold">{r.current_order_number}</span></span>}
+                          {r.eta_minutes != null && <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" />ETA {r.eta_minutes} min</span>}
+                          <span className="text-muted-foreground">Updated {timeAgo(r.status_updated_at)}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
 
         <section>
           <h2 className="font-bold mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-primary" />Live orders</h2>
