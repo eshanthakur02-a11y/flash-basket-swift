@@ -89,7 +89,7 @@ function Page() {
     if (error) { toast.error(error.message); return; }
     toast.success("Partner removed");
     setConfirmDel(null);
-    qc.invalidateQueries({ queryKey: ["online-partners"] });
+    qc.invalidateQueries({ queryKey: ["shop-partners", shopId] });
     qc.invalidateQueries({ queryKey: ["shop-perf", shopId] });
   };
 
