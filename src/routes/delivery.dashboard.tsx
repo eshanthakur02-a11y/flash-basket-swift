@@ -121,6 +121,10 @@ function Page() {
   });
 
   const toggleOnline = async (v: boolean) => {
+    if (!partner?.id) {
+      toast.error("Setting up your partner profile… try again in a moment.");
+      return;
+    }
     const { error } = await supabase.from("delivery_partners").update({ is_online: v }).eq("id", partner.id);
     if (error) toast.error(error.message);
     else setPartner({ ...partner, is_online: v });
