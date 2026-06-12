@@ -152,6 +152,60 @@ function Page() {
               </ul>
             </Card>
 
+            <Card className="p-4 space-y-3">
+              <p className="text-xs uppercase text-muted-foreground">Notify customer</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  max={240}
+                  value={etaMin}
+                  onChange={(e) => setEtaMin(e.target.value)}
+                  className="w-24"
+                />
+                <span className="text-sm text-muted-foreground">min</span>
+                <Button
+                  size="sm"
+                  disabled={sending}
+                  onClick={() => sendUpdate("eta", Math.max(1, Number(etaMin) || 0))}
+                >
+                  Send ETA
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={sending}
+                  onClick={() => sendUpdate("delay", Math.max(1, Number(etaMin) || 0))}
+                >
+                  Traffic delay
+                </Button>
+              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={sending}
+                onClick={() => sendUpdate("nearby")}
+              >
+                I've reached your area
+              </Button>
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Custom message to customer"
+                  value={customMsg}
+                  onChange={(e) => setCustomMsg(e.target.value)}
+                  maxLength={240}
+                />
+                <Button
+                  size="sm"
+                  disabled={sending || !customMsg.trim()}
+                  onClick={() => sendUpdate("custom", undefined, customMsg.trim())}
+                >
+                  Send
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Only the customer for this order receives this notification.</p>
+            </Card>
+
             <div className="fixed bottom-20 left-0 right-0 px-4">
               <div className="mx-auto max-w-md flex gap-2">
                 {data.status === "packed" && (
