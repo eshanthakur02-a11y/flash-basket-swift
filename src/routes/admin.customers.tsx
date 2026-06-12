@@ -15,9 +15,9 @@ export const Route = createFileRoute("/admin/customers")({
   ),
 });
 
-type AppRole = "admin" | "customer" | "shopkeeper" | "delivery";
-const ROLES: AppRole[] = ["admin", "shopkeeper", "delivery", "customer"];
-const ICONS: Record<AppRole, any> = { admin: Shield, shopkeeper: StoreIcon, delivery: Truck, customer: UserIcon };
+type AppRole = "admin" | "customer" | "shopkeeper" | "delivery" | "support";
+const ROLES: AppRole[] = ["admin", "shopkeeper", "delivery", "support", "customer"];
+const ICONS: Record<AppRole, any> = { admin: Shield, shopkeeper: StoreIcon, delivery: Truck, support: LifeBuoy, customer: UserIcon };
 
 function CustomersPage() {
   const qc = useQueryClient();
