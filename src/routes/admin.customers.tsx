@@ -139,10 +139,15 @@ function CustomersPage() {
           <div className="md:hidden space-y-3">
             {(users.data ?? []).map((u: any) => (
               <div key={u.id} className="rounded-2xl border border-border bg-card p-4 space-y-3">
-                <div>
-                  <div className="font-bold">{u.full_name || "—"}</div>
-                  <div className="text-[11px] text-muted-foreground font-mono">{u.id.slice(0, 8)}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{u.phone || "No phone"}</div>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-bold">{u.full_name || "—"}</div>
+                    <div className="text-[11px] text-muted-foreground">{u.email || "—"}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">{u.phone || "No phone"}</div>
+                  </div>
+                  <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold ${u.status === "disabled" ? "bg-destructive/15 text-destructive" : "bg-green-500/15 text-green-700 dark:text-green-300"}`}>
+                    {u.status === "disabled" ? "Disabled" : "Active"}
+                  </span>
                 </div>
                 <div>
                   <div className="text-[11px] font-bold uppercase text-muted-foreground mb-1.5">Current roles</div>
