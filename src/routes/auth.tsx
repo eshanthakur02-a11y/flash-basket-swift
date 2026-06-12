@@ -233,7 +233,7 @@ function PhoneOtpForm({ onAuthed }: { onAuthed: (userId: string) => void }) {
       email: profile.email.trim() || null,
       address: profile.address.trim() || null,
     };
-    const { error } = await supabase.from("profiles").update(updates).eq("id", u.user.id);
+    const { error } = await supabase.from("profiles").update(updates as any).eq("id", u.user.id);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Profile saved");
