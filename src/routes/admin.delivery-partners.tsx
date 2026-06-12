@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
@@ -11,7 +11,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Circle, Plus, Trash2, UserPlus } from "lucide-react";
+import { Truck, Activity, BarChart3, Circle, Trash2, UserPlus, Radio, Clock } from "lucide-react";
+import { partnerStatusMeta, timeAgo } from "@/lib/partnerStatus";
+
 
 export const Route = createFileRoute("/admin/delivery-partners")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket Admin" }] }),
