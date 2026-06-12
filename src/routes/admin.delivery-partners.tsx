@@ -108,7 +108,7 @@ function Page() {
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto shrink-0 whitespace-nowrap"><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
             </DialogTrigger>
-            <AddPartnerDialog onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["admin-partners"] }); }} />
+            <AddPartnerDialog shops={shops.data ?? []} onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["admin-partners"] }); }} />
           </Dialog>
         </header>
 
