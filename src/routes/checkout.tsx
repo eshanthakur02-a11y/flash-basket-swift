@@ -74,7 +74,7 @@ function CheckoutPage() {
     );
   }
 
-  const deliveryFee = subtotal >= 199 ? 0 : 25;
+  const deliveryFee = deliveryType === "fast_delivery" ? 100 : 0;
   const handling = 5;
   const discount = appliedCoupon?.discount ?? 0;
   const total = Math.max(0, subtotal - discount) + deliveryFee + handling;
