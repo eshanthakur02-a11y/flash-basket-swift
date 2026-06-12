@@ -165,6 +165,41 @@ function Page() {
         </section>
 
         <section>
+          <h2 className="font-bold mb-3 flex items-center gap-2"><Radio className="h-4 w-4 text-primary" />Live partner monitor</h2>
+          {liveByShop.length === 0 && (
+            <div className="text-sm text-muted-foreground">No delivery partners yet.</div>
+          )}
+          <div className="space-y-4">
+            {liveByShop.map(([shopId, g]) => (
+              <div key={shopId} className="rounded-2xl border border-border bg-card">
+                <div className="px-4 py-2 border-b border-border bg-secondary/30 font-bold text-sm">{g.shop_name}</div>
+                <div className="divide-y divide-border">
+                  {g.rows.map((r) => {
+                    const m = partnerStatusMeta(r.availability_status, r.is_online);
+                    return (
+                      <div key={r.partner_id} className="px-4 py-3 flex flex-wrap items-center gap-3 justify-between">
+                        <div className="min-w-0">
+                          <div className="font-semibold truncate">{r.name}{r.vehicle ? <span className="text-muted-foreground font-normal"> · {r.vehicle}</span> : null}</div>
+                          <div className="text-xs text-muted-foreground">{r.phone ?? "—"}</div>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase font-bold ${m.cls}`}>{m.label}</span>
+                          {r.current_order_number && <span>Order <span className="font-bold">{r.current_order_number}</span></span>}
+                          {r.eta_minutes != null && <span className="inline-flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" />ETA {r.eta_minutes} min</span>}
+                          <span className="text-muted-foreground">Updated {timeAgo(r.status_updated_at)}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
+
+        <section>
           <h2 className="font-bold mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-primary" />Live orders</h2>
           <div className="space-y-3">
             {(orders.data ?? []).map((o: any) => {
