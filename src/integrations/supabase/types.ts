@@ -1134,6 +1134,45 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_delivery_assignments: {
+        Row: {
+          assigned_by: string | null
+          created_at: string
+          delivery_partner_id: string
+          id: string
+          shop_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          created_at?: string
+          delivery_partner_id: string
+          id?: string
+          shop_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          created_at?: string
+          delivery_partner_id?: string
+          id?: string
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_delivery_assignments_delivery_partner_id_fkey"
+            columns: ["delivery_partner_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_delivery_assignments_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_products: {
         Row: {
           created_at: string
@@ -1557,6 +1596,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_create_delivery_partner: {
+        Args: {
+          _name: string
+          _phone: string
+          _user_email?: string
+          _vehicle?: string
+        }
+        Returns: string
+      }
       admin_create_shopkeeper: {
         Args: {
           _address: string
@@ -1836,6 +1884,31 @@ export type Database = {
         Args: { _order_id: string; _partner_id: string }
         Returns: undefined
       }
+      shop_available_partners: {
+        Args: { _shop_id: string }
+        Returns: {
+          is_online: boolean
+          name: string
+          on_team: boolean
+          partner_id: string
+          phone: string
+          rating: number
+          vehicle: string
+        }[]
+      }
+      shop_list_team: {
+        Args: { _shop_id: string }
+        Returns: {
+          active_order_count: number
+          availability_status: string
+          is_online: boolean
+          name: string
+          partner_id: string
+          phone: string
+          rating: number
+          vehicle: string
+        }[]
+      }
       shop_mark_collected: { Args: { _order_id: string }; Returns: undefined }
       shop_mark_packed: { Args: { _order_id: string }; Returns: undefined }
       shop_partner_performance: {
@@ -1854,6 +1927,10 @@ export type Database = {
         }[]
       }
       shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
+      shop_set_team: {
+        Args: { _partner_ids: string[]; _shop_id: string }
+        Returns: undefined
+      }
       submit_role_request: {
         Args: { _data: Json; _role: Database["public"]["Enums"]["app_role"] }
         Returns: string
