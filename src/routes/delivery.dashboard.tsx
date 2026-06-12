@@ -130,13 +130,14 @@ function Page() {
   });
 
   const toggleOnline = async (v: boolean) => {
-    if (!partner?.id) {
-      toast.error("Setting up your partner profile… try again in a moment.");
-      return;
+    let p = partner;
+    if (!p?.id) {
+      p = await ensurePartner();
+      if (!p?.id) return;
     }
-    const { error } = await supabase.from("delivery_partners").update({ is_online: v }).eq("id", partner.id);
+    const { error } = await supabase.from("delivery_partners").update({ is_online: v }).eq("id", p.id);
     if (error) toast.error(error.message);
-    else setPartner({ ...partner, is_online: v });
+    else setPartner({ ...p, is_online: v });
   };
 
   const markDelivered = async (id: string) => {
