@@ -222,10 +222,12 @@ function Page() {
                     <div className="min-w-0">
                       <div className="font-bold truncate">{r.name}</div>
                       <div className="text-xs text-muted-foreground">{pp?.phone ?? "No phone"}</div>
+                      <div className="text-xs text-muted-foreground">Shop: {shopName(pp?.shop_id ?? null)}</div>
                       <div className="mt-1 text-xs">
                         {r.is_online
                           ? <span className="inline-flex items-center gap-1 text-green-600 font-bold"><Circle className="h-2 w-2 fill-green-500 text-green-500" />Online</span>
                           : <span className="text-muted-foreground">Offline</span>}
+                        <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[10px] uppercase font-bold">{pp?.active_order_count ?? 0} active</span>
                       </div>
                     </div>
                     <Button size="icon" variant="ghost" onClick={() => setConfirmDel(r)}>
@@ -240,7 +242,14 @@ function Page() {
                     <MiniStat label="On-time" value={`${Number(r.on_time_pct_30d).toFixed(0)}%`} />
                     <MiniStat label="Rating" value={Number(r.rating).toFixed(1)} />
                   </div>
-                  <div className="mt-2 text-[11px] text-muted-foreground text-right">Hours today: {Number(r.hours_today).toFixed(2)}</div>
+                  <div className="mt-3">
+                    <Select value={pp?.shop_id ?? ""} onValueChange={(v) => transferPartner(r.partner_id, v)}>
+                      <SelectTrigger className="h-9 rounded-xl"><SelectValue placeholder="Transfer to shop…" /></SelectTrigger>
+                      <SelectContent>
+                        {(shops.data ?? []).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               );
             })}
