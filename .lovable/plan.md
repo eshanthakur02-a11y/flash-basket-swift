@@ -1,85 +1,99 @@
-## Goal
-Build an end-to-end support system: customers, shopkeepers, and delivery partners can file tickets; a new "Support Executive" role triages, replies, assigns, and resolves them. Admin gets analytics.
+# FlashBasket — Premium Customer App Redesign
 
-## Database (migration)
+Goal: make the customer mobile experience feel like a real ₹100M+ quick-commerce app (Blinkit / Zepto / Instamart). Mobile-first, dense, product-led, no demo vibes.
 
-Add `support` to `app_role` enum.
+## Scope (frontend only)
 
-New tables (all with GRANTs + RLS + updated_at trigger):
-- `support_tickets` — id, ticket_number (auto), user_id, role_at_creation (customer/shopkeeper/delivery), title, description, category (enum), order_id (nullable), shop_id (nullable), partner_id (nullable), status (open/assigned/in_progress/resolved/closed), priority (low/normal/high), assigned_to (support agent user_id, nullable), resolved_at, closed_at, first_response_at, timestamps
-- `support_messages` — id, ticket_id, sender_id, sender_role, body, is_internal_note (bool), created_at
-- `ticket_attachments` — id, ticket_id, message_id (nullable), uploaded_by, file_url, file_name, mime, created_at
-- `ticket_assignments` — id, ticket_id, assigned_to, assigned_by, assigned_at, unassigned_at (history log)
-- `support_agents` — user_id PK, display_name, is_active, max_concurrent, total_resolved, avg_resolution_minutes (computed cache, optional)
+- Home screen (`/customer/home` and `/` for signed-in customers)
+- Bottom navigation
+- Header (mobile customer surface)
+- Product card visual refresh
+- Skeleton/shimmer states
+- Optional: Profile shell tweaks to absorb "Wishlist" entry
 
-Enums:
-- `ticket_category`: order_issue, payment_issue, refund_issue, delivery_issue, product_issue, shop_issue, account_issue, technical_issue
-- `ticket_status`: open, assigned, in_progress, resolved, closed
-- `ticket_priority`: low, normal, high
+Out of scope this pass: Cart, Checkout, Category, Orders flows (will keep working; visual polish in a follow-up if you want).
 
-RLS:
-- Tickets: creator can SELECT/INSERT their own; support+admin can SELECT/UPDATE all. No internal notes visible to non-support.
-- Messages: ticket creator can see non-internal + insert; support/admin full access.
-- Attachments: same scoping as parent ticket.
-- Assignments: support/admin only.
-- Agents: support/admin select; admin manage.
+## Design system additions (`src/styles.css`)
 
-Security-definer functions:
-- `create_support_ticket(...)` → returns id, sets ticket_number, notifies all support agents.
-- `assign_ticket(_ticket_id, _agent_id)` → admin/support; writes assignment row, sets status='assigned', notifies agent and creator.
-- `update_ticket_status(_ticket_id, _status)` → support/admin; sets resolved_at/closed_at; notifies creator.
-- `post_ticket_message(_ticket_id, body, is_internal)` → both sides; first non-internal support reply sets first_response_at; notifies counterparty.
-- `admin_support_stats()` → totals (open/resolved), avg resolution minutes, per-agent perf.
+- Lock palette tokens: primary `#84CC16`, secondary `#0F172A`, bg `#F8FAFC`, card `#FFFFFF`, accent `#F59E0B`
+- Add gradients: `--gradient-hero` (lime → accent), `--gradient-banner-*` for rotating banner variants
+- Add shadows: `--shadow-card-premium`, `--shadow-float`
+- Radius scale tuned (16/20/24)
+- `.shimmer` utility for loading states
 
-Storage bucket: `support-attachments` (private) + RLS policies for ticket participants/support/admin.
+## Components
 
-Realtime: ADD TABLE for `support_tickets` and `support_messages`.
+1. **`CustomerHeader`** (new, mobile-first)
+   - Compact row: location pill ("Deliver in 10 min · Home ▼"), bell, avatar
+   - Sticky premium search bar: search icon + voice mic + camera (image search). Camera opens file input (accept=image/*, capture); placeholder hook for future matching.
 
-## Frontend
+2. **`HeroBannerCarousel`** (new)
+   - Framer Motion auto-rotating banners (3–4 slides), swipeable, dot indicators
+   - Compact height (~150px), gradient backgrounds + emoji/illustration, CTA pill
 
-New shared component:
-- `src/components/SupportTicketForm.tsx` — modal/page with fields (title, desc, category select, optional order_id select fetched from user's orders, image upload via ImageInput to support-attachments). Calls `create_support_ticket` RPC then uploads attachment.
-- `src/components/SupportFab.tsx` — floating "Help & Support" button that opens the form. Mounted on customer/shopkeeper/delivery dashboards.
+3. **`QuickServices`** (new)
+   - Horizontal scroll chips with colored icon tiles (Milk/Fruits/Veg/Snacks/Beverages/Personal Care) → link to category
 
-New routes:
-- `src/routes/support.my-tickets.tsx` — for any signed-in user; lists own tickets, click to view thread.
-- `src/routes/support.ticket.$id.tsx` — thread view; user sees public messages, can reply, see status.
-- `src/routes/support.tsx` (layout) + `support.dashboard.tsx`, `support.tickets.tsx`, `support.tickets.$id.tsx`, `support.profile.tsx` — Support Executive area with `RoleShell role="admin"` sidebar variant and `requireRoles={["support"]}`.
-  - Dashboard: counts, my assigned, unassigned queue.
-  - Tickets list: filters (status, category, role), search, assign-to-me, click → detail.
-  - Detail: complaint info + contextual panel:
-    - Customer ticket → profile (name/phone), addresses, recent orders, current orders.
-    - Shopkeeper ticket → shop, owner, products count, recent orders.
-    - Delivery ticket → partner record, vehicle, assigned active orders.
-    - Actions: Assign, Mark In Progress, Resolve, Close, Add internal note, Reply to user.
-- `src/routes/admin.support.tsx` — Admin analytics: totals, open, resolved, avg resolution time, per-agent performance table; manage Support Executives (assign/revoke role, toggle active).
+4. **`CategoryGrid`** (refresh existing categories block)
+   - 4-col grid, 2 rows, rounded soft-tinted tiles, bigger icons, tighter labels
 
-Nav updates:
-- Customer/Shopkeeper/Delivery dashboards → add SupportFab + nav entry "Help".
-- Add `SUPPORT_NAV` const & integrate into RoleShell.
-- Admin sidebar → add "Support" link.
-- `app.tsx` and `dashboard.tsx` redirects → include `support` role → `/support/dashboard`.
+5. **`DealsRail`, `TrendingRail`, `RecommendedRail`**
+   - Reuse `ProductCard` in a tighter "compact" variant; section headers with emoji + "See all"
 
-Realtime + notifications:
-- Subscribe to `support_tickets` (assigned_to=user) and `support_messages` (ticket I own/assigned) for live updates in detail/list views.
-- DB notifications inserted via existing `notify_user`/`notify_role` patterns; existing OneSignal pg_net trigger handles push.
+6. **`NearbyShops`** (new, optional if shops data exists; otherwise skip gracefully)
+   - Horizontal cards: name, distance, ETA, rating
 
-## Out of scope (this pass)
-- SLA timers, file types other than images, bulk operations, canned responses (can add later).
+7. **`FloatingCartBar`** (new)
+   - Sticky above bottom nav when cart has items: "X items · ₹Total · View cart →"
+   - Slide-in animation via Framer Motion
 
-## Files
+8. **`BottomNav` refresh**
+   - Items: Home / Categories / Cart / Orders / Profile (remove Favourites)
+   - Floating pill style with active indicator, larger active icon, subtle blur bg
 
-New:
-- `supabase/migrations/<ts>_support_system.sql`
-- `src/components/SupportTicketForm.tsx`, `src/components/SupportFab.tsx`
-- `src/routes/support.tsx`, `support.dashboard.tsx`, `support.tickets.tsx`, `support.tickets.$id.tsx`, `support.profile.tsx`
-- `src/routes/support.my-tickets.tsx`, `src/routes/support.ticket.$id.tsx`
-- `src/routes/admin.support.tsx`
+9. **`ProductCard` polish**
+   - Tighter padding, better price hierarchy, lime ADD button, discount chip in accent
+   - Skeleton shimmer variant
+
+## Profile
+
+- Add "Wishlist" entry inside `/customer/profile` (and/or `/account`) so removing Favourites tab doesn't lose access.
+
+## Routing notes
+
+- Home (`src/routes/customer.home.tsx`) gets the full new layout.
+- Public landing `src/routes/index.tsx` stays as-is unless it shows the same customer home (will verify).
+- `Layout.tsx` already conditionally hides the marketing header on `/customer/*` — confirm and ensure new `CustomerHeader` mounts inside the customer shell instead.
+
+## Tech
+
+- React + Tailwind v4 tokens in `src/styles.css`
+- Framer Motion for banner carousel, floating cart, page enter
+- Lucide icons throughout
+- All data via existing Supabase queries (categories, featured, bestsellers). New rails reuse same products query with different filters/limits — no schema changes.
+
+## Deliverables
+
+New files:
+- `src/components/customer/CustomerHeader.tsx`
+- `src/components/customer/HeroBannerCarousel.tsx`
+- `src/components/customer/QuickServices.tsx`
+- `src/components/customer/CategoryGrid.tsx`
+- `src/components/customer/ProductRail.tsx`
+- `src/components/customer/FloatingCartBar.tsx`
+- `src/components/customer/SkeletonCard.tsx`
 
 Edited:
-- `src/routes/customer.home.tsx`, `shopkeeper.dashboard.tsx`, `delivery.dashboard.tsx` (mount SupportFab)
-- `src/routes/admin.dashboard.tsx` (add Support link to ADMIN_NAV)
-- `src/routes/app.tsx`, `src/routes/dashboard.tsx` (route `support` role)
-- `src/hooks/useAuth.tsx` (extend Role type to include `support`)
+- `src/styles.css` — tokens, gradients, shimmer
+- `src/routes/customer.home.tsx` — compose new sections
+- `src/components/BottomNav.tsx` — new items + floating style
+- `src/components/ProductCard.tsx` — visual polish
+- `src/routes/customer.profile.tsx` — add Wishlist entry
+- `src/components/Layout.tsx` — mount `CustomerHeader` + `FloatingCartBar` for customer routes
 
-After your approval I'll run the migration first, then write the UI in one batch.
+## Quality bar
+
+- No empty space on mobile 390px viewport
+- Every section above the fold has a clear product/CTA hook
+- Smooth 60fps animations, no layout shift
+- Skeleton states for every async section
