@@ -231,6 +231,8 @@ export type Database = {
       }
       delivery_partners: {
         Row: {
+          active_order_count: number
+          availability_status: string
           created_at: string
           current_lat: number | null
           current_lng: number | null
@@ -239,11 +241,14 @@ export type Database = {
           name: string
           phone: string | null
           rating: number
+          shop_id: string | null
           updated_at: string
           user_id: string
           vehicle: string | null
         }
         Insert: {
+          active_order_count?: number
+          availability_status?: string
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
@@ -252,11 +257,14 @@ export type Database = {
           name: string
           phone?: string | null
           rating?: number
+          shop_id?: string | null
           updated_at?: string
           user_id: string
           vehicle?: string | null
         }
         Update: {
+          active_order_count?: number
+          availability_status?: string
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
@@ -265,11 +273,20 @@ export type Database = {
           name?: string
           phone?: string | null
           rating?: number
+          shop_id?: string | null
           updated_at?: string
           user_id?: string
           vehicle?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "delivery_partners_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_dispatch_log: {
         Row: {
@@ -1574,6 +1591,10 @@ export type Database = {
         Returns: string
       }
       admin_support_stats: { Args: never; Returns: Json }
+      admin_transfer_partner: {
+        Args: { _partner_id: string; _shop_id: string }
+        Returns: undefined
+      }
       admin_update_order_status: {
         Args: {
           _order_id: string
@@ -1593,6 +1614,7 @@ export type Database = {
         Args: {
           _name: string
           _phone: string
+          _shop_id?: string
           _user_email?: string
           _vehicle?: string
         }
@@ -1672,6 +1694,7 @@ export type Database = {
           item_count: number
           order_number: string
           placed_at: string
+          shop_name: string
           total: number
         }[]
       }

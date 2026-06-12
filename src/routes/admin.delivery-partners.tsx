@@ -42,12 +42,30 @@ function Page() {
     queryFn: async () => {
       const { data } = await supabase
         .from("delivery_partners")
-        .select("id, name, phone, vehicle, is_online, current_lat, current_lng, rating")
+        .select("id, name, phone, vehicle, is_online, current_lat, current_lng, rating, shop_id, availability_status, active_order_count")
         .order("is_online", { ascending: false });
       return data ?? [];
     },
     refetchInterval: 10000,
   });
+
+  const shops = useQuery({
+    queryKey: ["admin-shops-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("shops").select("id, name").order("name");
+      return data ?? [];
+    },
+  });
+
+  const transferPartner = async (partnerId: string, shopId: string) => {
+    const { error } = await supabase.rpc("admin_transfer_partner", { _partner_id: partnerId, _shop_id: shopId });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Partner transferred");
+    qc.invalidateQueries({ queryKey: ["admin-partners"] });
+    qc.invalidateQueries({ queryKey: ["admin-perf"] });
+  };
+
+  const shopName = (id: string | null) => (shops.data ?? []).find((s: any) => s.id === id)?.name ?? "—";
 
   const perf = useQuery({
     queryKey: ["admin-perf"],
@@ -90,7 +108,7 @@ function Page() {
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto shrink-0 whitespace-nowrap"><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
             </DialogTrigger>
-            <AddPartnerDialog onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["admin-partners"] }); }} />
+            <AddPartnerDialog shops={shops.data ?? []} onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["admin-partners"] }); }} />
           </Dialog>
         </header>
 
@@ -144,14 +162,16 @@ function Page() {
                 <tr>
                   <th className="text-left px-3 py-2">Partner</th>
                   <th className="text-left px-3 py-2">Phone</th>
+                  <th className="text-left px-3 py-2">Shop</th>
                   <th className="text-left px-3 py-2">Status</th>
+                  <th className="text-right px-3 py-2">Active</th>
                   <th className="text-right px-3 py-2">Today</th>
                   <th className="text-right px-3 py-2">7d</th>
                   <th className="text-right px-3 py-2">30d</th>
                   <th className="text-right px-3 py-2">Avg min</th>
                   <th className="text-right px-3 py-2">On-time</th>
-                  <th className="text-right px-3 py-2">Hours</th>
                   <th className="text-right px-3 py-2">Rating</th>
+                  <th className="px-3 py-2">Transfer</th>
                   <th className="px-3 py-2" />
                 </tr>
               </thead>
@@ -162,14 +182,23 @@ function Page() {
                     <tr key={r.partner_id} className="border-t border-border">
                       <td className="px-3 py-2 font-semibold">{r.name}</td>
                       <td className="px-3 py-2 text-muted-foreground">{pp?.phone ?? "—"}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{shopName(pp?.shop_id ?? null)}</td>
                       <td className="px-3 py-2">{r.is_online ? <span className="text-green-600 font-bold">Online</span> : <span className="text-muted-foreground">Offline</span>}</td>
+                      <td className="px-3 py-2 text-right">{pp?.active_order_count ?? 0}</td>
                       <td className="px-3 py-2 text-right">{r.orders_today}</td>
                       <td className="px-3 py-2 text-right">{r.orders_7d}</td>
                       <td className="px-3 py-2 text-right">{r.orders_30d}</td>
                       <td className="px-3 py-2 text-right">{Number(r.avg_minutes_30d).toFixed(1)}</td>
                       <td className="px-3 py-2 text-right">{Number(r.on_time_pct_30d).toFixed(0)}%</td>
-                      <td className="px-3 py-2 text-right">{Number(r.hours_today).toFixed(2)}</td>
                       <td className="px-3 py-2 text-right">{Number(r.rating).toFixed(1)}</td>
+                      <td className="px-3 py-2">
+                        <Select value={pp?.shop_id ?? ""} onValueChange={(v) => transferPartner(r.partner_id, v)}>
+                          <SelectTrigger className="h-8 w-36 rounded-xl"><SelectValue placeholder="Transfer to…" /></SelectTrigger>
+                          <SelectContent>
+                            {(shops.data ?? []).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </td>
                       <td className="px-3 py-2 text-right">
                         <Button size="icon" variant="ghost" onClick={() => setConfirmDel(r)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
@@ -178,7 +207,7 @@ function Page() {
                     </tr>
                   );
                 })}
-                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={11} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
+                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={13} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -193,10 +222,12 @@ function Page() {
                     <div className="min-w-0">
                       <div className="font-bold truncate">{r.name}</div>
                       <div className="text-xs text-muted-foreground">{pp?.phone ?? "No phone"}</div>
+                      <div className="text-xs text-muted-foreground">Shop: {shopName(pp?.shop_id ?? null)}</div>
                       <div className="mt-1 text-xs">
                         {r.is_online
                           ? <span className="inline-flex items-center gap-1 text-green-600 font-bold"><Circle className="h-2 w-2 fill-green-500 text-green-500" />Online</span>
                           : <span className="text-muted-foreground">Offline</span>}
+                        <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[10px] uppercase font-bold">{pp?.active_order_count ?? 0} active</span>
                       </div>
                     </div>
                     <Button size="icon" variant="ghost" onClick={() => setConfirmDel(r)}>
@@ -211,7 +242,14 @@ function Page() {
                     <MiniStat label="On-time" value={`${Number(r.on_time_pct_30d).toFixed(0)}%`} />
                     <MiniStat label="Rating" value={Number(r.rating).toFixed(1)} />
                   </div>
-                  <div className="mt-2 text-[11px] text-muted-foreground text-right">Hours today: {Number(r.hours_today).toFixed(2)}</div>
+                  <div className="mt-3">
+                    <Select value={pp?.shop_id ?? ""} onValueChange={(v) => transferPartner(r.partner_id, v)}>
+                      <SelectTrigger className="h-9 rounded-xl"><SelectValue placeholder="Transfer to shop…" /></SelectTrigger>
+                      <SelectContent>
+                        {(shops.data ?? []).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               );
             })}
@@ -236,22 +274,25 @@ function Page() {
   );
 }
 
-function AddPartnerDialog({ onDone }: { onDone: () => void }) {
+function AddPartnerDialog({ shops, onDone }: { shops: Array<{ id: string; name: string }>; onDone: () => void }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [vehicle, setVehicle] = useState("");
   const [email, setEmail] = useState("");
+  const [shopId, setShopId] = useState<string>("");
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
     if (!name.trim()) { toast.error("Name required"); return; }
+    if (!shopId) { toast.error("Pick a shop"); return; }
     setBusy(true);
     const { error } = await supabase.rpc("create_delivery_partner", {
       _name: name.trim(),
       _phone: phone.trim(),
       _vehicle: vehicle.trim() || undefined,
       _user_email: email.trim() || undefined,
-    });
+      _shop_id: shopId,
+    } as any);
     setBusy(false);
     if (error) toast.error(error.message);
     else { toast.success("Partner added"); onDone(); }
@@ -264,6 +305,15 @@ function AddPartnerDialog({ onDone }: { onDone: () => void }) {
         <div><label className="text-xs font-bold">Name *</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
         <div><label className="text-xs font-bold">Phone</label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
         <div><label className="text-xs font-bold">Vehicle</label><Input value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="Bike / Scooter / EV" /></div>
+        <div>
+          <label className="text-xs font-bold">Shop *</label>
+          <Select value={shopId} onValueChange={setShopId}>
+            <SelectTrigger><SelectValue placeholder="Select shop" /></SelectTrigger>
+            <SelectContent>
+              {shops.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
         <div>
           <label className="text-xs font-bold">Account email (optional)</label>
           <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="To grant login, user must already be signed up" />

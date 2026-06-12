@@ -47,14 +47,17 @@ function Page() {
   });
 
   const partners = useQuery({
-    queryKey: ["online-partners"],
+    queryKey: ["shop-partners", shopId],
     queryFn: async () => {
+      if (!shopId) return [];
       const { data } = await supabase
         .from("delivery_partners")
-        .select("id, name, phone, is_online, current_lat, current_lng, rating")
+        .select("id, name, phone, is_online, current_lat, current_lng, rating, availability_status, active_order_count, shop_id")
+        .eq("shop_id", shopId)
         .order("is_online", { ascending: false });
       return data ?? [];
     },
+    enabled: !!shopId,
     refetchInterval: 10000,
   });
 
@@ -86,7 +89,7 @@ function Page() {
     if (error) { toast.error(error.message); return; }
     toast.success("Partner removed");
     setConfirmDel(null);
-    qc.invalidateQueries({ queryKey: ["online-partners"] });
+    qc.invalidateQueries({ queryKey: ["shop-partners", shopId] });
     qc.invalidateQueries({ queryKey: ["shop-perf", shopId] });
   };
 
@@ -105,7 +108,7 @@ function Page() {
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto shrink-0 whitespace-nowrap"><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
             </DialogTrigger>
-            <AddPartnerDialog onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["online-partners"] }); qc.invalidateQueries({ queryKey: ["shop-perf", shopId] }); }} />
+            <AddPartnerDialog onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["shop-partners", shopId] }); qc.invalidateQueries({ queryKey: ["shop-perf", shopId] }); }} />
           </Dialog>
         </header>
 
@@ -132,8 +135,13 @@ function Page() {
                     <Select onValueChange={(v) => assign(o.id, v)}>
                       <SelectTrigger className="w-44 rounded-xl"><SelectValue placeholder={p ? "Re-assign" : "Assign partner"} /></SelectTrigger>
                       <SelectContent>
-                        {(partners.data ?? []).filter((pp: any) => pp.is_online).map((pp: any) => (
-                          <SelectItem key={pp.id} value={pp.id}>{pp.name} {pp.is_online ? "🟢" : ""}</SelectItem>
+                        {(partners.data ?? []).length === 0 && (
+                          <div className="px-3 py-2 text-xs text-muted-foreground">No partners added yet.</div>
+                        )}
+                        {(partners.data ?? []).map((pp: any) => (
+                          <SelectItem key={pp.id} value={pp.id}>
+                            {pp.name} {pp.is_online ? "🟢" : "⚫"} · {pp.active_order_count ?? 0} active
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -142,6 +150,34 @@ function Page() {
               );
             })}
             {(orders.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">No active deliveries.</div>}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="font-bold mb-3 flex items-center gap-2"><Truck className="h-4 w-4 text-primary" />Available delivery partners</h2>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {(partners.data ?? []).map((p: any) => (
+              <div key={p.id} className="rounded-2xl border border-border bg-card p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-bold truncate">{p.name}</div>
+                    <div className="text-xs text-muted-foreground">{p.phone ?? "No phone"}</div>
+                    <div className="mt-1 text-xs inline-flex items-center gap-1">
+                      <Circle className={`h-2 w-2 ${p.is_online ? "fill-green-500 text-green-500" : "fill-muted text-muted"}`} />
+                      <span className={p.is_online ? "text-green-600 font-bold" : "text-muted-foreground"}>{p.is_online ? "Online" : "Offline"}</span>
+                      <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[10px] uppercase font-bold">{p.availability_status ?? "available"}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] uppercase font-bold text-muted-foreground">Active</div>
+                    <div className="font-display text-xl font-extrabold">{p.active_order_count ?? 0}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {(partners.data?.length ?? 0) === 0 && (
+              <div className="text-sm text-muted-foreground">No delivery partners assigned to your shop yet. Click “Add delivery boy”.</div>
+            )}
           </div>
         </section>
 
