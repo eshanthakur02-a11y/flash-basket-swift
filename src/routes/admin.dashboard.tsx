@@ -4,14 +4,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { rupees } from "@/lib/format";
-import { LayoutDashboard, ListOrdered, Store, Users, Truck, BarChart, Bell, Settings, AlertTriangle, Wallet } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Store, Users, Truck, BarChart, Bell, Settings, AlertTriangle, Wallet, UserPlus } from "lucide-react";
 
 const NAV = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/orders", label: "Orders", icon: ListOrdered },
   { to: "/admin/payments", label: "Payments", icon: Wallet },
   { to: "/admin/shops", label: "Shops", icon: Store },
-  { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/customers", label: "Users", icon: Users },
+  { to: "/admin/role-requests", label: "Role requests", icon: UserPlus },
   { to: "/admin/delivery-partners", label: "Partners", icon: Truck },
   { to: "/admin/reports", label: "Reports", icon: BarChart },
   { to: "/admin/complaints", label: "Complaints", icon: AlertTriangle },

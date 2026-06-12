@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import {
-  User as UserIcon, MapPin, Package, Heart, Bell, Headphones, LogOut, ChevronRight, Shield,
+  User as UserIcon, MapPin, Package, Heart, Bell, Headphones, LogOut, ChevronRight, Shield, Briefcase,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -92,6 +92,7 @@ function AppProfile() {
         <Row to="/customer/wishlist" icon={<Heart className="h-5 w-5" />} label="Favourites" />
         <Row to="/account" icon={<MapPin className="h-5 w-5" />} label={`Addresses (${addresses.data?.length ?? 0})`} />
         <Row to="/customer/notifications" icon={<Bell className="h-5 w-5" />} label="Notifications" />
+        <Row to="/customer/apply" icon={<Briefcase className="h-5 w-5" />} label="Become a partner" />
         {isAdmin && <Row to="/admin/dashboard" icon={<Shield className="h-5 w-5" />} label="Admin panel" />}
         <RowButton onClick={() => setSupportOpen(true)} icon={<Headphones className="h-5 w-5" />} label="Help & support" />
       </div>
