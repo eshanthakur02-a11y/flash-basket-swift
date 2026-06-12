@@ -1707,6 +1707,25 @@ export type Database = {
           status: string
         }[]
       }
+      admin_live_partners: {
+        Args: never
+        Returns: {
+          active_order_count: number
+          availability_status: string
+          current_order_id: string
+          current_order_number: string
+          eta_minutes: number
+          is_online: boolean
+          name: string
+          partner_id: string
+          phone: string
+          rating: number
+          shop_id: string
+          shop_name: string
+          status_updated_at: string
+          vehicle: string
+        }[]
+      }
       admin_partner_performance: {
         Args: never
         Returns: {
@@ -1935,6 +1954,23 @@ export type Database = {
           partner_id: string
           phone: string
           rating: number
+          vehicle: string
+        }[]
+      }
+      shop_live_team: {
+        Args: { _shop_id: string }
+        Returns: {
+          active_order_count: number
+          availability_status: string
+          current_order_id: string
+          current_order_number: string
+          eta_minutes: number
+          is_online: boolean
+          name: string
+          partner_id: string
+          phone: string
+          rating: number
+          status_updated_at: string
           vehicle: string
         }[]
       }
