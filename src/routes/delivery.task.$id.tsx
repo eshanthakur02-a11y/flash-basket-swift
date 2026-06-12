@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { RouteMap } from "@/components/maps/RouteMap";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
@@ -26,6 +28,23 @@ export const Route = createFileRoute("/delivery/task/$id")({
 function Page() {
   const { id } = Route.useParams();
   const router = useRouter();
+  const [etaMin, setEtaMin] = useState<string>("10");
+  const [customMsg, setCustomMsg] = useState<string>("");
+  const [sending, setSending] = useState(false);
+
+  const sendUpdate = async (kind: "eta" | "nearby" | "delay" | "custom", minutes?: number, message?: string) => {
+    setSending(true);
+    const { error } = await supabase.rpc("partner_send_eta_update" as any, {
+      _order_id: id,
+      _kind: kind,
+      _eta_minutes: minutes ?? null,
+      _custom_message: message ?? null,
+    });
+    setSending(false);
+    if (error) return toast.error(error.message);
+    toast.success("Customer notified");
+    if (kind === "custom") setCustomMsg("");
+  };
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["delivery-task", id],
@@ -131,6 +150,60 @@ function Page() {
                   </li>
                 ))}
               </ul>
+            </Card>
+
+            <Card className="p-4 space-y-3">
+              <p className="text-xs uppercase text-muted-foreground">Notify customer</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  max={240}
+                  value={etaMin}
+                  onChange={(e) => setEtaMin(e.target.value)}
+                  className="w-24"
+                />
+                <span className="text-sm text-muted-foreground">min</span>
+                <Button
+                  size="sm"
+                  disabled={sending}
+                  onClick={() => sendUpdate("eta", Math.max(1, Number(etaMin) || 0))}
+                >
+                  Send ETA
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={sending}
+                  onClick={() => sendUpdate("delay", Math.max(1, Number(etaMin) || 0))}
+                >
+                  Traffic delay
+                </Button>
+              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={sending}
+                onClick={() => sendUpdate("nearby")}
+              >
+                I've reached your area
+              </Button>
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="Custom message to customer"
+                  value={customMsg}
+                  onChange={(e) => setCustomMsg(e.target.value)}
+                  maxLength={240}
+                />
+                <Button
+                  size="sm"
+                  disabled={sending || !customMsg.trim()}
+                  onClick={() => sendUpdate("custom", undefined, customMsg.trim())}
+                >
+                  Send
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Only the customer for this order receives this notification.</p>
             </Card>
 
             <div className="fixed bottom-20 left-0 right-0 px-4">

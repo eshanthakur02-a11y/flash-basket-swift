@@ -1858,6 +1858,15 @@ export type Database = {
         Args: { _order_id: string }
         Returns: undefined
       }
+      partner_send_eta_update: {
+        Args: {
+          _custom_message?: string
+          _eta_minutes?: number
+          _kind: string
+          _order_id: string
+        }
+        Returns: string
+      }
       partner_today_hours: { Args: { _partner_id: string }; Returns: number }
       place_order: {
         Args: {
