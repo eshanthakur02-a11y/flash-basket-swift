@@ -1,28 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { RoleShell } from "@/components/RoleShell";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { rupees } from "@/lib/format";
-import { Truck, Activity, BarChart3, Circle, UserPlus, Trash2 } from "lucide-react";
+import { Truck, Activity, BarChart3, Circle, Users, Star } from "lucide-react";
 
 export const Route = createFileRoute("/shopkeeper/delivery")({
   head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
   component: Page,
 });
 
+type Partner = {
+  id: string;
+  name: string;
+  phone: string | null;
+  is_online: boolean;
+  rating: number | null;
+  availability_status: string | null;
+  active_order_count: number | null;
+  shop_id: string;
+};
+
+function statusBadge(p: Partner) {
+  if (!p.is_online) return { label: "Offline", cls: "bg-muted text-muted-foreground" };
+  if ((p.active_order_count ?? 0) > 0 || p.availability_status === "busy") return { label: "Busy", cls: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400" };
+  return { label: "Online", cls: "bg-green-500/15 text-green-700 dark:text-green-400" };
+}
+
 function Page() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [shopId, setShopId] = useState<string | null>(null);
+  const [manageOpen, setManageOpen] = useState(false);
+  const [assignFor, setAssignFor] = useState<any | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -36,7 +52,7 @@ function Page() {
       if (!shopId) return [];
       const { data } = await supabase
         .from("orders")
-        .select("id, order_number, total, status, address, partner_id, placed_at, updated_at")
+        .select("id, order_number, total, status, address, partner_id, placed_at")
         .eq("shop_id", shopId)
         .in("status", ["packed", "out_for_delivery"])
         .order("placed_at", { ascending: false });
@@ -49,13 +65,13 @@ function Page() {
   const partners = useQuery({
     queryKey: ["shop-partners", shopId],
     queryFn: async () => {
-      if (!shopId) return [];
+      if (!shopId) return [] as Partner[];
       const { data } = await supabase
         .from("delivery_partners")
-        .select("id, name, phone, is_online, current_lat, current_lng, rating, availability_status, active_order_count, shop_id")
+        .select("id, name, phone, is_online, rating, availability_status, active_order_count, shop_id")
         .eq("shop_id", shopId)
         .order("is_online", { ascending: false });
-      return data ?? [];
+      return (data ?? []) as Partner[];
     },
     enabled: !!shopId,
     refetchInterval: 10000,
@@ -73,25 +89,22 @@ function Page() {
     refetchInterval: 15000,
   });
 
+  const perfByPartner = useMemo(() => {
+    const m: Record<string, any> = {};
+    (perf.data ?? []).forEach((r: any) => { m[r.partner_id] = r; });
+    return m;
+  }, [perf.data]);
+
   const assign = async (orderId: string, partnerId: string) => {
     const { error } = await supabase.rpc("shop_assign_partner", { _order_id: orderId, _partner_id: partnerId });
-    if (error) toast.error(error.message);
-    else { toast.success("Partner assigned"); qc.invalidateQueries({ queryKey: ["shop-delivery-orders", shopId] }); }
-  };
-
-  const partnerById = (id: string | null) => (partners.data ?? []).find((p: any) => p.id === id);
-
-  const [addOpen, setAddOpen] = useState(false);
-  const [confirmDel, setConfirmDel] = useState<any | null>(null);
-
-  const deletePartner = async (id: string) => {
-    const { error } = await supabase.rpc("delete_delivery_partner", { _partner_id: id });
     if (error) { toast.error(error.message); return; }
-    toast.success("Partner removed");
-    setConfirmDel(null);
+    toast.success("Delivery partner assigned");
+    setAssignFor(null);
+    qc.invalidateQueries({ queryKey: ["shop-delivery-orders", shopId] });
     qc.invalidateQueries({ queryKey: ["shop-partners", shopId] });
-    qc.invalidateQueries({ queryKey: ["shop-perf", shopId] });
   };
+
+  const partnerById = (id: string | null) => (partners.data ?? []).find((p) => p.id === id);
 
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
@@ -102,16 +115,16 @@ function Page() {
               <Truck className="h-6 w-6 sm:h-7 sm:w-7 text-primary shrink-0" />
               Delivery Management
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">Add or remove delivery boys, assign live orders, and track performance.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              View partners assigned to your shop by admin, assign live orders, and track performance.
+            </p>
           </div>
-          <Dialog open={addOpen} onOpenChange={setAddOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto shrink-0 whitespace-nowrap"><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
-            </DialogTrigger>
-            <AddPartnerDialog onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["shop-partners", shopId] }); qc.invalidateQueries({ queryKey: ["shop-perf", shopId] }); }} />
-          </Dialog>
+          <Button className="w-full sm:w-auto shrink-0 whitespace-nowrap" onClick={() => setManageOpen(true)}>
+            <Users className="h-4 w-4 mr-1" />Manage assigned delivery partners
+          </Button>
         </header>
 
+        {/* Active orders */}
         <section>
           <h2 className="font-bold mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-primary" />Active orders</h2>
           <div className="space-y-3">
@@ -131,21 +144,9 @@ function Page() {
                       ) : <span className="text-yellow-600 font-semibold">Unassigned</span>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Select onValueChange={(v) => assign(o.id, v)}>
-                      <SelectTrigger className="w-44 rounded-xl"><SelectValue placeholder={p ? "Re-assign" : "Assign partner"} /></SelectTrigger>
-                      <SelectContent>
-                        {(partners.data ?? []).length === 0 && (
-                          <div className="px-3 py-2 text-xs text-muted-foreground">No partners added yet.</div>
-                        )}
-                        {(partners.data ?? []).map((pp: any) => (
-                          <SelectItem key={pp.id} value={pp.id}>
-                            {pp.name} {pp.is_online ? "🟢" : "⚫"} · {pp.active_order_count ?? 0} active
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Button size="sm" onClick={() => setAssignFor(o)}>
+                    {p ? "Re-assign" : "Assign delivery partner"}
+                  </Button>
                 </div>
               );
             })}
@@ -153,34 +154,7 @@ function Page() {
           </div>
         </section>
 
-        <section>
-          <h2 className="font-bold mb-3 flex items-center gap-2"><Truck className="h-4 w-4 text-primary" />Available delivery partners</h2>
-          <div className="grid sm:grid-cols-2 gap-3">
-            {(partners.data ?? []).map((p: any) => (
-              <div key={p.id} className="rounded-2xl border border-border bg-card p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="font-bold truncate">{p.name}</div>
-                    <div className="text-xs text-muted-foreground">{p.phone ?? "No phone"}</div>
-                    <div className="mt-1 text-xs inline-flex items-center gap-1">
-                      <Circle className={`h-2 w-2 ${p.is_online ? "fill-green-500 text-green-500" : "fill-muted text-muted"}`} />
-                      <span className={p.is_online ? "text-green-600 font-bold" : "text-muted-foreground"}>{p.is_online ? "Online" : "Offline"}</span>
-                      <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[10px] uppercase font-bold">{p.availability_status ?? "available"}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[10px] uppercase font-bold text-muted-foreground">Active</div>
-                    <div className="font-display text-xl font-extrabold">{p.active_order_count ?? 0}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {(partners.data?.length ?? 0) === 0 && (
-              <div className="text-sm text-muted-foreground">No delivery partners assigned to your shop yet. Click “Add delivery boy”.</div>
-            )}
-          </div>
-        </section>
-
+        {/* Partner dashboard */}
         <section>
           <h2 className="font-bold mb-3 flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" />Partner performance</h2>
           <div className="overflow-x-auto rounded-2xl border border-border">
@@ -189,90 +163,113 @@ function Page() {
                 <tr>
                   <th className="text-left px-3 py-2">Partner</th>
                   <th className="text-left px-3 py-2">Status</th>
-                  <th className="text-right px-3 py-2">Today</th>
-                  <th className="text-right px-3 py-2">7d</th>
-                  <th className="text-right px-3 py-2">Avg min</th>
-                  <th className="text-right px-3 py-2">On-time %</th>
-                  <th className="text-right px-3 py-2">Hours today</th>
+                  <th className="text-right px-3 py-2">Active</th>
+                  <th className="text-right px-3 py-2">Completed (7d)</th>
+                  <th className="text-right px-3 py-2">Rating</th>
+                  <th className="px-3 py-2"></th>
                 </tr>
               </thead>
               <tbody>
-                {(perf.data ?? []).map((r: any) => (
-                  <tr key={r.partner_id} className="border-t border-border">
-                    <td className="px-3 py-2 font-semibold">{r.name}</td>
-                    <td className="px-3 py-2">{r.is_online ? <span className="text-green-600 font-bold">Online</span> : <span className="text-muted-foreground">Offline</span>}</td>
-                    <td className="px-3 py-2 text-right">{r.orders_today}</td>
-                    <td className="px-3 py-2 text-right">{r.orders_7d}</td>
-                    <td className="px-3 py-2 text-right">{Number(r.avg_minutes_today).toFixed(1)}</td>
-                    <td className="px-3 py-2 text-right">{Number(r.on_time_pct).toFixed(0)}%</td>
-                    <td className="px-3 py-2 text-right">{Number(r.hours_today).toFixed(2)}</td>
-                    <td className="px-3 py-2 text-right">
-                      <Button size="icon" variant="ghost" onClick={() => setConfirmDel(r)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                {(perf.data?.length ?? 0) === 0 && <tr><td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">No data yet.</td></tr>}
+                {(partners.data ?? []).map((p) => {
+                  const b = statusBadge(p);
+                  const r = perfByPartner[p.id];
+                  return (
+                    <tr key={p.id} className="border-t border-border">
+                      <td className="px-3 py-2">
+                        <div className="font-semibold">{p.name}</div>
+                        <div className="text-xs text-muted-foreground">{p.phone ?? "—"}</div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase font-bold ${b.cls}`}>{b.label}</span>
+                      </td>
+                      <td className="px-3 py-2 text-right font-bold">{p.active_order_count ?? 0}</td>
+                      <td className="px-3 py-2 text-right">{r?.orders_7d ?? 0}</td>
+                      <td className="px-3 py-2 text-right">
+                        <span className="inline-flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                          {p.rating != null ? Number(p.rating).toFixed(1) : "—"}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <Button size="sm" variant="secondary" disabled={(orders.data ?? []).length === 0} onClick={() => {
+                          const unassigned = (orders.data ?? []).find((o: any) => !o.partner_id) ?? (orders.data ?? [])[0];
+                          if (unassigned) setAssignFor(unassigned);
+                        }}>Assign order</Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {(partners.data?.length ?? 0) === 0 && (
+                  <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
+                    No delivery partners assigned to your shop yet. Ask admin to assign partners.
+                  </td></tr>
+                )}
               </tbody>
             </table>
           </div>
         </section>
-
-        <AlertDialog open={!!confirmDel} onOpenChange={(v) => !v && setConfirmDel(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Remove “{confirmDel?.name}”?</AlertDialogTitle>
-              <AlertDialogDescription>The partner profile and delivery role will be removed. Active orders block deletion.</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => confirmDel && deletePartner(confirmDel.partner_id)}>Remove</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
+
+      {/* Manage assigned partners dialog */}
+      <Dialog open={manageOpen} onOpenChange={setManageOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Available delivery partners</DialogTitle></DialogHeader>
+          <div className="space-y-2 max-h-[60vh] overflow-auto">
+            {(partners.data ?? []).map((p) => {
+              const b = statusBadge(p);
+              return (
+                <div key={p.id} className="rounded-xl border border-border p-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-bold truncate">{p.name}</div>
+                    <div className="text-xs text-muted-foreground">{p.phone ?? "No phone"} · Active: {p.active_order_count ?? 0}</div>
+                  </div>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase font-bold ${b.cls}`}>{b.label}</span>
+                </div>
+              );
+            })}
+            {(partners.data?.length ?? 0) === 0 && (
+              <div className="text-sm text-muted-foreground p-2">
+                No partners assigned. Admin manages delivery-partner assignment from the Admin Dashboard.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setManageOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign order dialog */}
+      <Dialog open={!!assignFor} onOpenChange={(v) => !v && setAssignFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign delivery partner {assignFor ? `· ${assignFor.order_number}` : ""}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 max-h-[60vh] overflow-auto">
+            {(partners.data ?? []).map((p) => {
+              const b = statusBadge(p);
+              const disabled = !p.is_online;
+              return (
+                <button
+                  key={p.id}
+                  disabled={disabled}
+                  onClick={() => assignFor && assign(assignFor.id, p.id)}
+                  className={`w-full text-left rounded-xl border border-border p-3 flex items-center justify-between gap-3 transition ${disabled ? "opacity-50 cursor-not-allowed" : "hover:border-primary hover:bg-primary/5"}`}
+                >
+                  <div className="min-w-0">
+                    <div className="font-bold truncate">{p.name}</div>
+                    <div className="text-xs text-muted-foreground">Active orders: {p.active_order_count ?? 0}</div>
+                  </div>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase font-bold ${b.cls}`}>{b.label}</span>
+                </button>
+              );
+            })}
+            {(partners.data?.length ?? 0) === 0 && (
+              <div className="text-sm text-muted-foreground p-2">No partners available. Ask admin to assign delivery partners to your shop.</div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </RoleShell>
-  );
-}
-
-function AddPartnerDialog({ onDone }: { onDone: () => void }) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [vehicle, setVehicle] = useState("");
-  const [email, setEmail] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const submit = async () => {
-    if (!name.trim()) { toast.error("Name required"); return; }
-    setBusy(true);
-    const { error } = await supabase.rpc("create_delivery_partner", {
-      _name: name.trim(),
-      _phone: phone.trim(),
-      _vehicle: vehicle.trim() || undefined,
-      _user_email: email.trim() || undefined,
-    });
-    setBusy(false);
-    if (error) toast.error(error.message);
-    else { toast.success("Partner added"); onDone(); }
-  };
-
-  return (
-    <DialogContent>
-      <DialogHeader><DialogTitle>Add delivery boy</DialogTitle></DialogHeader>
-      <div className="space-y-3">
-        <div><label className="text-xs font-bold">Name *</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-        <div><label className="text-xs font-bold">Phone</label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
-        <div><label className="text-xs font-bold">Vehicle</label><Input value={vehicle} onChange={(e) => setVehicle(e.target.value)} placeholder="Bike / Scooter / EV" /></div>
-        <div>
-          <label className="text-xs font-bold">Account email (optional)</label>
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Existing signed-up email to grant login" />
-          <p className="text-[11px] text-muted-foreground mt-1">Leave blank to create a profile-only partner without login.</p>
-        </div>
-      </div>
-      <DialogFooter>
-        <Button onClick={submit} disabled={busy}>{busy ? "Adding…" : "Add partner"}</Button>
-      </DialogFooter>
-    </DialogContent>
   );
 }
