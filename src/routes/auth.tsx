@@ -199,7 +199,7 @@ function PhoneOtpForm({ onAuthed }: { onAuthed: (userId: string) => void }) {
     if (form.fullName) updates.full_name = form.fullName.trim();
     if (form.email) updates.email = form.email.trim();
     if (Object.keys(updates).length) {
-      await supabase.from("profiles").update(updates).eq("id", data.user.id);
+      await supabase.from("profiles").update(updates as any).eq("id", data.user.id);
     }
 
     // Decide if profile is complete
