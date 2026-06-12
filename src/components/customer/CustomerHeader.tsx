@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bell, ChevronDown, MapPin, Mic, Camera, Search, User as UserIcon } from "lucide-react";
+import { Bell, ChevronDown, MapPin, Search, User as UserIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -82,31 +82,6 @@ export function CustomerHeader() {
                 {placeholders[phIdx]}
               </motion.div>
             </div>
-            <button
-              type="button"
-              aria-label="Voice search"
-              onClick={(e) => { e.preventDefault(); toast("Voice search coming soon"); }}
-              className="grid h-8 w-8 place-items-center rounded-full text-primary"
-            >
-              <Mic className="h-5 w-5" />
-            </button>
-            <div className="h-5 w-px bg-border" />
-            <button
-              type="button"
-              aria-label="Image search"
-              onClick={(e) => { e.preventDefault(); fileRef.current?.click(); }}
-              className="grid h-8 w-8 place-items-center rounded-full text-primary"
-            >
-              <Camera className="h-5 w-5" />
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={onImage}
-              className="hidden"
-            />
           </Link>
         </div>
       </div>
