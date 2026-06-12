@@ -50,7 +50,7 @@ function CustomerShell() {
         <Outlet />
       </main>
 
-      <FloatingCartBar />
+      {!/^\/customer\/(cart|checkout)/.test(pathname) && <FloatingCartBar />}
 
       {/* Floating bottom nav */}
       <nav className="fixed bottom-3 left-3 right-3 z-30">
