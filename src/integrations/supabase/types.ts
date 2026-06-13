@@ -1660,6 +1660,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_assign_shop_owner: {
+        Args: { _shop_id: string; _user_email: string }
+        Returns: string
+      }
       admin_create_delivery_partner: {
         Args: {
           _name: string
