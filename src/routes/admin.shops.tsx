@@ -84,6 +84,7 @@ function Page() {
               <div className="text-xs text-muted-foreground">{s.address}, {s.city} · {s.pincode}</div>
               <div className="text-xs mt-1">Owner: <span className="font-mono">{s.owner_id ? s.owner_id.slice(0,8) : "Unassigned"}</span> • {s.is_open ? <span className="text-green-600 font-bold">Open</span> : <span className="text-muted-foreground">Closed</span>}</div>
               <div className="text-xs text-muted-foreground">{s.phone || "No phone"} · radius {s.service_radius_km} km</div>
+              <AssignOwnerInline shopId={s.id} onDone={() => qc.invalidateQueries({ queryKey: ["admin-shops"] })} />
             </div>
           ))}
           {shops.length === 0 && <div className="text-sm text-muted-foreground">No shops yet.</div>}
