@@ -319,16 +319,6 @@ function LoginPage() {
             </Link>
           </p>
 
-          {/* Demo creds hint */}
-          <details className="mt-4 rounded-xl bg-muted/40 p-3 text-[11px] text-muted-foreground">
-            <summary className="cursor-pointer font-bold">Demo credentials</summary>
-            <div className="mt-2 grid grid-cols-2 gap-1.5 font-mono">
-              <span>admin@example.com</span><span>password123</span>
-              <span>shop@example.com</span><span>password123</span>
-              <span>delivery@example.com</span><span>password123</span>
-              <span>customer@example.com</span><span>password123</span>
-            </div>
-          </details>
         </div>
       </div>
     </div>
