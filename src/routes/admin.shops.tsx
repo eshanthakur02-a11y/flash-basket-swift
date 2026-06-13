@@ -165,9 +165,10 @@ function AddShopkeeperDialog({ onDone }: { onDone: () => void }) {
   );
 }
 
-function AssignOwnerInline({ shopId, onDone }: { shopId: string; onDone: () => void }) {
+function AssignOwnerInline({ shopId, hasOwner, onDone }: { shopId: string; hasOwner: boolean; onDone: () => void }) {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const submit = async () => {
     if (!email.trim()) { toast.error("Enter the shopkeeper's email"); return; }
     setBusy(true);
@@ -176,10 +177,22 @@ function AssignOwnerInline({ shopId, onDone }: { shopId: string; onDone: () => v
     if (error) toast.error(error.message);
     else { toast.success("Owner assigned"); setEmail(""); onDone(); }
   };
+  const remove = async () => {
+    setRemoving(true);
+    const { error } = await (supabase as any).rpc("admin_unassign_shop_owner", { _shop_id: shopId });
+    setRemoving(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Owner removed"); setEmail(""); onDone(); }
+  };
   return (
     <div className="mt-3 flex gap-2">
       <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Assign owner by email" className="h-9 text-xs" />
       <Button size="sm" onClick={submit} disabled={busy}>{busy ? "…" : "Assign"}</Button>
+      {hasOwner && (
+        <Button size="sm" variant="outline" onClick={remove} disabled={removing} aria-label="Remove shop owner">
+          {removing ? "…" : <UserMinus className="h-4 w-4" />}
+        </Button>
+      )}
     </div>
   );
 }
