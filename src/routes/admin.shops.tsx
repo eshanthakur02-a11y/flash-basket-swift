@@ -9,7 +9,7 @@ import { LocationPicker, type LatLng } from "@/components/maps/LocationPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Store, UserPlus } from "lucide-react";
+import { Store, UserMinus, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/shops")({ component: Page });
@@ -19,7 +19,11 @@ function Page() {
   const [addOpen, setAddOpen] = useState(false);
   const q = useQuery({
     queryKey: ["admin-shops"],
-    queryFn: async () => (await supabase.from("shops").select("*").order("name")).data ?? [],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_list_shops");
+      if (error) throw error;
+      return data ?? [];
+    },
   });
 
   const shops = q.data ?? [];
@@ -84,9 +88,9 @@ function Page() {
             <div key={s.id} className="rounded-2xl border border-border bg-card p-4">
               <div className="font-bold">{s.name}</div>
               <div className="text-xs text-muted-foreground">{s.address}, {s.city} · {s.pincode}</div>
-              <div className="text-xs mt-1">Owner: <span className="font-mono">{s.owner_id ? s.owner_id.slice(0,8) : "Unassigned"}</span> • {s.is_open ? <span className="text-green-600 font-bold">Open</span> : <span className="text-muted-foreground">Closed</span>}</div>
+              <div className="text-xs mt-1">Owner: <span className={s.owner_email ? "font-medium" : "text-muted-foreground"}>{s.owner_email || "Unassigned"}</span> • {s.is_open ? <span className="text-green-600 font-bold">Open</span> : <span className="text-muted-foreground">Closed</span>}</div>
               <div className="text-xs text-muted-foreground">{s.phone || "No phone"} · radius {s.service_radius_km} km</div>
-              <AssignOwnerInline shopId={s.id} onDone={() => qc.invalidateQueries({ queryKey: ["admin-shops"] })} />
+              <AssignOwnerInline shopId={s.id} hasOwner={Boolean(s.owner_id)} onDone={() => qc.invalidateQueries({ queryKey: ["admin-shops"] })} />
             </div>
           ))}
           {shops.length === 0 && <div className="text-sm text-muted-foreground">No shops yet.</div>}
@@ -161,9 +165,10 @@ function AddShopkeeperDialog({ onDone }: { onDone: () => void }) {
   );
 }
 
-function AssignOwnerInline({ shopId, onDone }: { shopId: string; onDone: () => void }) {
+function AssignOwnerInline({ shopId, hasOwner, onDone }: { shopId: string; hasOwner: boolean; onDone: () => void }) {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const submit = async () => {
     if (!email.trim()) { toast.error("Enter the shopkeeper's email"); return; }
     setBusy(true);
@@ -172,10 +177,22 @@ function AssignOwnerInline({ shopId, onDone }: { shopId: string; onDone: () => v
     if (error) toast.error(error.message);
     else { toast.success("Owner assigned"); setEmail(""); onDone(); }
   };
+  const remove = async () => {
+    setRemoving(true);
+    const { error } = await supabase.rpc("admin_unassign_shop_owner", { _shop_id: shopId });
+    setRemoving(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Owner removed"); setEmail(""); onDone(); }
+  };
   return (
     <div className="mt-3 flex gap-2">
       <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Assign owner by email" className="h-9 text-xs" />
       <Button size="sm" onClick={submit} disabled={busy}>{busy ? "…" : "Assign"}</Button>
+      {hasOwner && (
+        <Button size="sm" variant="outline" onClick={remove} disabled={removing} aria-label="Remove shop owner">
+          {removing ? "…" : <UserMinus className="h-4 w-4" />}
+        </Button>
+      )}
     </div>
   );
 }
