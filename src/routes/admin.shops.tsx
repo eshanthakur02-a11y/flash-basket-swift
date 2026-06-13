@@ -20,7 +20,7 @@ function Page() {
   const q = useQuery({
     queryKey: ["admin-shops"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("admin_list_shops");
+      const { data, error } = await supabase.rpc("admin_list_shops");
       if (error) throw error;
       return data ?? [];
     },
@@ -179,7 +179,7 @@ function AssignOwnerInline({ shopId, hasOwner, onDone }: { shopId: string; hasOw
   };
   const remove = async () => {
     setRemoving(true);
-    const { error } = await (supabase as any).rpc("admin_unassign_shop_owner", { _shop_id: shopId });
+    const { error } = await supabase.rpc("admin_unassign_shop_owner", { _shop_id: shopId });
     setRemoving(false);
     if (error) toast.error(error.message);
     else { toast.success("Owner removed"); setEmail(""); onDone(); }
