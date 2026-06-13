@@ -158,3 +158,22 @@ function AddShopkeeperDialog({ onDone }: { onDone: () => void }) {
     </DialogContent>
   );
 }
+
+function AssignOwnerInline({ shopId, onDone }: { shopId: string; onDone: () => void }) {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    if (!email.trim()) { toast.error("Enter the shopkeeper's email"); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_assign_shop_owner", { _shop_id: shopId, _user_email: email.trim() });
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else { toast.success("Owner assigned"); setEmail(""); onDone(); }
+  };
+  return (
+    <div className="mt-3 flex gap-2">
+      <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Assign owner by email" className="h-9 text-xs" />
+      <Button size="sm" onClick={submit} disabled={busy}>{busy ? "…" : "Assign"}</Button>
+    </div>
+  );
+}
