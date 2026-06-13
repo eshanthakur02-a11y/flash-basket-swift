@@ -76,6 +76,7 @@ function Page() {
               );
             }}
           </LeafletMap>
+          </div>
         )}
 
         <div className="grid sm:grid-cols-2 gap-3">
