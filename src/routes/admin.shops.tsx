@@ -50,6 +50,7 @@ function Page() {
         </header>
 
         {valid.length > 0 && (
+          <div className="relative z-0 isolate">
           <LeafletMap center={center} zoom={11} className="h-72 sm:h-80 w-full rounded-2xl overflow-hidden border border-border">
             {(RL) => {
               const { Marker, Popup, Circle } = RL;
@@ -75,6 +76,7 @@ function Page() {
               );
             }}
           </LeafletMap>
+          </div>
         )}
 
         <div className="grid sm:grid-cols-2 gap-3">
