@@ -32,13 +32,25 @@ function Page() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [shopId, setShopId] = useState<string | null>(null);
+  const [shopLoading, setShopLoading] = useState(true);
 
-  // Load my shop
+  // Load my shop (+ realtime when admin assigns one)
   useEffect(() => {
     if (!user) return;
-    supabase.from("shops").select("id").eq("owner_id", user.id).order("name").limit(1).then(({ data }) => {
+    let cancelled = false;
+    const load = async () => {
+      const { data } = await supabase.from("shops").select("id").eq("owner_id", user.id).order("name").limit(1);
+      if (cancelled) return;
       setShopId(data?.[0]?.id ?? null);
-    });
+      setShopLoading(false);
+    };
+    setShopLoading(true);
+    load();
+    const ch = supabase
+      .channel("my-shop-" + user.id)
+      .on("postgres_changes", { event: "*", schema: "public", table: "shops", filter: `owner_id=eq.${user.id}` }, () => load())
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(ch); };
   }, [user]);
 
   // Realtime: refetch on any orders change for my shop
