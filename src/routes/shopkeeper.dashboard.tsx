@@ -36,8 +36,8 @@ function Page() {
   // Load my shop
   useEffect(() => {
     if (!user) return;
-    supabase.from("shops").select("id").eq("owner_id", user.id).maybeSingle().then(({ data }) => {
-      setShopId(data?.id ?? null);
+    supabase.from("shops").select("id").eq("owner_id", user.id).order("name").limit(1).then(({ data }) => {
+      setShopId(data?.[0]?.id ?? null);
     });
   }, [user]);
 
