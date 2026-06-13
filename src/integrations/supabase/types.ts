@@ -1745,6 +1745,25 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_shops: {
+        Args: never
+        Returns: {
+          address: string
+          city: string
+          created_at: string
+          id: string
+          is_open: boolean
+          latitude: number
+          longitude: number
+          name: string
+          owner_email: string
+          owner_id: string
+          phone: string
+          pincode: string
+          service_radius_km: number
+          updated_at: string
+        }[]
+      }
       admin_list_users: {
         Args: never
         Returns: {
@@ -1831,6 +1850,7 @@ export type Database = {
         Args: { _partner_id: string; _shop_id: string }
         Returns: undefined
       }
+      admin_unassign_shop_owner: { Args: { _shop_id: string }; Returns: string }
       admin_update_order_status: {
         Args: {
           _order_id: string
