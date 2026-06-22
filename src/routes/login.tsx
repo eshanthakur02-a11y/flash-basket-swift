@@ -1,10 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Lock, Mail, Shield, Store, Bike, User, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Loader2, Phone, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -16,37 +15,22 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
-type RoleKey = "admin" | "shopkeeper" | "delivery" | "customer";
-
-const ROLES: Array<{
-  key: RoleKey;
-  title: string;
-  subtitle: string;
-  icon: any;
-  iconBg: string;
-  iconColor: string;
-  dashboard: string;
-}> = [
-  { key: "admin", title: "Admin", subtitle: "Platform Administrator", icon: Shield, iconBg: "bg-emerald-100", iconColor: "text-emerald-600", dashboard: "/admin/dashboard" },
-  { key: "shopkeeper", title: "Shopkeeper", subtitle: "Manage your Shop", icon: Store, iconBg: "bg-blue-100", iconColor: "text-blue-600", dashboard: "/shopkeeper/dashboard" },
-  { key: "delivery", title: "Delivery", subtitle: "Deliver Orders", icon: Bike, iconBg: "bg-orange-100", iconColor: "text-orange-600", dashboard: "/delivery/dashboard" },
-  { key: "customer", title: "Customer", subtitle: "Browse & Order Products", icon: User, iconBg: "bg-violet-100", iconColor: "text-violet-600", dashboard: "/customer/dashboard" },
-];
-
-const DEMO_CREDS: Record<RoleKey, { email: string; password: string }> = {
-  admin: { email: "admin@example.com", password: "password123" },
-  shopkeeper: { email: "shop@example.com", password: "password123" },
-  delivery: { email: "delivery@example.com", password: "password123" },
-  customer: { email: "customer@example.com", password: "password123" },
-};
+type Tab = "password" | "otp";
 
 function LoginPage() {
-  const [role, setRole] = useState<RoleKey | null>(null);
+  const [tab, setTab] = useState<Tab>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [remember, setRemember] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // OTP state
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -56,17 +40,25 @@ function LoginPage() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed?.email) setEmail(parsed.email);
-        if (parsed?.role) setRole(parsed.role);
       }
     } catch {}
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function routeAfterLogin() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+    const roles = (data ?? []).map((r: any) => r.role);
+    // Customer app: any non-staff role lands on customer dashboard.
+    if (roles.includes("admin")) return navigate({ to: "/admin/dashboard" as any });
+    if (roles.includes("shopkeeper")) return navigate({ to: "/shopkeeper/dashboard" as any });
+    if (roles.includes("delivery")) return navigate({ to: "/delivery/dashboard" as any });
+    if (roles.includes("support")) return navigate({ to: "/support/dashboard" as any });
+    navigate({ to: "/customer/dashboard" as any });
+  }
+
+  async function handlePassword(e: React.FormEvent) {
     e.preventDefault();
-    if (!role) {
-      toast.error("Please select a role to continue");
-      return;
-    }
     setSubmitting(true);
     const { error } = await signIn(email, password);
     if (error) {
@@ -75,56 +67,20 @@ function LoginPage() {
       return;
     }
     try {
-      if (remember) localStorage.setItem("flashbasket.auth", JSON.stringify({ email, role }));
+      if (remember) localStorage.setItem("flashbasket.auth", JSON.stringify({ email }));
       else localStorage.removeItem("flashbasket.auth");
     } catch {}
-
-    // Fetch actual roles from DB to enforce RBAC and pick the right dashboard.
-    const { data: { user } } = await supabase.auth.getUser();
-    let actualRoles: string[] = [];
-    if (user) {
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-      actualRoles = (data ?? []).map((r: any) => r.role);
-    }
-
-    // Map the chosen role-card to allowed actual roles.
-    const allowedFor: Record<RoleKey, string[]> = {
-      admin: ["admin", "support"], // Admin card accepts admin OR support accounts
-      shopkeeper: ["shopkeeper"],
-      delivery: ["delivery"],
-      customer: ["customer"],
-    };
-    const allowed = allowedFor[role];
-    const matched = allowed.find((r) => actualRoles.includes(r));
-
-    if (!matched) {
-      setSubmitting(false);
-      await supabase.auth.signOut();
-      toast.error(`This account does not have ${role} access`);
-      return;
-    }
-
-    const dashboardByRole: Record<string, string> = {
-      admin: "/admin/dashboard",
-      support: "/support/dashboard",
-      shopkeeper: "/shopkeeper/dashboard",
-      delivery: "/delivery/dashboard",
-      customer: "/customer/dashboard",
-    };
-    toast.success(`Welcome back`);
-    navigate({ to: dashboardByRole[matched] as any });
+    toast.success("Welcome back");
+    await routeAfterLogin();
   }
 
   async function handleGoogle() {
-    if (!role) {
-      toast.error("Please select a role first");
-      return;
-    }
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin + "/login",
     });
     if (result.error) return toast.error(result.error.message || "Google sign-in failed");
     if (result.redirected) return;
+    await routeAfterLogin();
   }
 
   async function handleForgot() {
@@ -137,188 +93,165 @@ function LoginPage() {
     else toast.success("Password reset link sent — check your inbox");
   }
 
+  async function sendOtp() {
+    if (!otpEmail) return toast.error("Enter your email");
+    setOtpLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: otpEmail,
+      options: { shouldCreateUser: true, emailRedirectTo: window.location.origin + "/login" },
+    });
+    setOtpLoading(false);
+    if (error) return toast.error(error.message);
+    setOtpSent(true);
+    toast.success("OTP sent — check your email");
+  }
+
+  async function verifyOtp() {
+    if (otpCode.length < 6) return toast.error("Enter the 6-digit code");
+    setOtpLoading(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email: otpEmail,
+      token: otpCode,
+      type: "email",
+    });
+    setOtpLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Signed in");
+    await routeAfterLogin();
+  }
+
   return (
     <div className="min-h-screen bg-muted/30 flex items-start md:items-center justify-center p-0 md:p-6">
       <div className="w-full max-w-md bg-card md:rounded-3xl md:border md:border-border md:shadow-xl overflow-hidden">
-        {/* Hero illustration */}
-        <div className="relative h-44 md:h-52 overflow-hidden" style={{ background: "linear-gradient(135deg, #bbf7d0 0%, #86efac 60%, #4ade80 100%)" }}>
-          {/* Skyline silhouette */}
-          <div className="absolute inset-x-0 bottom-0 h-20 opacity-30" style={{
-            background: "repeating-linear-gradient(90deg, transparent 0 24px, rgba(255,255,255,0.08) 24px 56px)",
-          }} />
+        {/* Header with staff portal link */}
+        <div className="flex items-center justify-end px-4 pt-3">
+          <Link
+            to="/staff-login"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:border-primary/40 transition"
+          >
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Staff Login
+          </Link>
+        </div>
+
+        {/* Hero */}
+        <div className="relative h-36 md:h-44 overflow-hidden mt-2" style={{ background: "linear-gradient(135deg, #bbf7d0 0%, #86efac 60%, #4ade80 100%)" }}>
           <svg viewBox="0 0 400 200" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
-            {/* clouds */}
-            <g fill="rgba(255,255,255,0.12)">
+            <g fill="rgba(255,255,255,0.18)">
               <ellipse cx="60" cy="40" rx="22" ry="6" />
               <ellipse cx="320" cy="32" rx="28" ry="7" />
               <ellipse cx="350" cy="60" rx="18" ry="5" />
             </g>
-            {/* shop with green/white awning */}
-            <g transform="translate(40,90)">
-              <rect x="0" y="40" width="80" height="60" fill="#f5f5f0" rx="3" />
-              <rect x="0" y="30" width="80" height="14" fill="#16a34a" />
-              <g fill="#f5f5f0">
-                <rect x="0" y="30" width="10" height="14" />
-                <rect x="20" y="30" width="10" height="14" />
-                <rect x="40" y="30" width="10" height="14" />
-                <rect x="60" y="30" width="10" height="14" />
-              </g>
-              <rect x="10" y="55" width="40" height="6" fill="#cbd5d1" />
-              <rect x="10" y="68" width="50" height="4" fill="#cbd5d1" />
-              <rect x="10" y="78" width="35" height="4" fill="#cbd5d1" />
-              <rect x="55" y="55" width="20" height="45" fill="#1f2937" />
-            </g>
-            {/* phone center */}
             <g transform="translate(160,30)">
               <rect x="0" y="0" width="78" height="140" rx="14" fill="#ffffff" stroke="#0e3b2a" strokeWidth="2" />
               <rect x="6" y="14" width="66" height="118" rx="6" fill="#f8fafc" />
               <path d="M20 110 Q 38 60 60 30" stroke="#16a34a" strokeWidth="2.5" strokeDasharray="4 4" fill="none" />
               <circle cx="60" cy="30" r="6" fill="#16a34a" />
-              <circle cx="60" cy="30" r="2" fill="#fff" />
-            </g>
-            {/* package + scooter */}
-            <g transform="translate(255,110)">
-              <rect x="0" y="20" width="34" height="30" fill="#d8a564" rx="2" />
-              <rect x="0" y="30" width="34" height="3" fill="#a07842" />
-              <rect x="15" y="20" width="4" height="30" fill="#a07842" />
-            </g>
-            <g transform="translate(290,80)">
-              <circle cx="20" cy="62" r="10" fill="#1f2937" />
-              <circle cx="20" cy="62" r="4" fill="#9ca3af" />
-              <circle cx="62" cy="62" r="10" fill="#1f2937" />
-              <circle cx="62" cy="62" r="4" fill="#9ca3af" />
-              <path d="M10 55 Q 25 30 55 35 L 70 55 Z" fill="#16a34a" />
-              <rect x="30" y="20" width="22" height="20" rx="3" fill="#16a34a" />
-              <circle cx="41" cy="20" r="8" fill="#0e3b2a" />
-              <circle cx="41" cy="20" r="5" fill="#16a34a" />
             </g>
           </svg>
         </div>
 
         <div className="p-6 md:p-8 -mt-3 bg-card rounded-t-3xl relative">
           <div className="text-center">
-            <h1 className="font-display text-2xl font-extrabold text-foreground">Welcome Back!</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Login to access your account</p>
+            <h1 className="font-display text-2xl font-extrabold text-foreground">Welcome to FlashBasket</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Groceries delivered at lightning speed</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="email"
-                required
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-12 rounded-xl pl-10"
-              />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type={show ? "text" : "password"}
-                required
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12 rounded-xl pl-10 pr-10"
-              />
-              <button
-                type="button"
-                aria-label={show ? "Hide password" : "Show password"}
-                onClick={() => setShow((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground cursor-pointer">
-                <Checkbox checked={remember} onCheckedChange={(v) => setRemember(!!v)} />
-                Remember me
-              </label>
-              <button
-                type="button"
-                onClick={handleForgot}
-                className="text-xs font-bold text-primary hover:underline"
-              >
-                Forgot Password?
-              </button>
-            </div>
-
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-base shadow-md"
+          {/* Tabs */}
+          <div className="mt-5 grid grid-cols-2 gap-2 rounded-xl bg-muted p-1">
+            <button
+              type="button"
+              onClick={() => setTab("password")}
+              className={cn("h-9 rounded-lg text-xs font-bold transition", tab === "password" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}
             >
-              {submitting ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Signing in…</>
-              ) : (
-                "Login"
+              Email & Password
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("otp")}
+              className={cn("h-9 rounded-lg text-xs font-bold transition", tab === "otp" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}
+            >
+              OTP Login
+            </button>
+          </div>
+
+          {tab === "password" ? (
+            <form onSubmit={handlePassword} className="mt-5 space-y-3">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input type="email" required placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 rounded-xl pl-10" />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type={show ? "text" : "password"}
+                  required
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 rounded-xl pl-10 pr-10"
+                />
+                <button type="button" aria-label={show ? "Hide password" : "Show password"} onClick={() => setShow((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground cursor-pointer">
+                  <Checkbox checked={remember} onCheckedChange={(v) => setRemember(!!v)} />
+                  Remember me
+                </label>
+                <button type="button" onClick={handleForgot} className="text-xs font-bold text-primary hover:underline">
+                  Forgot Password?
+                </button>
+              </div>
+
+              <Button type="submit" disabled={submitting} className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-base shadow-md">
+                {submitting ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Signing in…</>) : "Login"}
+              </Button>
+            </form>
+          ) : (
+            <div className="mt-5 space-y-3">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input type="email" placeholder="Enter your email" value={otpEmail} onChange={(e) => setOtpEmail(e.target.value)} disabled={otpSent} className="h-12 rounded-xl pl-10" />
+              </div>
+              {otpSent && (
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input inputMode="numeric" maxLength={6} placeholder="Enter 6-digit OTP" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))} className="h-12 rounded-xl pl-10 tracking-widest" />
+                </div>
               )}
-            </Button>
-          </form>
+              {!otpSent ? (
+                <Button type="button" onClick={sendOtp} disabled={otpLoading} className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-base shadow-md">
+                  {otpLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending…</>) : "Send OTP"}
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Button type="button" onClick={verifyOtp} disabled={otpLoading} className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-base shadow-md">
+                    {otpLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying…</>) : "Verify & Login"}
+                  </Button>
+                  <button type="button" onClick={() => { setOtpSent(false); setOtpCode(""); }} className="w-full text-xs text-muted-foreground hover:text-foreground">
+                    Use a different email
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="relative my-5">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-            <div className="relative flex justify-center"><span className="bg-card px-3 text-xs text-muted-foreground">or login as</span></div>
+            <div className="relative flex justify-center"><span className="bg-card px-3 text-xs text-muted-foreground">or</span></div>
           </div>
 
-          {/* Role selector */}
-          <div className="grid grid-cols-4 gap-2">
-            {ROLES.map((r) => {
-              const Icon = r.icon;
-              const active = role === r.key;
-              return (
-                <motion.button
-                  type="button"
-                  key={r.key}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    setRole(r.key);
-                    const creds = DEMO_CREDS[r.key];
-                    setEmail(creds.email);
-                    setPassword(creds.password);
-                  }}
-                  className={cn(
-                    "flex flex-col items-center gap-1.5 rounded-2xl border-2 p-2.5 text-center transition-all",
-                    active
-                      ? "border-primary bg-primary/5 shadow-lg shadow-primary/20"
-                      : "border-border bg-card hover:border-primary/40 hover:shadow-sm",
-                  )}
-                >
-                  <span className={cn("grid h-10 w-10 place-items-center rounded-xl", r.iconBg)}>
-                    <Icon className={cn("h-5 w-5", r.iconColor)} />
-                  </span>
-                  <span className={cn("text-[11px] font-extrabold leading-tight", active ? "text-primary" : "text-foreground")}>
-                    {r.title}
-                  </span>
-                  <span className="text-[9px] leading-tight text-muted-foreground line-clamp-2">
-                    {r.subtitle}
-                  </span>
-                </motion.button>
-              );
-            })}
-          </div>
-
-          {/* Google */}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGoogle}
-            className="mt-4 w-full h-11 rounded-xl font-bold gap-2"
-          >
+          <Button type="button" variant="outline" onClick={handleGoogle} className="w-full h-11 rounded-xl font-bold gap-2">
             <GoogleIcon /> Continue with Google
           </Button>
 
           <p className="mt-5 text-center text-xs text-muted-foreground">
             Don't have an account?{" "}
-            <Link to="/signup" className="font-bold text-primary hover:underline">
-              Sign up
-            </Link>
+            <Link to="/signup" className="font-bold text-primary hover:underline">Sign up</Link>
           </p>
-
         </div>
       </div>
     </div>
