@@ -2120,6 +2120,14 @@ export type Database = {
         Args: { _order_id: string }
         Returns: boolean
       }
+      validate_coupon: {
+        Args: { _code: string; _subtotal: number }
+        Returns: {
+          code: string
+          description: string
+          discount: number
+        }[]
+      }
     }
     Enums: {
       address_type: "home" | "work" | "other"

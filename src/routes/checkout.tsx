@@ -78,27 +78,16 @@ function CheckoutPage() {
     const code = coupon.trim().toUpperCase();
     if (!code) return toast.error("Enter a coupon code");
     setApplyingCoupon(true);
-    const { data, error } = await supabase
-      .from("coupons")
-      .select("*")
-      .eq("code", code)
-      .eq("active", true)
-      .maybeSingle();
+    const { data, error } = await (supabase as any).rpc("validate_coupon", {
+      _code: code,
+      _subtotal: subtotal,
+    });
     setApplyingCoupon(false);
-    if (error || !data) return toast.error("Invalid coupon code");
-    if (data.expires_at && new Date(data.expires_at) < new Date())
-      return toast.error("Coupon expired");
-    if (data.usage_limit && data.times_used >= data.usage_limit)
-      return toast.error("Coupon usage limit reached");
-    if (subtotal < Number(data.min_order))
-      return toast.error(`Add ₹${(Number(data.min_order) - subtotal).toFixed(0)} more to use ${code}`);
-    let disc = 0;
-    if (data.type === "flat") disc = Math.min(Number(data.value), subtotal);
-    else {
-      disc = (subtotal * Number(data.value)) / 100;
-      if (data.max_discount) disc = Math.min(disc, Number(data.max_discount));
-    }
-    setAppliedCoupon({ code, discount: Math.round(disc * 100) / 100 });
+    if (error) return toast.error(error.message || "Invalid coupon code");
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return toast.error("Invalid coupon code");
+    const disc = Number(row.discount) || 0;
+    setAppliedCoupon({ code: row.code ?? code, discount: Math.round(disc * 100) / 100 });
     toast.success(`${code} applied — you saved ₹${disc.toFixed(0)}`);
   };
 
