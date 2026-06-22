@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as StaffLoginRouteImport } from './routes/staff-login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ShopkeeperRouteImport } from './routes/shopkeeper'
 import { Route as ProductsRouteImport } from './routes/products'
@@ -90,6 +91,11 @@ import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffLoginRoute = StaffLoginRouteImport.update({
+  id: '/staff-login',
+  path: '/staff-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -491,6 +497,7 @@ export interface FileRoutesByFullPath {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
@@ -570,6 +577,7 @@ export interface FileRoutesByTo {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
@@ -650,6 +658,7 @@ export interface FileRoutesById {
   '/products': typeof ProductsRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
+  '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
@@ -731,6 +740,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/staff-login'
     | '/support'
     | '/admin/categories'
     | '/admin/complaints'
@@ -810,6 +820,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/staff-login'
     | '/support'
     | '/admin/categories'
     | '/admin/complaints'
@@ -889,6 +900,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/shopkeeper'
     | '/signup'
+    | '/staff-login'
     | '/support'
     | '/admin/categories'
     | '/admin/complaints'
@@ -969,6 +981,7 @@ export interface RootRouteChildren {
   ProductsRoute: typeof ProductsRoute
   ShopkeeperRoute: typeof ShopkeeperRouteWithChildren
   SignupRoute: typeof SignupRoute
+  StaffLoginRoute: typeof StaffLoginRoute
   SupportRoute: typeof SupportRouteWithChildren
   CategorySlugRoute: typeof CategorySlugRoute
   OrdersIdRoute: typeof OrdersIdRoute
@@ -985,6 +998,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff-login': {
+      id: '/staff-login'
+      path: '/staff-login'
+      fullPath: '/staff-login'
+      preLoaderRoute: typeof StaffLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -1734,6 +1754,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProductsRoute: ProductsRoute,
   ShopkeeperRoute: ShopkeeperRouteWithChildren,
   SignupRoute: SignupRoute,
+  StaffLoginRoute: StaffLoginRoute,
   SupportRoute: SupportRouteWithChildren,
   CategorySlugRoute: CategorySlugRoute,
   OrdersIdRoute: OrdersIdRoute,
@@ -1746,13 +1767,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
