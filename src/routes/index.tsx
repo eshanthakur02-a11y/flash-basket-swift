@@ -484,6 +484,16 @@ function ProductSection({
   );
 }
 
+type OfferRow = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  image_url: string;
+  link_url: string | null;
+  badge: string | null;
+  scope: "global" | "shop";
+};
+
 const STATIC_OFFERS: OfferRow[] = [
   {
     id: "1",
