@@ -15,6 +15,13 @@ import { Hero3D } from "@/components/Hero3D";
 import { MobileHeroScene } from "@/components/MobileHeroScene";
 import { useAuth } from "@/hooks/useAuth";
 
+import offer1 from "@/assets/offer-1.jpg";
+import offer2 from "@/assets/offer-2.jpg";
+import offer3 from "@/assets/offer-3.jpg";
+import offer4 from "@/assets/offer-4.jpg";
+import offer5 from "@/assets/offer-5.jpg";
+import offer6 from "@/assets/offer-6.jpg";
+
 type SortKey = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 
 export const Route = createFileRoute("/")({
@@ -494,72 +501,112 @@ type OfferRow = {
   scope: "global" | "shop";
 };
 
+const STATIC_OFFERS: OfferRow[] = [
+  {
+    id: "1",
+    title: "Weekend Sale",
+    subtitle: "Up to 70% off on fresh produce",
+    image_url: offer1,
+    link_url: "/products",
+    badge: "70% OFF",
+    scope: "global",
+  },
+  {
+    id: "2",
+    title: "BOGO Deal",
+    subtitle: "Buy 1 Get 1 Free on dairy",
+    image_url: offer2,
+    link_url: "/products",
+    badge: "B1G1",
+    scope: "global",
+  },
+  {
+    id: "3",
+    title: "Snack Fiesta",
+    subtitle: "Flat 50% off on all snacks",
+    image_url: offer3,
+    link_url: "/products",
+    badge: "50% OFF",
+    scope: "global",
+  },
+  {
+    id: "4",
+    title: "Farm Fresh",
+    subtitle: "40% off on vegetables",
+    image_url: offer4,
+    link_url: "/products",
+    badge: "40% OFF",
+    scope: "global",
+  },
+  {
+    id: "5",
+    title: "Daily Essentials",
+    subtitle: "Big savings on household items",
+    image_url: offer5,
+    link_url: "/products",
+    badge: "SAVE BIG",
+    scope: "global",
+  },
+  {
+    id: "6",
+    title: "Summer Special",
+    subtitle: "60% off on fruits & juices",
+    image_url: offer6,
+    link_url: "/products",
+    badge: "60% OFF",
+    scope: "global",
+  },
+];
+
 function OfferBannersCarousel() {
-  const offers = useQuery({
-    queryKey: ["offers-public"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("offers" as any)
-        .select("id, title, subtitle, image_url, link_url, badge, scope, display_order")
-        .order("display_order", { ascending: true });
-      return (data ?? []) as unknown as OfferRow[];
-    },
-  });
-
-  if (!offers.isLoading && (!offers.data || offers.data.length === 0)) return null;
-
   return (
     <section className="mx-auto max-w-7xl px-4 pt-6">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-display text-lg md:text-xl font-bold">🎁 Offers & deals</h2>
       </div>
 
-      {offers.isLoading ? (
-        <Skeleton className="w-full h-28 sm:h-32 rounded-2xl" />
-      ) : (
-        <Swiper
-          modules={[Autoplay, Pagination]}
-          loop={(offers.data?.length ?? 0) > 1}
-          spaceBetween={12}
-          autoplay={{ delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }}
-          pagination={{ clickable: true, dynamicBullets: true }}
-          breakpoints={{
-            0: { slidesPerView: 1.1 },
-            640: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 4 },
-          }}
-          className="!pb-8"
-        >
-          {offers.data!.map((o) => {
-            const href = o.link_url || "/";
-            const img = (
-              <div className="relative rounded-2xl overflow-hidden shadow-md hover:shadow-glow transition-shadow border border-border bg-card">
-                <img
-                  src={o.image_url}
-                  alt={o.title}
-                  loading="lazy"
-                  className="w-full h-28 sm:h-32 md:h-36 object-cover"
-                />
-                {o.badge && (
-                  <span className="absolute top-2 left-2 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 shadow-glow">
-                    {o.badge}
-                  </span>
-                )}
-              </div>
-            );
-            return (
-              <SwiperSlide key={o.id}>
-                {href.startsWith("/") ? (
-                  <Link to={href as any} className="block">{img}</Link>
-                ) : (
-                  <a href={href} target="_blank" rel="noreferrer" className="block">{img}</a>
-                )}
-              </SwiperSlide>
-            );
-          })}
-        </Swiper>
-      )}
+      <Swiper
+        modules={[Autoplay, Pagination]}
+        loop={STATIC_OFFERS.length > 1}
+        spaceBetween={12}
+        autoplay={{ delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }}
+        pagination={{ clickable: true, dynamicBullets: true }}
+        breakpoints={{
+          0: { slidesPerView: 1.1 },
+          640: { slidesPerView: 2 },
+          768: { slidesPerView: 3 },
+          1024: { slidesPerView: 4 },
+        }}
+        className="!pb-8"
+      >
+        {STATIC_OFFERS.map((o) => {
+          const href = o.link_url || "/";
+          const img = (
+            <div className="relative rounded-2xl overflow-hidden shadow-md hover:shadow-glow transition-shadow border border-border bg-card">
+              <img
+                src={o.image_url}
+                alt={o.title}
+                loading="lazy"
+                className="w-full h-28 sm:h-32 md:h-36 object-cover"
+              />
+              {o.badge && (
+                <span className="absolute top-2 left-2 rounded-full gradient-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 shadow-glow">
+                  {o.badge}
+                </span>
+              )}
+            </div>
+          );
+          return (
+            <SwiperSlide key={o.id}>
+              {href.startsWith("/") ? (
+                <Link to={href as any} className="block">{img}</Link>
+              ) : (
+                <a href={href} target="_blank" rel="noreferrer" className="block">{img}</a>
+              )}
+            </SwiperSlide>
+          );
+        })}
+      </Swiper>
     </section>
   );
 }
