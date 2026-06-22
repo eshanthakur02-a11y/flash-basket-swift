@@ -15,6 +15,13 @@ import { Hero3D } from "@/components/Hero3D";
 import { MobileHeroScene } from "@/components/MobileHeroScene";
 import { useAuth } from "@/hooks/useAuth";
 
+import offer1 from "@/assets/offer-1.jpg";
+import offer2 from "@/assets/offer-2.jpg";
+import offer3 from "@/assets/offer-3.jpg";
+import offer4 from "@/assets/offer-4.jpg";
+import offer5 from "@/assets/offer-5.jpg";
+import offer6 from "@/assets/offer-6.jpg";
+
 type SortKey = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 
 export const Route = createFileRoute("/")({
