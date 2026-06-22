@@ -69,12 +69,14 @@ function LoginPage() {
       toast.error(error.message || "Sign-in failed");
       return;
     }
+    const ok = await routeAfterLogin();
+    setSubmitting(false);
+    if (!ok) return;
     try {
       if (remember) localStorage.setItem("flashbasket.auth", JSON.stringify({ email }));
       else localStorage.removeItem("flashbasket.auth");
     } catch {}
     toast.success("Welcome back");
-    await routeAfterLogin();
   }
 
   async function handleGoogle() {
