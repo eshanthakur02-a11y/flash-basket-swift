@@ -44,17 +44,20 @@ function LoginPage() {
     } catch {}
   }, []);
 
-  async function routeAfterLogin() {
+  async function routeAfterLogin(): Promise<boolean> {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) return false;
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
     const roles = (data ?? []).map((r: any) => r.role);
-    // Customer app: any non-staff role lands on customer dashboard.
-    if (roles.includes("admin")) return navigate({ to: "/admin/dashboard" as any });
-    if (roles.includes("shopkeeper")) return navigate({ to: "/shopkeeper/dashboard" as any });
-    if (roles.includes("delivery")) return navigate({ to: "/delivery/dashboard" as any });
-    if (roles.includes("support")) return navigate({ to: "/support/dashboard" as any });
+    const STAFF = ["admin", "shopkeeper", "delivery", "support"];
+    if (roles.some((r: string) => STAFF.includes(r))) {
+      await supabase.auth.signOut();
+      toast.error("Staff accounts must use the Management Portal");
+      navigate({ to: "/staff-login" as any });
+      return false;
+    }
     navigate({ to: "/customer/dashboard" as any });
+    return true;
   }
 
   async function handlePassword(e: React.FormEvent) {
@@ -66,12 +69,14 @@ function LoginPage() {
       toast.error(error.message || "Sign-in failed");
       return;
     }
+    const ok = await routeAfterLogin();
+    setSubmitting(false);
+    if (!ok) return;
     try {
       if (remember) localStorage.setItem("flashbasket.auth", JSON.stringify({ email }));
       else localStorage.removeItem("flashbasket.auth");
     } catch {}
     toast.success("Welcome back");
-    await routeAfterLogin();
   }
 
   async function handleGoogle() {
