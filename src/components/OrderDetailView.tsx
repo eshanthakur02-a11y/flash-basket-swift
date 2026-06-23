@@ -36,8 +36,8 @@ export function OrderDetailView({ id }: { id: string }) {
         shop = data;
       }
       if (o?.partner_id) {
-        const { data } = await supabase.from("delivery_partners").select("id,name,current_lat,current_lng").eq("id", o.partner_id).maybeSingle();
-        partner = data;
+        const { data } = await supabase.rpc("get_order_partner_tracking", { _order_id: id });
+        partner = Array.isArray(data) ? data[0] ?? null : data;
       }
       return o ? { ...o, items: it ?? [], shop, partner } : null;
     },
