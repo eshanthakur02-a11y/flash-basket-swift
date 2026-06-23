@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Package, CheckCircle2 } from "lucide-react";
 import { RoleShell } from "@/components/RoleShell";
-import { SHOPKEEPER_NAV } from "@/components/shopkeeper-nav";
+import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ function ShopkeeperNotifications() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("notifications")
-        .select("id,title,body,category,data,is_read,created_at")
+        .select("id,title,body,category,data,read,created_at")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(100);
@@ -47,8 +47,8 @@ function ShopkeeperNotifications() {
 
   // Mark all as read on view
   useEffect(() => {
-    if (!user?.id || !items.some((n: any) => !n.is_read)) return;
-    supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false).then(() => {
+    if (!user?.id || !items.some((n: any) => !n.read)) return;
+    supabase.from("notifications").update({ read: true }).eq("user_id", user.id).eq("read", false).then(() => {
       qc.invalidateQueries({ queryKey: ["shopkeeper-notification-unread", user.id] });
     });
   }, [items, user?.id, qc]);
@@ -71,7 +71,7 @@ function ShopkeeperNotifications() {
               const Inner = (
                 <div className={cn(
                   "flex gap-3 rounded-2xl border border-border p-3 transition hover:bg-secondary/60",
-                  !n.is_read && "bg-primary/5 border-primary/30",
+                  !n.read && "bg-primary/5 border-primary/30",
                 )}>
                   <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary shrink-0">
                     {n.category === "order" ? <Package className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
