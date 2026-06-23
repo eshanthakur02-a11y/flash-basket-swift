@@ -1909,6 +1909,20 @@ export type Database = {
         Args: { _order_id: string }
         Returns: string
       }
+      get_order_partner_tracking: {
+        Args: { _order_id: string }
+        Returns: {
+          availability_status: string
+          current_lat: number
+          current_lng: number
+          eta_minutes: number
+          id: string
+          name: string
+          rating: number
+          status_updated_at: string
+          vehicle: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
