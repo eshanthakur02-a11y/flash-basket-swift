@@ -149,3 +149,44 @@ function SwipeableSheetContent({ children, onClose }: { children: React.ReactNod
     </SheetContent>
   );
 }
+
+function NotificationBell({ userId }: { userId?: string }) {
+  const qc = useQueryClient();
+  const { data: count = 0 } = useQuery({
+    queryKey: ["shopkeeper-notification-unread", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId!)
+        .eq("read", false);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  useEffect(() => {
+    if (!userId) return;
+    const ch = supabase
+      .channel(`notif-bell-${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
+        () => qc.invalidateQueries({ queryKey: ["shopkeeper-notification-unread", userId] }),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [userId, qc]);
+
+  return (
+    <Link to="/shopkeeper/notifications" aria-label="Notifications" className="relative grid h-10 w-10 place-items-center rounded-full hover:bg-secondary transition">
+      <Bell className="h-5 w-5" />
+      {count > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-accent-foreground text-[10px] font-bold grid place-items-center ring-2 ring-background">
+          {count > 9 ? "9+" : count}
+        </span>
+      )}
+    </Link>
+  );
+}
