@@ -640,7 +640,9 @@ export type Database = {
         Row: {
           address: Json
           assignment_attempts: number
+          assignment_distance_km: number | null
           assignment_expires_at: string | null
+          assignment_reason: string | null
           cancel_reason: string | null
           coupon_code: string | null
           delivery_fee: number
@@ -671,7 +673,9 @@ export type Database = {
         Insert: {
           address: Json
           assignment_attempts?: number
+          assignment_distance_km?: number | null
           assignment_expires_at?: string | null
+          assignment_reason?: string | null
           cancel_reason?: string | null
           coupon_code?: string | null
           delivery_fee?: number
@@ -702,7 +706,9 @@ export type Database = {
         Update: {
           address?: Json
           assignment_attempts?: number
+          assignment_distance_km?: number | null
           assignment_expires_at?: string | null
+          assignment_reason?: string | null
           cancel_reason?: string | null
           coupon_code?: string | null
           delivery_fee?: number
