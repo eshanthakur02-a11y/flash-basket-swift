@@ -27,6 +27,15 @@ function Page() {
           <h1 className="font-display text-2xl font-bold">{o.order_number}</h1>
           <div className="text-sm text-muted-foreground mt-1">{o.status} • {rupees(o.total)}</div>
         </div>
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-2 text-sm">
+          <div className="font-semibold">Shop assignment</div>
+          <div className="grid grid-cols-2 gap-y-1 text-muted-foreground">
+            <span>Assigned shop</span><span className="text-foreground font-mono text-xs">{o.shop_id ?? "—"}</span>
+            <span>Distance</span><span className="text-foreground">{o.assignment_distance_km != null ? `${Number(o.assignment_distance_km).toFixed(2)} km` : "—"}</span>
+            <span>Reason</span><span className="text-foreground">{o.assignment_reason ?? "—"}</span>
+            <span>Placed at</span><span className="text-foreground">{o.placed_at ? new Date(o.placed_at).toLocaleString() : "—"}</span>
+          </div>
+        </div>
         <div className="rounded-2xl border border-border bg-card divide-y divide-border">
           {o.items.map((it: any) => (
             <div key={it.id} className="flex justify-between px-4 py-3 text-sm">
