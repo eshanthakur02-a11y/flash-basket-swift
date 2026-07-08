@@ -169,7 +169,7 @@ function CategoriesBrowse() {
                   key={c.key}
                   whileTap={{ scale: 0.94 }}
                   onClick={() =>
-                    navigate({ search: (prev: any) => ({ ...prev, chip: active ? undefined : c.key }) as any })
+                    navigate({ search: { chip: active ? undefined : c.key } as any })
                   }
                   className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-bold border transition-all ${
                     active
