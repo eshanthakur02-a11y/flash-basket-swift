@@ -53,7 +53,6 @@ import { Route as DeliveryAvailableOrdersRouteImport } from './routes/delivery.a
 import { Route as CustomerWishlistRouteImport } from './routes/customer.wishlist'
 import { Route as CustomerShopRouteImport } from './routes/customer.shop'
 import { Route as CustomerProfileRouteImport } from './routes/customer.profile'
-import { Route as CustomerOrdersRouteImport } from './routes/customer.orders'
 import { Route as CustomerNotificationsRouteImport } from './routes/customer.notifications'
 import { Route as CustomerHomeRouteImport } from './routes/customer.home'
 import { Route as CustomerDashboardRouteImport } from './routes/customer.dashboard'
@@ -78,6 +77,7 @@ import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminComplaintsRouteImport } from './routes/admin.complaints'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as CustomerOrdersIndexRouteImport } from './routes/customer.orders.index'
 import { Route as SupportTicketsIdRouteImport } from './routes/support.tickets.$id'
 import { Route as SupportTicketIdRouteImport } from './routes/support.ticket.$id'
 import { Route as ShopkeeperOrdersIdRouteImport } from './routes/shopkeeper.orders.$id'
@@ -308,11 +308,6 @@ const CustomerProfileRoute = CustomerProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => CustomerRoute,
 } as any)
-const CustomerOrdersRoute = CustomerOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => CustomerRoute,
-} as any)
 const CustomerNotificationsRoute = CustomerNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -433,6 +428,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const CustomerOrdersIndexRoute = CustomerOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => CustomerRoute,
+} as any)
 const SupportTicketsIdRoute = SupportTicketsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -459,9 +459,9 @@ const CustomerProductIdRoute = CustomerProductIdRouteImport.update({
   getParentRoute: () => CustomerRoute,
 } as any)
 const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => CustomerOrdersRoute,
+  id: '/orders/$id',
+  path: '/orders/$id',
+  getParentRoute: () => CustomerRoute,
 } as any)
 const ApiPublicOneSignalSDKWorkerDotjsRoute =
   ApiPublicOneSignalSDKWorkerDotjsRouteImport.update({
@@ -523,7 +523,6 @@ export interface FileRoutesByFullPath {
   '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
-  '/customer/orders': typeof CustomerOrdersRouteWithChildren
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
   '/customer/wishlist': typeof CustomerWishlistRoute
@@ -560,6 +559,7 @@ export interface FileRoutesByFullPath {
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
   '/support/ticket/$id': typeof SupportTicketIdRoute
   '/support/tickets/$id': typeof SupportTicketsIdRoute
+  '/customer/orders/': typeof CustomerOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -603,7 +603,6 @@ export interface FileRoutesByTo {
   '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
-  '/customer/orders': typeof CustomerOrdersRouteWithChildren
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
   '/customer/wishlist': typeof CustomerWishlistRoute
@@ -640,6 +639,7 @@ export interface FileRoutesByTo {
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
   '/support/ticket/$id': typeof SupportTicketIdRoute
   '/support/tickets/$id': typeof SupportTicketsIdRoute
+  '/customer/orders': typeof CustomerOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -684,7 +684,6 @@ export interface FileRoutesById {
   '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
-  '/customer/orders': typeof CustomerOrdersRouteWithChildren
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
   '/customer/wishlist': typeof CustomerWishlistRoute
@@ -721,6 +720,7 @@ export interface FileRoutesById {
   '/shopkeeper/orders/$id': typeof ShopkeeperOrdersIdRoute
   '/support/ticket/$id': typeof SupportTicketIdRoute
   '/support/tickets/$id': typeof SupportTicketsIdRoute
+  '/customer/orders/': typeof CustomerOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -766,7 +766,6 @@ export interface FileRouteTypes {
     | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
-    | '/customer/orders'
     | '/customer/profile'
     | '/customer/shop'
     | '/customer/wishlist'
@@ -803,6 +802,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/orders/$id'
     | '/support/ticket/$id'
     | '/support/tickets/$id'
+    | '/customer/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -846,7 +846,6 @@ export interface FileRouteTypes {
     | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
-    | '/customer/orders'
     | '/customer/profile'
     | '/customer/shop'
     | '/customer/wishlist'
@@ -883,6 +882,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/orders/$id'
     | '/support/ticket/$id'
     | '/support/tickets/$id'
+    | '/customer/orders'
   id:
     | '__root__'
     | '/'
@@ -926,7 +926,6 @@ export interface FileRouteTypes {
     | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
-    | '/customer/orders'
     | '/customer/profile'
     | '/customer/shop'
     | '/customer/wishlist'
@@ -963,6 +962,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/orders/$id'
     | '/support/ticket/$id'
     | '/support/tickets/$id'
+    | '/customer/orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1301,13 +1301,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerProfileRouteImport
       parentRoute: typeof CustomerRoute
     }
-    '/customer/orders': {
-      id: '/customer/orders'
-      path: '/orders'
-      fullPath: '/customer/orders'
-      preLoaderRoute: typeof CustomerOrdersRouteImport
-      parentRoute: typeof CustomerRoute
-    }
     '/customer/notifications': {
       id: '/customer/notifications'
       path: '/notifications'
@@ -1476,6 +1469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/customer/orders/': {
+      id: '/customer/orders/'
+      path: '/orders'
+      fullPath: '/customer/orders/'
+      preLoaderRoute: typeof CustomerOrdersIndexRouteImport
+      parentRoute: typeof CustomerRoute
+    }
     '/support/tickets/$id': {
       id: '/support/tickets/$id'
       path: '/$id'
@@ -1513,10 +1513,10 @@ declare module '@tanstack/react-router' {
     }
     '/customer/orders/$id': {
       id: '/customer/orders/$id'
-      path: '/$id'
+      path: '/orders/$id'
       fullPath: '/customer/orders/$id'
       preLoaderRoute: typeof CustomerOrdersIdRouteImport
-      parentRoute: typeof CustomerOrdersRoute
+      parentRoute: typeof CustomerRoute
     }
     '/api/public/OneSignalSDKWorker.js': {
       id: '/api/public/OneSignalSDKWorker.js'
@@ -1594,18 +1594,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface CustomerOrdersRouteChildren {
-  CustomerOrdersIdRoute: typeof CustomerOrdersIdRoute
-}
-
-const CustomerOrdersRouteChildren: CustomerOrdersRouteChildren = {
-  CustomerOrdersIdRoute: CustomerOrdersIdRoute,
-}
-
-const CustomerOrdersRouteWithChildren = CustomerOrdersRoute._addFileChildren(
-  CustomerOrdersRouteChildren,
-)
-
 interface CustomerRouteChildren {
   CustomerApplyRoute: typeof CustomerApplyRoute
   CustomerCartRoute: typeof CustomerCartRoute
@@ -1614,11 +1602,12 @@ interface CustomerRouteChildren {
   CustomerDashboardRoute: typeof CustomerDashboardRoute
   CustomerHomeRoute: typeof CustomerHomeRoute
   CustomerNotificationsRoute: typeof CustomerNotificationsRoute
-  CustomerOrdersRoute: typeof CustomerOrdersRouteWithChildren
   CustomerProfileRoute: typeof CustomerProfileRoute
   CustomerShopRoute: typeof CustomerShopRoute
   CustomerWishlistRoute: typeof CustomerWishlistRoute
+  CustomerOrdersIdRoute: typeof CustomerOrdersIdRoute
   CustomerProductIdRoute: typeof CustomerProductIdRoute
+  CustomerOrdersIndexRoute: typeof CustomerOrdersIndexRoute
 }
 
 const CustomerRouteChildren: CustomerRouteChildren = {
@@ -1629,11 +1618,12 @@ const CustomerRouteChildren: CustomerRouteChildren = {
   CustomerDashboardRoute: CustomerDashboardRoute,
   CustomerHomeRoute: CustomerHomeRoute,
   CustomerNotificationsRoute: CustomerNotificationsRoute,
-  CustomerOrdersRoute: CustomerOrdersRouteWithChildren,
   CustomerProfileRoute: CustomerProfileRoute,
   CustomerShopRoute: CustomerShopRoute,
   CustomerWishlistRoute: CustomerWishlistRoute,
+  CustomerOrdersIdRoute: CustomerOrdersIdRoute,
   CustomerProductIdRoute: CustomerProductIdRoute,
+  CustomerOrdersIndexRoute: CustomerOrdersIndexRoute,
 }
 
 const CustomerRouteWithChildren = CustomerRoute._addFileChildren(
@@ -1767,13 +1757,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
