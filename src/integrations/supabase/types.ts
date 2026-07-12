@@ -1969,6 +1969,8 @@ export type Database = {
         Returns: {
           area_pincode: string
           city: string
+          delivery_type: string
+          fast_delivery_fee: number
           id: string
           item_count: number
           order_number: string
