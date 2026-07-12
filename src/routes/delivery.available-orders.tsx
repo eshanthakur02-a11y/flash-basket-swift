@@ -8,6 +8,7 @@ import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { Truck } from "lucide-react";
 import { DELIVERY_NAV } from "./delivery.dashboard";
+import { FastDeliveryBadge } from "@/components/FastDeliveryBadge";
 
 export const Route = createFileRoute("/delivery/available-orders")({
   head: () => ({ meta: [{ title: "Available Orders — Delivery" }] }),
