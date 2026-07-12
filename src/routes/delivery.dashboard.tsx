@@ -390,5 +390,89 @@ function Page() {
 }
 
 
+function PriorityOrderRow({
+  o, partnerOnline, onAccept, onDecline, assignedMode,
+}: {
+  o: any; partnerOnline: boolean; onAccept: () => void; onDecline?: () => void; assignedMode?: boolean;
+}) {
+  const isFast = o.delivery_type === "fast_delivery";
+  const deadline = isFast && o.placed_at ? new Date(new Date(o.placed_at).getTime() + 30 * 60 * 1000) : null;
+  const countdown = useCountdown(deadline);
+
+  if (isFast) {
+    return (
+      <div className="relative overflow-hidden rounded-2xl border-2 border-red-500 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/40 dark:to-red-900/30 p-4 space-y-3 shadow-lg">
+        <div className="absolute inset-x-0 top-0 h-1 bg-red-500 animate-pulse" />
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <PriorityDot />
+            <span className="inline-flex items-center gap-1 rounded-full bg-red-600 text-white px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider animate-pulse">
+              <AlertTriangle className="h-3 w-3" />
+              Fast delivery · Priority
+            </span>
+          </div>
+          {deadline && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/80 dark:bg-black/40 text-red-700 dark:text-red-300 border border-red-300 px-2 py-1 text-xs font-bold">
+              <Timer className="h-3 w-3" />
+              {countdown}
+            </span>
+          )}
+        </div>
+        <div className="min-w-0">
+          <div className="text-xs font-bold uppercase text-red-700 dark:text-red-300">New priority order</div>
+          <div className="font-extrabold text-lg leading-tight">{o.order_number}</div>
+          <div className="text-xs text-red-900/80 dark:text-red-100/80 mt-0.5">
+            {(o.address as any)?.line1}, {(o.address as any)?.city}
+          </div>
+          <div className="mt-1 text-xs text-red-900/70 dark:text-red-100/70">
+            ⏱ Deliver within 15–30 min · Total {rupees(o.total)}
+            {o.fast_delivery_fee ? ` · Extra ${rupees(o.fast_delivery_fee)}` : ""}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={onAccept}
+            disabled={!partnerOnline}
+            className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold"
+          >
+            <Zap className="h-4 w-4 mr-1" />
+            {partnerOnline ? "Accept now" : "Go online to accept"}
+          </Button>
+          {assignedMode && onDecline && (
+            <Button size="sm" variant="outline" onClick={onDecline} className="rounded-xl border-red-300 text-red-700 hover:bg-red-100">
+              Decline
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(
+      "rounded-2xl p-4 space-y-2",
+      assignedMode ? "border-2 border-primary/40 bg-primary/5" : "border border-border bg-card flex items-center justify-between gap-3 flex-wrap",
+    )}>
+      <div className="min-w-0">
+        <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+        <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
+      </div>
+      <div className={cn("flex gap-2", assignedMode ? "" : "shrink-0")}>
+        <Button
+          size="sm"
+          onClick={onAccept}
+          disabled={!partnerOnline}
+          className={cn("rounded-xl gradient-primary text-primary-foreground", assignedMode && "flex-1")}
+        >
+          {partnerOnline ? "Accept" : "Go online to accept"}
+        </Button>
+        {assignedMode && onDecline && (
+          <Button size="sm" variant="outline" onClick={onDecline} className="rounded-xl">Decline</Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export { NAV as DELIVERY_NAV };
