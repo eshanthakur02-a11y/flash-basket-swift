@@ -249,7 +249,10 @@ function EditDialog({
   const [description, setDescription] = useState(item.products?.description ?? "");
   const [mrp, setMrp] = useState(item.products?.mrp ?? 0);
   const [categoryId, setCategoryId] = useState(item.products?.category_id ?? "");
-  const [imageUrl, setImageUrl] = useState(item.products?.image_url ?? "");
+  const initialGallery = (item.products?.image_gallery && item.products.image_gallery.length > 0)
+    ? item.products.image_gallery
+    : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
+  const [gallery, setGallery] = useState<string[]>(initialGallery);
   const [saving, setSaving] = useState(false);
 
   async function save() {
