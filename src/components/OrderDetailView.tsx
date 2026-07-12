@@ -38,6 +38,9 @@ export function OrderDetailView({ id }: { id: string }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [cancelling, setCancelling] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [reason, setReason] = useState<string>("");
+  const [customReason, setCustomReason] = useState("");
   const [live, setLive] = useState(false);
 
   const order = useQuery({
