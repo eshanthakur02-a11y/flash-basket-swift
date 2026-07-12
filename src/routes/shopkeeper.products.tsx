@@ -379,7 +379,12 @@ function CreateNewProduct({
   const [saving, setSaving] = useState(false);
 
   async function save() {
-    if (!name || !imageUrl || !categoryId) {
+    if (!name || gallery.length === 0 || !categoryId) {
+      toast.error("Name, at least one image and category are required");
+      return;
+    }
+    void 0;
+    if (false) {
       toast.error("Name, image and category are required");
       return;
     }
