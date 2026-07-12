@@ -138,17 +138,26 @@ function Page() {
     };
   }, [partner?.is_online, partner?.id]);
 
+  const sortFastFirst = <T extends { delivery_type?: string | null; placed_at?: string }>(rows: T[]) =>
+    [...rows].sort((a, b) => {
+      const ap = a.delivery_type === "fast_delivery" ? 0 : 1;
+      const bp = b.delivery_type === "fast_delivery" ? 0 : 1;
+      if (ap !== bp) return ap - bp;
+      return new Date(a.placed_at ?? 0).getTime() - new Date(b.placed_at ?? 0).getTime();
+    });
+
   const myDeliveries = useQuery({
     queryKey: ["my-deliveries", partner?.id],
     queryFn: async () => {
       if (!partner) return [];
       const { data: orders } = await supabase
         .from("orders")
-        .select("id, order_number, total, status, address, shop_id, delivery_lat, delivery_lng")
+        .select("id, order_number, total, status, address, shop_id, delivery_lat, delivery_lng, delivery_type, fast_delivery_fee, placed_at")
         .eq("partner_id", partner.id)
         .in("status", ["out_for_delivery"])
+        .neq("delivery_type", "pickup")
         .order("placed_at", { ascending: false });
-      const list = orders ?? [];
+      const list = sortFastFirst(orders ?? []);
       const shopIds = Array.from(new Set(list.map((o: any) => o.shop_id).filter(Boolean)));
       let shopMap: Record<string, any> = {};
       if (shopIds.length > 0) {
@@ -182,12 +191,12 @@ function Page() {
     queryFn: async () => {
       const { data } = await supabase
         .from("orders")
-        .select("id, order_number, total, address")
+        .select("id, order_number, total, address, delivery_type, fast_delivery_fee, placed_at")
         .eq("status", "packed")
         .is("partner_id", null)
-        .order("placed_at", { ascending: true })
-        .limit(10);
-      return data ?? [];
+        .neq("delivery_type", "pickup")
+        .limit(20);
+      return sortFastFirst(data ?? []);
     },
     refetchInterval: 5000,
   });
@@ -198,11 +207,11 @@ function Page() {
       if (!partner) return [];
       const { data } = await supabase
         .from("orders")
-        .select("id, order_number, total, address, shop_id")
+        .select("id, order_number, total, address, shop_id, delivery_type, fast_delivery_fee, placed_at")
         .eq("partner_id", partner.id)
         .eq("status", "packed")
-        .order("placed_at", { ascending: true });
-      return data ?? [];
+        .neq("delivery_type", "pickup");
+      return sortFastFirst(data ?? []);
     },
     enabled: !!partner,
     refetchInterval: 5000,
