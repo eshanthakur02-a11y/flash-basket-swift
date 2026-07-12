@@ -94,16 +94,19 @@ function AppOrders() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[11px] text-muted-foreground truncate">{o.order_number}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">{o.order_number}{o.shop?.name ? ` • ${o.shop.name}` : ""}</div>
                   <div className="font-bold text-sm truncate">
                     {firstName ? firstName : `${rupees(o.total)} • ${o.payment_method.toUpperCase()}`}
                   </div>
                   <div className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                    {rupees(o.total)} • {o.payment_method.toUpperCase()} • {totalQty} item{totalQty === 1 ? "" : "s"}
+                    {rupees(o.total)} • {o.payment_method.toUpperCase()} • {o.payment_status} • {totalQty} item{totalQty === 1 ? "" : "s"}
                   </div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">
-                    {new Date(o.placed_at).toLocaleString()}
+                    {(o.delivery_type ?? "standard_delivery").replace(/_/g, " ")} • {new Date(o.placed_at).toLocaleString()}
                   </div>
+                  {o.status === "cancelled" && o.cancel_reason && (
+                    <div className="text-[11px] text-destructive mt-0.5 truncate">Cancelled: {o.cancel_reason}</div>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className={`text-[10px] font-bold uppercase rounded-full px-2 py-1 ${statusColor[o.status] ?? "bg-secondary"}`}>
