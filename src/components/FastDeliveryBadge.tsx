@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,14 +27,10 @@ export function PriorityDot({ className }: { className?: string }) {
   );
 }
 
-/**
- * Returns mm:ss remaining until `deadline`. Empty string when expired.
- */
+/** Returns mm:ss remaining until `deadline`. "00:00" when expired. */
 export function useCountdown(deadline: Date | null): string {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const React = require("react") as typeof import("react");
-  const [now, setNow] = React.useState(() => Date.now());
-  React.useEffect(() => {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
     if (!deadline) return;
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
