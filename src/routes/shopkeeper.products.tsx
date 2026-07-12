@@ -336,7 +336,7 @@ function EditDialog({
         </label>
       </div>
       <DialogFooter>
-        <Button disabled={saving || !name || !imageUrl} onClick={save}>{saving ? "Saving..." : "Save"}</Button>
+        <Button disabled={saving || !name || gallery.length === 0} onClick={save}>{saving ? "Saving..." : "Save"}</Button>
       </DialogFooter>
     </DialogContent>
   );
