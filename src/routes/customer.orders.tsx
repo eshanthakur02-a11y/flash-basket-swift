@@ -32,7 +32,7 @@ function AppOrders() {
       if (!user) return [];
       const { data } = await supabase
         .from("orders")
-        .select("*")
+        .select("*, items:order_items(id,name,image_url,quantity)")
         .eq("user_id", user.id)
         .order("placed_at", { ascending: false });
       return data ?? [];
@@ -40,6 +40,7 @@ function AppOrders() {
     enabled: !!user,
     refetchInterval: 20000,
   });
+
 
   return (
     <div className="px-4 py-4">
