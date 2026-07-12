@@ -58,14 +58,43 @@ function Page() {
   useEffect(() => { ensurePartner(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
 
   useEffect(() => {
+    const beep = () => {
+      try {
+        const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (!AC) return;
+        const ctx = new AC();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "square";
+        o.frequency.value = 880;
+        o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        o.start();
+        o.stop(ctx.currentTime + 0.4);
+      } catch { /* ignore */ }
+    };
     const ch = supabase
       .channel("delivery-orders")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, (payload) => {
+        const n: any = payload.new ?? {};
+        const o: any = payload.old ?? {};
         qc.invalidateQueries({ queryKey: ["my-deliveries"] });
+        qc.invalidateQueries({ queryKey: ["assigned-to-me"] });
+        qc.invalidateQueries({ queryKey: ["dashboard-available-orders"] });
+        const becameMine = partner?.id && n.partner_id === partner.id && o.partner_id !== partner.id;
+        if (becameMine && n.delivery_type === "fast_delivery") {
+          beep();
+          toast.error("🚨 Fast Delivery — Priority order", {
+            description: `${n.order_number ?? "New order"} · Deliver within 15–30 min`,
+            duration: 8000,
+          });
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [qc]);
+  }, [qc, partner?.id]);
 
   // Live geolocation broadcast while online
   useEffect(() => {
