@@ -32,7 +32,7 @@ function AppOrders() {
       if (!user) return [];
       const { data } = await supabase
         .from("orders")
-        .select("*")
+        .select("*, items:order_items(id,name,image_url,quantity)")
         .eq("user_id", user.id)
         .order("placed_at", { ascending: false });
       return data ?? [];
@@ -40,6 +40,7 @@ function AppOrders() {
     enabled: !!user,
     refetchInterval: 20000,
   });
+
 
   return (
     <div className="px-4 py-4">
@@ -61,28 +62,59 @@ function AppOrders() {
         </div>
       ) : (
         <div className="space-y-3">
-          {orders.data?.map((o) => (
-            <Link
-              key={o.id}
-              to="/customer/orders/$id"
-              params={{ id: o.id }}
-              className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-card hover:shadow-glow transition"
-            >
-              <div className="min-w-0">
-                <div className="text-[11px] text-muted-foreground truncate">{o.order_number}</div>
-                <div className="font-bold text-sm">{rupees(o.total)} • {o.payment_method.toUpperCase()}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">
-                  {new Date(o.placed_at).toLocaleString()}
+          {orders.data?.map((o: any) => {
+            const items = (o.items ?? []) as Array<{ id: string; name: string; image_url: string | null; quantity: number }>;
+            const preview = items.slice(0, 3);
+            const extra = Math.max(0, items.length - preview.length);
+            const firstName = items[0]?.name;
+            const totalQty = items.reduce((s, it) => s + (it.quantity ?? 0), 0);
+            return (
+              <Link
+                key={o.id}
+                to="/customer/orders/$id"
+                params={{ id: o.id }}
+                className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card hover:shadow-glow transition"
+              >
+                <div className="flex -space-x-3 shrink-0">
+                  {preview.length === 0 ? (
+                    <div className="h-14 w-14 rounded-xl bg-secondary grid place-items-center ring-2 ring-card">🛒</div>
+                  ) : (
+                    preview.map((it) =>
+                      it.image_url ? (
+                        <img key={it.id} src={it.image_url} alt={it.name} className="h-14 w-14 rounded-xl object-cover ring-2 ring-card bg-secondary" />
+                      ) : (
+                        <div key={it.id} className="h-14 w-14 rounded-xl bg-secondary grid place-items-center ring-2 ring-card text-lg">🛒</div>
+                      )
+                    )
+                  )}
+                  {extra > 0 && (
+                    <div className="h-14 w-14 rounded-xl bg-foreground/85 text-background grid place-items-center ring-2 ring-card text-xs font-bold">
+                      +{extra}
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className={`text-[10px] font-bold uppercase rounded-full px-2 py-1 ${statusColor[o.status] ?? "bg-secondary"}`}>
-                  {o.status.replace(/_/g, " ")}
-                </span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </div>
-            </Link>
-          ))}
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] text-muted-foreground truncate">{o.order_number}</div>
+                  <div className="font-bold text-sm truncate">
+                    {firstName ? firstName : `${rupees(o.total)} • ${o.payment_method.toUpperCase()}`}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                    {rupees(o.total)} • {o.payment_method.toUpperCase()} • {totalQty} item{totalQty === 1 ? "" : "s"}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">
+                    {new Date(o.placed_at).toLocaleString()}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className={`text-[10px] font-bold uppercase rounded-full px-2 py-1 ${statusColor[o.status] ?? "bg-secondary"}`}>
+                    {o.status.replace(/_/g, " ")}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </Link>
+            );
+          })}
+
         </div>
       )}
     </div>
