@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageInput } from "@/components/ImageInput";
+import { MultiImageInput } from "@/components/MultiImageInput";
 import { rupees } from "@/lib/format";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
@@ -56,6 +56,8 @@ type ShopProduct = {
     name: string;
     unit: string;
     image_url: string | null;
+    cover_image: string | null;
+    image_gallery: string[] | null;
     mrp: number;
     price: number;
     description: string | null;
@@ -100,7 +102,7 @@ function Page() {
       if (!shopId) return [] as ShopProduct[];
       const { data, error } = await supabase
         .from("shop_products")
-        .select("id, price, stock, is_available, product_id, products(id, name, unit, image_url, mrp, price, description, brand, category_id)")
+        .select("id, price, stock, is_available, product_id, products(id, name, unit, image_url, cover_image, image_gallery, mrp, price, description, brand, category_id)")
         .eq("shop_id", shopId)
         .order("created_at", { ascending: false })
         .limit(500);
@@ -247,7 +249,10 @@ function EditDialog({
   const [description, setDescription] = useState(item.products?.description ?? "");
   const [mrp, setMrp] = useState(item.products?.mrp ?? 0);
   const [categoryId, setCategoryId] = useState(item.products?.category_id ?? "");
-  const [imageUrl, setImageUrl] = useState(item.products?.image_url ?? "");
+  const initialGallery = (item.products?.image_gallery && item.products.image_gallery.length > 0)
+    ? item.products.image_gallery
+    : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
+  const [gallery, setGallery] = useState<string[]>(initialGallery);
   const [saving, setSaving] = useState(false);
 
   async function save() {
@@ -259,7 +264,10 @@ function EditDialog({
           .from("products")
           .update({
             name, unit, brand, description, mrp: mrp || price,
-            image_url: imageUrl, category_id: categoryId || null,
+            image_url: gallery[0] ?? null,
+            cover_image: gallery[0] ?? null,
+            image_gallery: gallery,
+            category_id: categoryId || null,
           })
           .eq("id", item.product_id);
         if (pErr) throw pErr;
@@ -283,7 +291,7 @@ function EditDialog({
     <DialogContent className="max-h-[90vh] overflow-y-auto">
       <DialogHeader><DialogTitle>Edit product</DialogTitle></DialogHeader>
       <div className="space-y-3">
-        <ImageInput value={imageUrl} onChange={setImageUrl} bucket="products" label="Product image" required />
+        <MultiImageInput value={gallery} onChange={setGallery} label="Product images" required />
         <div>
           <label className="text-xs font-bold">Name</label>
           <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -328,7 +336,7 @@ function EditDialog({
         </label>
       </div>
       <DialogFooter>
-        <Button disabled={saving || !name || !imageUrl} onClick={save}>{saving ? "Saving..." : "Save"}</Button>
+        <Button disabled={saving || !name || gallery.length === 0} onClick={save}>{saving ? "Saving..." : "Save"}</Button>
       </DialogFooter>
     </DialogContent>
   );
@@ -364,15 +372,15 @@ function CreateNewProduct({
   const [unit, setUnit] = useState("1 pc");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [gallery, setGallery] = useState<string[]>([]);
   const [price, setPrice] = useState<number>(0);
   const [mrp, setMrp] = useState<number>(0);
   const [stock, setStock] = useState<number>(0);
   const [saving, setSaving] = useState(false);
 
   async function save() {
-    if (!name || !imageUrl || !categoryId) {
-      toast.error("Name, image and category are required");
+    if (!name || gallery.length === 0 || !categoryId) {
+      toast.error("Name, at least one image and category are required");
       return;
     }
     setSaving(true);
@@ -381,7 +389,9 @@ function CreateNewProduct({
       const { data: prod, error: pErr } = await supabase
         .from("products")
         .insert({
-          name, slug, description, image_url: imageUrl,
+          name, slug, description, image_url: gallery[0] ?? null,
+          cover_image: gallery[0] ?? null,
+          image_gallery: gallery,
           category_id: categoryId, brand, unit,
           price, mrp: mrp || price, stock: 0,
           is_available: true,
@@ -408,7 +418,7 @@ function CreateNewProduct({
 
   return (
     <div className="space-y-3">
-      <ImageInput value={imageUrl} onChange={setImageUrl} bucket="products" label="Product image" required />
+      <MultiImageInput value={gallery} onChange={setGallery} label="Product images" required />
       <div>
         <label className="text-xs font-bold">Name</label>
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Amul Gold Milk" />

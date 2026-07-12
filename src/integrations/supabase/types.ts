@@ -888,10 +888,12 @@ export type Database = {
         Row: {
           brand: string | null
           category_id: string | null
+          cover_image: string | null
           created_at: string
           delivery_minutes: number
           description: string | null
           id: string
+          image_gallery: string[]
           image_url: string | null
           is_available: boolean
           is_bestseller: boolean
@@ -908,10 +910,12 @@ export type Database = {
         Insert: {
           brand?: string | null
           category_id?: string | null
+          cover_image?: string | null
           created_at?: string
           delivery_minutes?: number
           description?: string | null
           id?: string
+          image_gallery?: string[]
           image_url?: string | null
           is_available?: boolean
           is_bestseller?: boolean
@@ -928,10 +932,12 @@ export type Database = {
         Update: {
           brand?: string | null
           category_id?: string | null
+          cover_image?: string | null
           created_at?: string
           delivery_minutes?: number
           description?: string | null
           id?: string
+          image_gallery?: string[]
           image_url?: string | null
           is_available?: boolean
           is_bestseller?: boolean
