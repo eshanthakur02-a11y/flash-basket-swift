@@ -383,9 +383,6 @@ function CreateNewProduct({
       toast.error("Name, at least one image and category are required");
       return;
     }
-      toast.error("Name, image and category are required");
-      return;
-    }
     setSaving(true);
     try {
       const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
