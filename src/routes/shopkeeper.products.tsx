@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageInput } from "@/components/ImageInput";
+import { MultiImageInput } from "@/components/MultiImageInput";
 import { rupees } from "@/lib/format";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
