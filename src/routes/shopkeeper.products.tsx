@@ -372,7 +372,7 @@ function CreateNewProduct({
   const [unit, setUnit] = useState("1 pc");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [gallery, setGallery] = useState<string[]>([]);
   const [price, setPrice] = useState<number>(0);
   const [mrp, setMrp] = useState<number>(0);
   const [stock, setStock] = useState<number>(0);
