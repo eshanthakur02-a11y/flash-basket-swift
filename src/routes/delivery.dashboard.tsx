@@ -358,11 +358,18 @@ function Page() {
                 o.shop ? { lat: o.shop.latitude, lng: o.shop.longitude, label: `Shop: ${o.shop.name}` } : null,
                 o.delivery_lat && o.delivery_lng ? { lat: o.delivery_lat, lng: o.delivery_lng, label: `Drop: ${(o.address as any)?.name ?? "Customer"}` } : null,
               ].filter(Boolean) as { lat: number; lng: number; label: string }[];
+              const isFast = o.delivery_type === "fast_delivery";
               return (
-                <div key={o.id} className="rounded-2xl border border-border bg-card p-4 space-y-3">
+                <div key={o.id} className={cn(
+                  "rounded-2xl border p-4 space-y-3",
+                  isFast ? "border-2 border-red-500 bg-red-50 dark:bg-red-950/30" : "border-border bg-card",
+                )}>
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div className="min-w-0">
-                      <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+                        {isFast && <FastDeliveryBadge />}
+                      </div>
                       <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
                     </div>
                     <div className="flex gap-2 flex-wrap">
