@@ -38,13 +38,11 @@ function ProductPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="rounded-3xl bg-card border border-border shadow-card overflow-hidden"
         >
-          {p.image_url ? (
-            <img src={p.image_url} alt={p.name} className="aspect-square w-full object-cover" />
-          ) : (
-            <div className="aspect-square grid place-items-center text-8xl">🛒</div>
-          )}
+          <ProductGallery
+            name={p.name}
+            images={buildImageList(p)}
+          />
         </motion.div>
 
         <div>
