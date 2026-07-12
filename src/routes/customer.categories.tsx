@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Mic, QrCode, Search, Sparkles } from "lucide-react";
+import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
 
 const search = z.object({ q: z.string().optional(), chip: z.string().optional() });
 
@@ -142,21 +143,8 @@ function CategoriesBrowse() {
               placeholder="Search categories, products…"
               className="flex-1 min-w-0 bg-transparent text-[14px] font-medium placeholder:text-muted-foreground focus:outline-none"
             />
-            <button
-              type="button"
-              aria-label="Voice search"
-              className="h-8 w-8 grid place-items-center rounded-full bg-white/70 border border-white text-foreground/70 hover:text-primary transition"
-            >
-              <Mic className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              aria-label="Scan QR"
-              className="h-8 w-8 grid place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow"
-            >
-              <QrCode className="h-4 w-4" />
-            </button>
           </form>
+
         </div>
 
         {/* Quick action chips */}
