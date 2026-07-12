@@ -418,7 +418,7 @@ function CreateNewProduct({
 
   return (
     <div className="space-y-3">
-      <ImageInput value={imageUrl} onChange={setImageUrl} bucket="products" label="Product image" required />
+      <MultiImageInput value={gallery} onChange={setGallery} label="Product images" required />
       <div>
         <label className="text-xs font-bold">Name</label>
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Amul Gold Milk" />
