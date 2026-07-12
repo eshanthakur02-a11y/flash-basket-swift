@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Clock, Package, Truck, Home, X, Store, Search, Radio } from "lucide-react";
+import { Check, Clock, Package, Truck, Home, X, Store, Search, Radio, LifeBuoy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
@@ -10,6 +10,21 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RouteMap } from "@/components/maps/RouteMap";
 import { DeliveryUpdates } from "@/components/DeliveryUpdates";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+const CANCEL_STATUSES = new Set(["placed", "payment_confirmed", "awaiting_shop", "accepted_by_shop"]);
+const CANCEL_REASONS = [
+  "Ordered by mistake",
+  "Wrong delivery address",
+  "Changed my mind",
+  "Ordered the wrong items",
+  "Other",
+];
 
 const STEPS = [
   { key: "awaiting_shop", label: "Finding a shop", desc: "Looking for the nearest shop with your items", icon: Search },
