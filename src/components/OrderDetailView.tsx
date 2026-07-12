@@ -218,6 +218,12 @@ export function OrderDetailView({ id }: { id: string }) {
         <div className="mt-6 rounded-3xl border-2 border-destructive/30 bg-destructive/5 p-5">
           <div className="flex items-center gap-2 font-bold text-destructive"><X className="h-4 w-4" /> Order cancelled</div>
           {o.cancel_reason && <div className="text-sm text-muted-foreground mt-1">Reason: {o.cancel_reason}</div>}
+          {o.cancelled_at && <div className="text-xs text-muted-foreground mt-1">Cancelled on {new Date(o.cancelled_at).toLocaleString()}</div>}
+          {(o.payment_status === "refund_initiated" || o.payment_status === "refunded") && (
+            <div className="mt-2 inline-flex items-center rounded-full bg-primary/15 text-primary px-3 py-1 text-xs font-bold">
+              Refund {o.payment_status === "refunded" ? "completed" : "in progress"}
+            </div>
+          )}
         </div>
       )}
 
