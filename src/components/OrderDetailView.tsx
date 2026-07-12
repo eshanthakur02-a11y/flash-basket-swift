@@ -99,17 +99,25 @@ export function OrderDetailView({ id }: { id: string }) {
   const currentIdx = Math.max(0, STEPS.findIndex((s) => s.key === status));
   const isCancelled = status === "cancelled";
   const isFailed = status === "no_shop_available";
-  const canCancel = status === "awaiting_shop" || status === "placed" || status === "payment_confirmed";
+  const canCancel = CANCEL_STATUSES.has(status);
 
-  const cancel = async () => {
-    if (!confirm("Cancel this order? Stock will be restored.")) return;
+  const submitCancel = async () => {
+    const finalReason = reason === "Other" ? customReason.trim() : reason;
+    if (!finalReason) {
+      toast.error("Please select a reason");
+      return;
+    }
     setCancelling(true);
-    const { error } = await supabase.rpc("cancel_order", { _order_id: id, _reason: "Customer request" });
+    const { error } = await supabase.rpc("cancel_order", { _order_id: id, _reason: finalReason });
     setCancelling(false);
     if (error) return toast.error(error.message);
     toast.success("Order cancelled");
+    setCancelOpen(false);
+    setReason("");
+    setCustomReason("");
     qc.invalidateQueries({ queryKey: ["order", id] });
     qc.invalidateQueries({ queryKey: ["orders"] });
+    qc.invalidateQueries({ queryKey: ["app-orders"] });
   };
 
   return (
