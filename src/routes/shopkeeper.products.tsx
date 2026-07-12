@@ -264,7 +264,10 @@ function EditDialog({
           .from("products")
           .update({
             name, unit, brand, description, mrp: mrp || price,
-            image_url: imageUrl, category_id: categoryId || null,
+            image_url: gallery[0] ?? null,
+            cover_image: gallery[0] ?? null,
+            image_gallery: gallery,
+            category_id: categoryId || null,
           })
           .eq("id", item.product_id);
         if (pErr) throw pErr;
