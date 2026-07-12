@@ -116,3 +116,116 @@ function Perk({ icon, title, sub }: { icon: React.ReactNode; title: string; sub:
     </div>
   );
 }
+
+function buildImageList(p: any): string[] {
+  const list: string[] = [];
+  const cover = p.cover_image ?? p.image_url ?? null;
+  if (cover) list.push(cover);
+  const gallery: string[] = Array.isArray(p.image_gallery) ? p.image_gallery : [];
+  for (const url of gallery) {
+    if (url && !list.includes(url)) list.push(url);
+  }
+  return list;
+}
+
+function ProductGallery({ images, name }: { images: string[]; name: string }) {
+  const [idx, setIdx] = useState(0);
+  const [zoom, setZoom] = useState(false);
+  const [touchX, setTouchX] = useState<number | null>(null);
+
+  if (images.length === 0) {
+    return (
+      <div className="rounded-3xl bg-card border border-border shadow-card overflow-hidden aspect-square grid place-items-center text-8xl">
+        🛒
+      </div>
+    );
+  }
+
+  const go = (delta: number) => setIdx((i) => (i + delta + images.length) % images.length);
+
+  return (
+    <>
+      <div className="rounded-3xl bg-card border border-border shadow-card overflow-hidden relative">
+        <div
+          className="relative aspect-square cursor-zoom-in select-none"
+          onClick={() => setZoom(true)}
+          onTouchStart={(e) => setTouchX(e.touches[0].clientX)}
+          onTouchEnd={(e) => {
+            if (touchX === null) return;
+            const dx = e.changedTouches[0].clientX - touchX;
+            if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
+            setTouchX(null);
+          }}
+        >
+          <img src={images[idx]} alt={name} className="w-full h-full object-cover" />
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); go(-1); }}
+                className="hidden md:grid place-items-center absolute left-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-background/80 hover:bg-background"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); go(1); }}
+                className="hidden md:grid place-items-center absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-background/80 hover:bg-background"
+                aria-label="Next image"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setIdx(i); }}
+                    className={`h-1.5 rounded-full transition-all ${i === idx ? "w-6 bg-primary" : "w-1.5 bg-background/70"}`}
+                    aria-label={`Go to image ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        {images.length > 1 && (
+          <div className="flex gap-2 p-2 overflow-x-auto border-t border-border">
+            {images.map((url, i) => (
+              <button
+                key={url + i}
+                type="button"
+                onClick={() => setIdx(i)}
+                className={`shrink-0 h-14 w-14 rounded-lg overflow-hidden border-2 transition ${i === idx ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"}`}
+              >
+                <img src={url} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {zoom && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 grid place-items-center p-4"
+          onClick={() => setZoom(false)}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 h-10 w-10 grid place-items-center rounded-full bg-white/10 text-white"
+            aria-label="Close zoom"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={images[idx]}
+            alt={name}
+            className="max-h-[90vh] max-w-[95vw] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+    </>
+  );
+}
