@@ -389,7 +389,9 @@ function CreateNewProduct({
       const { data: prod, error: pErr } = await supabase
         .from("products")
         .insert({
-          name, slug, description, image_url: imageUrl,
+          name, slug, description, image_url: gallery[0] ?? null,
+          cover_image: gallery[0] ?? null,
+          image_gallery: gallery,
           category_id: categoryId, brand, unit,
           price, mrp: mrp || price, stock: 0,
           is_available: true,
