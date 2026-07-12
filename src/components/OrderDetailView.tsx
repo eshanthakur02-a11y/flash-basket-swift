@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Clock, Package, Truck, Home, X, Store, Search, Radio } from "lucide-react";
+import { Check, Clock, Package, Truck, Home, X, Store, Search, Radio, LifeBuoy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
@@ -10,6 +10,21 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RouteMap } from "@/components/maps/RouteMap";
 import { DeliveryUpdates } from "@/components/DeliveryUpdates";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+const CANCEL_STATUSES = new Set(["placed", "payment_confirmed", "awaiting_shop", "accepted_by_shop"]);
+const CANCEL_REASONS = [
+  "Ordered by mistake",
+  "Wrong delivery address",
+  "Changed my mind",
+  "Ordered the wrong items",
+  "Other",
+];
 
 const STEPS = [
   { key: "awaiting_shop", label: "Finding a shop", desc: "Looking for the nearest shop with your items", icon: Search },
@@ -23,6 +38,9 @@ export function OrderDetailView({ id }: { id: string }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [cancelling, setCancelling] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [reason, setReason] = useState<string>("");
+  const [customReason, setCustomReason] = useState("");
   const [live, setLive] = useState(false);
 
   const order = useQuery({
@@ -81,17 +99,25 @@ export function OrderDetailView({ id }: { id: string }) {
   const currentIdx = Math.max(0, STEPS.findIndex((s) => s.key === status));
   const isCancelled = status === "cancelled";
   const isFailed = status === "no_shop_available";
-  const canCancel = status === "awaiting_shop" || status === "placed" || status === "payment_confirmed";
+  const canCancel = CANCEL_STATUSES.has(status);
 
-  const cancel = async () => {
-    if (!confirm("Cancel this order? Stock will be restored.")) return;
+  const submitCancel = async () => {
+    const finalReason = reason === "Other" ? customReason.trim() : reason;
+    if (!finalReason) {
+      toast.error("Please select a reason");
+      return;
+    }
     setCancelling(true);
-    const { error } = await supabase.rpc("cancel_order", { _order_id: id, _reason: "Customer request" });
+    const { error } = await supabase.rpc("cancel_order", { _order_id: id, _reason: finalReason });
     setCancelling(false);
     if (error) return toast.error(error.message);
     toast.success("Order cancelled");
+    setCancelOpen(false);
+    setReason("");
+    setCustomReason("");
     qc.invalidateQueries({ queryKey: ["order", id] });
     qc.invalidateQueries({ queryKey: ["orders"] });
+    qc.invalidateQueries({ queryKey: ["app-orders"] });
   };
 
   return (
@@ -192,6 +218,12 @@ export function OrderDetailView({ id }: { id: string }) {
         <div className="mt-6 rounded-3xl border-2 border-destructive/30 bg-destructive/5 p-5">
           <div className="flex items-center gap-2 font-bold text-destructive"><X className="h-4 w-4" /> Order cancelled</div>
           {o.cancel_reason && <div className="text-sm text-muted-foreground mt-1">Reason: {o.cancel_reason}</div>}
+          {o.cancelled_at && <div className="text-xs text-muted-foreground mt-1">Cancelled on {new Date(o.cancelled_at).toLocaleString()}</div>}
+          {(o.payment_status === "refund_initiated" || o.payment_status === "refunded") && (
+            <div className="mt-2 inline-flex items-center rounded-full bg-primary/15 text-primary px-3 py-1 text-xs font-bold">
+              Refund {o.payment_status === "refunded" ? "completed" : "in progress"}
+            </div>
+          )}
         </div>
       )}
 
@@ -238,14 +270,74 @@ export function OrderDetailView({ id }: { id: string }) {
         </div>
       </section>
 
-      <div className="mt-6 flex gap-3">
-        {canCancel && (
-          <Button onClick={cancel} disabled={cancelling} variant="outline" className="rounded-xl border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
-            {cancelling ? "Cancelling…" : "Cancel order"}
+      <div className="mt-6 flex flex-wrap gap-3">
+        {canCancel ? (
+          <Button
+            onClick={() => setCancelOpen(true)}
+            disabled={cancelling}
+            variant="outline"
+            className="rounded-xl border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          >
+            <X className="h-4 w-4 mr-1" />
+            Cancel order
           </Button>
-        )}
+        ) : !isCancelled && !isFailed ? (
+          <div className="w-full rounded-2xl border border-border bg-muted/40 p-4">
+            <p className="text-sm text-muted-foreground">
+              This order can no longer be cancelled because preparation or delivery has already started.
+              If you need help, please contact Support.
+            </p>
+            <Button
+              variant="outline"
+              className="rounded-xl mt-3"
+              onClick={() => navigate({ to: "/support" })}
+            >
+              <LifeBuoy className="h-4 w-4 mr-1" />
+              Contact Support
+            </Button>
+          </div>
+        ) : null}
         <Button variant="outline" className="rounded-xl" onClick={() => navigate({ to: "/products" })}>Shop more</Button>
       </div>
+
+      <Dialog open={cancelOpen} onOpenChange={(v) => { setCancelOpen(v); if (!v) { setReason(""); setCustomReason(""); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancel order {o.order_number}?</DialogTitle>
+            <DialogDescription>
+              Please tell us why you're cancelling. Your reserved stock will be released
+              {(o.payment_status === "paid" && o.payment_method !== "cod") ? " and a refund will be initiated" : ""}.
+            </DialogDescription>
+          </DialogHeader>
+          <RadioGroup value={reason} onValueChange={setReason} className="space-y-2 py-2">
+            {CANCEL_REASONS.map((r) => (
+              <div key={r} className="flex items-center gap-2 rounded-xl border border-border p-3 cursor-pointer hover:bg-muted/50"
+                   onClick={() => setReason(r)}>
+                <RadioGroupItem value={r} id={`r-${r}`} />
+                <Label htmlFor={`r-${r}`} className="cursor-pointer flex-1 text-sm">{r}</Label>
+              </div>
+            ))}
+          </RadioGroup>
+          {reason === "Other" && (
+            <Textarea
+              placeholder="Tell us more (required)"
+              value={customReason}
+              onChange={(e) => setCustomReason(e.target.value)}
+              maxLength={280}
+            />
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelling}>Keep order</Button>
+            <Button
+              variant="destructive"
+              onClick={submitCancel}
+              disabled={cancelling || !reason || (reason === "Other" && !customReason.trim())}
+            >
+              {cancelling ? "Cancelling…" : "Confirm cancel"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

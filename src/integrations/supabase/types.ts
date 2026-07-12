@@ -644,6 +644,7 @@ export type Database = {
           assignment_expires_at: string | null
           assignment_reason: string | null
           cancel_reason: string | null
+          cancelled_at: string | null
           coupon_code: string | null
           delivery_fee: number
           delivery_instruction: string | null
@@ -677,6 +678,7 @@ export type Database = {
           assignment_expires_at?: string | null
           assignment_reason?: string | null
           cancel_reason?: string | null
+          cancelled_at?: string | null
           coupon_code?: string | null
           delivery_fee?: number
           delivery_instruction?: string | null
@@ -710,6 +712,7 @@ export type Database = {
           assignment_expires_at?: string | null
           assignment_reason?: string | null
           cancel_reason?: string | null
+          cancelled_at?: string | null
           coupon_code?: string | null
           delivery_fee?: number
           delivery_instruction?: string | null
