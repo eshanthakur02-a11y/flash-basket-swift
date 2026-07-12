@@ -7,10 +7,12 @@ import { RoleShell } from "@/components/RoleShell";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { LayoutDashboard, PackageOpen, History, Wallet, User, Check, MapPin } from "lucide-react";
+import { LayoutDashboard, PackageOpen, History, Wallet, User, Check, MapPin, Zap, Timer, AlertTriangle } from "lucide-react";
 import { rupees } from "@/lib/format";
 import { RouteMap } from "@/components/maps/RouteMap";
 import { MessageCustomerDialog } from "@/components/MessageCustomerDialog";
+import { FastDeliveryBadge, PriorityDot, useCountdown } from "@/components/FastDeliveryBadge";
+import { cn } from "@/lib/utils";
 
 
 
@@ -56,14 +58,43 @@ function Page() {
   useEffect(() => { ensurePartner(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
 
   useEffect(() => {
+    const beep = () => {
+      try {
+        const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (!AC) return;
+        const ctx = new AC();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "square";
+        o.frequency.value = 880;
+        o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.001, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        o.start();
+        o.stop(ctx.currentTime + 0.4);
+      } catch { /* ignore */ }
+    };
     const ch = supabase
       .channel("delivery-orders")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, (payload) => {
+        const n: any = payload.new ?? {};
+        const o: any = payload.old ?? {};
         qc.invalidateQueries({ queryKey: ["my-deliveries"] });
+        qc.invalidateQueries({ queryKey: ["assigned-to-me"] });
+        qc.invalidateQueries({ queryKey: ["dashboard-available-orders"] });
+        const becameMine = partner?.id && n.partner_id === partner.id && o.partner_id !== partner.id;
+        if (becameMine && n.delivery_type === "fast_delivery") {
+          beep();
+          toast.error("🚨 Fast Delivery — Priority order", {
+            description: `${n.order_number ?? "New order"} · Deliver within 15–30 min`,
+            duration: 8000,
+          });
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [qc]);
+  }, [qc, partner?.id]);
 
   // Live geolocation broadcast while online
   useEffect(() => {
@@ -107,17 +138,26 @@ function Page() {
     };
   }, [partner?.is_online, partner?.id]);
 
+  const sortFastFirst = <T extends { delivery_type?: string | null; placed_at?: string }>(rows: T[]) =>
+    [...rows].sort((a, b) => {
+      const ap = a.delivery_type === "fast_delivery" ? 0 : 1;
+      const bp = b.delivery_type === "fast_delivery" ? 0 : 1;
+      if (ap !== bp) return ap - bp;
+      return new Date(a.placed_at ?? 0).getTime() - new Date(b.placed_at ?? 0).getTime();
+    });
+
   const myDeliveries = useQuery({
     queryKey: ["my-deliveries", partner?.id],
     queryFn: async () => {
       if (!partner) return [];
       const { data: orders } = await supabase
         .from("orders")
-        .select("id, order_number, total, status, address, shop_id, delivery_lat, delivery_lng")
+        .select("id, order_number, total, status, address, shop_id, delivery_lat, delivery_lng, delivery_type, fast_delivery_fee, placed_at")
         .eq("partner_id", partner.id)
         .in("status", ["out_for_delivery"])
+        .neq("delivery_type", "pickup")
         .order("placed_at", { ascending: false });
-      const list = orders ?? [];
+      const list = sortFastFirst(orders ?? []);
       const shopIds = Array.from(new Set(list.map((o: any) => o.shop_id).filter(Boolean)));
       let shopMap: Record<string, any> = {};
       if (shopIds.length > 0) {
@@ -151,12 +191,12 @@ function Page() {
     queryFn: async () => {
       const { data } = await supabase
         .from("orders")
-        .select("id, order_number, total, address")
+        .select("id, order_number, total, address, delivery_type, fast_delivery_fee, placed_at")
         .eq("status", "packed")
         .is("partner_id", null)
-        .order("placed_at", { ascending: true })
-        .limit(10);
-      return data ?? [];
+        .neq("delivery_type", "pickup")
+        .limit(20);
+      return sortFastFirst(data ?? []);
     },
     refetchInterval: 5000,
   });
@@ -167,11 +207,11 @@ function Page() {
       if (!partner) return [];
       const { data } = await supabase
         .from("orders")
-        .select("id, order_number, total, address, shop_id")
+        .select("id, order_number, total, address, shop_id, delivery_type, fast_delivery_fee, placed_at")
         .eq("partner_id", partner.id)
         .eq("status", "packed")
-        .order("placed_at", { ascending: true });
-      return data ?? [];
+        .neq("delivery_type", "pickup");
+      return sortFastFirst(data ?? []);
     },
     enabled: !!partner,
     refetchInterval: 5000,
@@ -281,35 +321,29 @@ function Page() {
           <h2 className="font-bold mb-3">Assigned to you {((assigned.data?.length ?? 0) > 0) && <span className="ml-2 rounded-full bg-yellow-200 text-yellow-900 px-2 py-0.5 text-[10px] font-bold">{assigned.data!.length}</span>}</h2>
           <div className="space-y-3">
             {(assigned.data ?? []).map((o: any) => (
-              <div key={o.id} className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 space-y-2">
-                <div className="min-w-0">
-                  <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
-                  <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={() => acceptAvailable(o.id)} className="flex-1 rounded-xl gradient-primary text-primary-foreground" disabled={!partner?.is_online}>Accept</Button>
-                  <Button size="sm" variant="outline" onClick={() => declineAssignment(o.id)} className="rounded-xl">Decline</Button>
-                </div>
-              </div>
+              <PriorityOrderRow
+                key={o.id}
+                o={o}
+                partnerOnline={!!partner?.is_online}
+                onAccept={() => acceptAvailable(o.id)}
+                onDecline={() => declineAssignment(o.id)}
+                assignedMode
+              />
             ))}
             {(assigned.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">Nothing assigned right now.</div>}
           </div>
         </section>
 
         <section>
-
           <h2 className="font-bold mb-3">Available orders {((available.data?.length ?? 0) > 0) && <span className="ml-2 rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[10px] font-bold">{available.data!.length} new</span>}</h2>
           <div className="space-y-3">
             {(available.data ?? []).map((o: any) => (
-              <div key={o.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap">
-                <div className="min-w-0">
-                  <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
-                  <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
-                </div>
-                <Button size="sm" onClick={() => acceptAvailable(o.id)} className="rounded-xl gradient-primary text-primary-foreground" disabled={!partner?.is_online}>
-                  {partner?.is_online ? "Accept" : "Go online to accept"}
-                </Button>
-              </div>
+              <PriorityOrderRow
+                key={o.id}
+                o={o}
+                partnerOnline={!!partner?.is_online}
+                onAccept={() => acceptAvailable(o.id)}
+              />
             ))}
             {(available.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">No available orders right now.</div>}
           </div>
@@ -324,11 +358,18 @@ function Page() {
                 o.shop ? { lat: o.shop.latitude, lng: o.shop.longitude, label: `Shop: ${o.shop.name}` } : null,
                 o.delivery_lat && o.delivery_lng ? { lat: o.delivery_lat, lng: o.delivery_lng, label: `Drop: ${(o.address as any)?.name ?? "Customer"}` } : null,
               ].filter(Boolean) as { lat: number; lng: number; label: string }[];
+              const isFast = o.delivery_type === "fast_delivery";
               return (
-                <div key={o.id} className="rounded-2xl border border-border bg-card p-4 space-y-3">
+                <div key={o.id} className={cn(
+                  "rounded-2xl border p-4 space-y-3",
+                  isFast ? "border-2 border-red-500 bg-red-50 dark:bg-red-950/30" : "border-border bg-card",
+                )}>
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div className="min-w-0">
-                      <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+                        {isFast && <FastDeliveryBadge />}
+                      </div>
                       <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
                     </div>
                     <div className="flex gap-2 flex-wrap">
@@ -349,5 +390,89 @@ function Page() {
 }
 
 
+function PriorityOrderRow({
+  o, partnerOnline, onAccept, onDecline, assignedMode,
+}: {
+  o: any; partnerOnline: boolean; onAccept: () => void; onDecline?: () => void; assignedMode?: boolean;
+}) {
+  const isFast = o.delivery_type === "fast_delivery";
+  const deadline = isFast && o.placed_at ? new Date(new Date(o.placed_at).getTime() + 30 * 60 * 1000) : null;
+  const countdown = useCountdown(deadline);
+
+  if (isFast) {
+    return (
+      <div className="relative overflow-hidden rounded-2xl border-2 border-red-500 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/40 dark:to-red-900/30 p-4 space-y-3 shadow-lg">
+        <div className="absolute inset-x-0 top-0 h-1 bg-red-500 animate-pulse" />
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <PriorityDot />
+            <span className="inline-flex items-center gap-1 rounded-full bg-red-600 text-white px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider animate-pulse">
+              <AlertTriangle className="h-3 w-3" />
+              Fast delivery · Priority
+            </span>
+          </div>
+          {deadline && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/80 dark:bg-black/40 text-red-700 dark:text-red-300 border border-red-300 px-2 py-1 text-xs font-bold">
+              <Timer className="h-3 w-3" />
+              {countdown}
+            </span>
+          )}
+        </div>
+        <div className="min-w-0">
+          <div className="text-xs font-bold uppercase text-red-700 dark:text-red-300">New priority order</div>
+          <div className="font-extrabold text-lg leading-tight">{o.order_number}</div>
+          <div className="text-xs text-red-900/80 dark:text-red-100/80 mt-0.5">
+            {(o.address as any)?.line1}, {(o.address as any)?.city}
+          </div>
+          <div className="mt-1 text-xs text-red-900/70 dark:text-red-100/70">
+            ⏱ Deliver within 15–30 min · Total {rupees(o.total)}
+            {o.fast_delivery_fee ? ` · Extra ${rupees(o.fast_delivery_fee)}` : ""}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={onAccept}
+            disabled={!partnerOnline}
+            className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold"
+          >
+            <Zap className="h-4 w-4 mr-1" />
+            {partnerOnline ? "Accept now" : "Go online to accept"}
+          </Button>
+          {assignedMode && onDecline && (
+            <Button size="sm" variant="outline" onClick={onDecline} className="rounded-xl border-red-300 text-red-700 hover:bg-red-100">
+              Decline
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(
+      "rounded-2xl p-4 space-y-2",
+      assignedMode ? "border-2 border-primary/40 bg-primary/5" : "border border-border bg-card flex items-center justify-between gap-3 flex-wrap",
+    )}>
+      <div className="min-w-0">
+        <div className="font-bold">{o.order_number} <span className="text-muted-foreground font-normal">• {rupees(o.total)}</span></div>
+        <div className="text-xs text-muted-foreground">{(o.address as any)?.line1}, {(o.address as any)?.city}</div>
+      </div>
+      <div className={cn("flex gap-2", assignedMode ? "" : "shrink-0")}>
+        <Button
+          size="sm"
+          onClick={onAccept}
+          disabled={!partnerOnline}
+          className={cn("rounded-xl gradient-primary text-primary-foreground", assignedMode && "flex-1")}
+        >
+          {partnerOnline ? "Accept" : "Go online to accept"}
+        </Button>
+        {assignedMode && onDecline && (
+          <Button size="sm" variant="outline" onClick={onDecline} className="rounded-xl">Decline</Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export { NAV as DELIVERY_NAV };
