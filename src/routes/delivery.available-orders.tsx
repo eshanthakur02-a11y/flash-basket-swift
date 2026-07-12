@@ -31,7 +31,11 @@ function Page() {
     queryKey: ["available-orders"],
     queryFn: async () => {
       const { data } = await supabase.rpc("partner_available_orders");
-      return (data ?? []) as Array<{ id: string; order_number: string; total: number; city: string | null; area_pincode: string | null; item_count: number; shop_name: string | null }>;
+      return (data ?? []) as Array<{
+        id: string; order_number: string; total: number; city: string | null;
+        area_pincode: string | null; item_count: number; shop_name: string | null;
+        delivery_type?: string | null; fast_delivery_fee?: number | null; placed_at?: string;
+      }>;
     },
     refetchInterval: 5000,
   });
@@ -47,15 +51,41 @@ function Page() {
         <h1 className="font-display text-3xl font-extrabold flex items-center gap-2"><Truck className="h-7 w-7 text-primary" />My assignments</h1>
         <p className="text-sm text-muted-foreground mt-1">Orders your shop has assigned to you. Accept to start delivery.</p>
         <div className="mt-5 space-y-3">
-          {(orders.data ?? []).map(o => (
-            <div key={o.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap">
-              <div className="min-w-0">
-                <div className="font-bold">{o.order_number} • {rupees(o.total)}</div>
-                <div className="text-xs text-muted-foreground">{[o.shop_name, o.city, o.area_pincode].filter(Boolean).join(" • ")} · {o.item_count} item{o.item_count === 1 ? "" : "s"}</div>
+          {(orders.data ?? []).map(o => {
+            const isFast = o.delivery_type === "fast_delivery";
+            return (
+              <div
+                key={o.id}
+                className={
+                  isFast
+                    ? "rounded-2xl border-2 border-red-500 bg-red-50 dark:bg-red-950/30 p-4 flex items-center justify-between gap-3 flex-wrap shadow-md"
+                    : "rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap"
+                }
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="font-bold">{o.order_number} • {rupees(o.total)}</div>
+                    {isFast && <FastDeliveryBadge />}
+                  </div>
+                  <div className="text-xs text-muted-foreground">{[o.shop_name, o.city, o.area_pincode].filter(Boolean).join(" • ")} · {o.item_count} item{o.item_count === 1 ? "" : "s"}</div>
+                  {isFast && (
+                    <div className="text-xs text-red-700 dark:text-red-300 font-semibold mt-0.5">
+                      ⏱ Deliver within 15–30 min{o.fast_delivery_fee ? ` · Extra ${rupees(o.fast_delivery_fee)}` : ""}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => accept(o.id)}
+                  className={isFast
+                    ? "rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold"
+                    : "rounded-xl gradient-primary text-primary-foreground"}
+                >
+                  {isFast ? "Accept now" : "Accept"}
+                </Button>
               </div>
-              <Button size="sm" onClick={() => accept(o.id)} className="rounded-xl gradient-primary text-primary-foreground">Accept</Button>
-            </div>
-          ))}
+            );
+          })}
           {(orders.data?.length ?? 0) === 0 && <div className="text-sm text-muted-foreground">No assignments yet. Your shopkeeper will pick you for an order.</div>}
         </div>
       </div>
