@@ -56,6 +56,8 @@ type ShopProduct = {
     name: string;
     unit: string;
     image_url: string | null;
+    cover_image: string | null;
+    image_gallery: string[] | null;
     mrp: number;
     price: number;
     description: string | null;
