@@ -5,7 +5,7 @@ import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { Download, Search, X, ArrowUpDown, TrendingUp, TrendingDown } from "lucide-react";
+import { Download, Search, ArrowUpDown, TrendingUp, TrendingDown } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
