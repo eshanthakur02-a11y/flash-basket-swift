@@ -636,6 +636,66 @@ export type Database = {
           },
         ]
       }
+      order_routing_log: {
+        Row: {
+          candidates_considered: number
+          chosen_distance_km: number | null
+          chosen_shop_id: string | null
+          created_at: string
+          delivery_lat: number | null
+          delivery_lng: number | null
+          details: Json
+          id: string
+          order_id: string | null
+          outcome: string
+          pincode: string | null
+          reason: string | null
+        }
+        Insert: {
+          candidates_considered?: number
+          chosen_distance_km?: number | null
+          chosen_shop_id?: string | null
+          created_at?: string
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          details?: Json
+          id?: string
+          order_id?: string | null
+          outcome: string
+          pincode?: string | null
+          reason?: string | null
+        }
+        Update: {
+          candidates_considered?: number
+          chosen_distance_km?: number | null
+          chosen_shop_id?: string | null
+          created_at?: string
+          delivery_lat?: number | null
+          delivery_lng?: number | null
+          details?: Json
+          id?: string
+          order_id?: string | null
+          outcome?: string
+          pincode?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_routing_log_chosen_shop_id_fkey"
+            columns: ["chosen_shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_routing_log_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           address: Json
@@ -650,6 +710,7 @@ export type Database = {
           delivery_instruction: string | null
           delivery_lat: number | null
           delivery_lng: number | null
+          delivery_pincode: string | null
           delivery_type: string
           discount: number
           fast_delivery_fee: number
@@ -663,6 +724,7 @@ export type Database = {
           placed_at: string
           ready_for_pickup_at: string | null
           rejected_shop_ids: string[]
+          routing_status: string | null
           shop_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
@@ -684,6 +746,7 @@ export type Database = {
           delivery_instruction?: string | null
           delivery_lat?: number | null
           delivery_lng?: number | null
+          delivery_pincode?: string | null
           delivery_type?: string
           discount?: number
           fast_delivery_fee?: number
@@ -697,6 +760,7 @@ export type Database = {
           placed_at?: string
           ready_for_pickup_at?: string | null
           rejected_shop_ids?: string[]
+          routing_status?: string | null
           shop_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal: number
@@ -718,6 +782,7 @@ export type Database = {
           delivery_instruction?: string | null
           delivery_lat?: number | null
           delivery_lng?: number | null
+          delivery_pincode?: string | null
           delivery_type?: string
           discount?: number
           fast_delivery_fee?: number
@@ -731,6 +796,7 @@ export type Database = {
           placed_at?: string
           ready_for_pickup_at?: string | null
           rejected_shop_ids?: string[]
+          routing_status?: string | null
           shop_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
@@ -1906,6 +1972,16 @@ export type Database = {
       delete_delivery_partner: {
         Args: { _partner_id: string }
         Returns: undefined
+      }
+      find_best_shop_for_cart: {
+        Args: {
+          _exclude?: string[]
+          _lat: number
+          _lng: number
+          _pincode: string
+          _user_id: string
+        }
+        Returns: string
       }
       find_nearest_partner_for_order: {
         Args: { _exclude?: string[]; _order_id: string }
