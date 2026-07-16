@@ -4,11 +4,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { rupees } from "@/lib/format";
-import { LayoutDashboard, ListOrdered, Store, Users, Truck, BarChart, Bell, Settings, AlertTriangle, Wallet, UserPlus } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Store, Users, Truck, BarChart, Bell, Settings, AlertTriangle, Wallet, UserPlus, Route as RouteIcon } from "lucide-react";
 
 const NAV = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/orders", label: "Orders", icon: ListOrdered },
+  { to: "/admin/routing", label: "Routing", icon: RouteIcon },
   { to: "/admin/payments", label: "Payments", icon: Wallet },
   { to: "/admin/shops", label: "Shops", icon: Store },
   { to: "/admin/customers", label: "Users", icon: Users },

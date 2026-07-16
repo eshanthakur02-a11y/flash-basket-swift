@@ -64,6 +64,7 @@ import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminShopsRouteImport } from './routes/admin.shops'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminRoutingRouteImport } from './routes/admin.routing'
 import { Route as AdminRoleRequestsRouteImport } from './routes/admin.role-requests'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
@@ -363,6 +364,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRoutingRoute = AdminRoutingRouteImport.update({
+  id: '/routing',
+  path: '/routing',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRoleRequestsRoute = AdminRoleRequestsRouteImport.update({
   id: '/role-requests',
   path: '/role-requests',
@@ -512,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/role-requests': typeof AdminRoleRequestsRoute
+  '/admin/routing': typeof AdminRoutingRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -592,6 +599,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/role-requests': typeof AdminRoleRequestsRoute
+  '/admin/routing': typeof AdminRoutingRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -673,6 +681,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/role-requests': typeof AdminRoleRequestsRoute
+  '/admin/routing': typeof AdminRoutingRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
@@ -755,6 +764,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reports'
     | '/admin/role-requests'
+    | '/admin/routing'
     | '/admin/settings'
     | '/admin/shops'
     | '/admin/support'
@@ -835,6 +845,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reports'
     | '/admin/role-requests'
+    | '/admin/routing'
     | '/admin/settings'
     | '/admin/shops'
     | '/admin/support'
@@ -915,6 +926,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/reports'
     | '/admin/role-requests'
+    | '/admin/routing'
     | '/admin/settings'
     | '/admin/shops'
     | '/admin/support'
@@ -1378,6 +1390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/routing': {
+      id: '/admin/routing'
+      path: '/routing'
+      fullPath: '/admin/routing'
+      preLoaderRoute: typeof AdminRoutingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/role-requests': {
       id: '/admin/role-requests'
       path: '/role-requests'
@@ -1568,6 +1587,7 @@ interface AdminRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminRoleRequestsRoute: typeof AdminRoleRequestsRoute
+  AdminRoutingRoute: typeof AdminRoutingRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminShopsRoute: typeof AdminShopsRoute
   AdminSupportRoute: typeof AdminSupportRoute
@@ -1587,6 +1607,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminRoleRequestsRoute: AdminRoleRequestsRoute,
+  AdminRoutingRoute: AdminRoutingRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminShopsRoute: AdminShopsRoute,
   AdminSupportRoute: AdminSupportRoute,
