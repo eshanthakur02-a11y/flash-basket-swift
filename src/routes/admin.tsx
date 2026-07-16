@@ -32,6 +32,7 @@ const BOTTOM_NAV = [
 
 const DRAWER_NAV = [
   { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/earnings", label: "Earnings", icon: TrendingUp },
   { to: "/admin/categories", label: "Categories", icon: Tag },
   
   { to: "/admin/offers", label: "Offers", icon: Megaphone },
