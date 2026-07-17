@@ -18,18 +18,11 @@ function CategoryPage() {
     queryFn: async () => (await supabase.from("categories").select("*").eq("slug", slug).maybeSingle()).data,
   });
 
-  const products = useQuery({
-    queryKey: ["products-by-cat", slug],
-    queryFn: async () => {
-      if (!category.data) return [];
-      const { data } = await supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
-        .eq("category_id", category.data.id)
-        .limit(60);
-      return (data ?? []) as ProductCardData[];
-    },
+  const products = useCustomerProducts({
+    categoryId: category.data?.id ?? null,
+    limit: 60,
     enabled: !!category.data,
+    key: `cat:${slug}`,
   });
 
   return (
