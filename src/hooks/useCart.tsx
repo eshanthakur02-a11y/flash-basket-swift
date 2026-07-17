@@ -114,7 +114,8 @@ export function useCart() {
     savings,
     totalQty,
     loading: cartQuery.isLoading,
-    add: (productId: string, qty = 1) => addMutation.mutate({ productId, qty }),
+    add: (productId: string, qty = 1, variantId: string | null = null) =>
+      addMutation.mutate({ productId, variantId, qty }),
     setQty: (lineId: string, qty: number) => updateMutation.mutate({ lineId, qty }),
     clear,
   };
