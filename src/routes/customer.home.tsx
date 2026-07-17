@@ -28,41 +28,9 @@ function CustomerHome() {
     },
   });
 
-  const featured = useQuery({
-    queryKey: ["app-featured"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
-        .eq("is_featured", true)
-        .limit(10);
-      return (data ?? []) as ProductCardData[];
-    },
-  });
-
-  const bestsellers = useQuery({
-    queryKey: ["app-best"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
-        .eq("is_bestseller", true)
-        .limit(10);
-      return (data ?? []) as ProductCardData[];
-    },
-  });
-
-  const deals = useQuery({
-    queryKey: ["app-deals"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
-        .order("price", { ascending: true })
-        .limit(10);
-      return (data ?? []) as ProductCardData[];
-    },
-  });
+  const featured = useCustomerProducts({ onlyFeatured: true, limit: 10, key: "featured" });
+  const bestsellers = useCustomerProducts({ onlyBestseller: true, limit: 10, key: "best" });
+  const deals = useCustomerProducts({ sort: "price_asc", limit: 10, key: "deals" });
 
   return (
     <motion.div
