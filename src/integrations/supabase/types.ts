@@ -2171,6 +2171,31 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      list_customer_products: {
+        Args: {
+          _category_id?: string
+          _ids?: string[]
+          _limit?: number
+          _only_bestseller?: boolean
+          _only_featured?: boolean
+          _pincode: string
+          _search?: string
+          _sort?: string
+        }
+        Returns: {
+          category_id: string
+          delivery_minutes: number
+          id: string
+          image_url: string
+          mrp: number
+          name: string
+          price: number
+          rating: number
+          slug: string
+          stock: number
+          unit: string
+        }[]
+      }
       list_eligible_shops_for_product: {
         Args: {
           _lat?: number
