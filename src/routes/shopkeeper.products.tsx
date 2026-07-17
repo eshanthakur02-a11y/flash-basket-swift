@@ -325,6 +325,11 @@ function EditDialog({
           <label className="text-xs font-bold">Description</label>
           <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
+
+        <div className="pt-2 border-t border-border">
+          <VariantsEditor variants={variants} onChange={setVariants} />
+        </div>
+
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="text-xs font-bold">Your price ₹</label>
