@@ -27,6 +27,7 @@ function CustomerShell() {
   const { user, loading, roles } = useAuth() as any;
   const navigate = useNavigate();
   const { totalQty } = useCart();
+  useCustomerCatalogRealtime();
 
   useEffect(() => {
     if (loading) return;
