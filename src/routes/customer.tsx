@@ -7,6 +7,7 @@ import { useCart } from "@/hooks/useCart";
 import { cn } from "@/lib/utils";
 import { CustomerHeader } from "@/components/customer/CustomerHeader";
 import { FloatingCartBar } from "@/components/customer/FloatingCartBar";
+import { useCustomerCatalogRealtime } from "@/hooks/useCustomerProducts";
 
 export const Route = createFileRoute("/customer")({
   head: () => ({ meta: [{ title: "FlashBasket — 10-min grocery delivery" }] }),
