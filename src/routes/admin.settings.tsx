@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
 import { toast } from "sonner";
 import {
   User as UserIcon, Mail, ShieldCheck, LogOut, LifeBuoy, MessageCircle, ChevronRight,
-  Bell, Store, Truck, Tag, Settings as SettingsIcon,
+  Bell, Store, Truck, Tag, Settings as SettingsIcon, ShoppingBag,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/admin/settings")({ component: Page });
 
@@ -23,13 +25,35 @@ function Page() {
   const [profile, setProfile] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [ticketOpen, setTicketOpen] = useState(false);
+  const [shopSelectionEnabled, setShopSelectionEnabled] = useState<boolean>(true);
+  const [savingShopSel, setSavingShopSel] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) =>
       setProfile(data ?? { id: user.id, full_name: "", phone: "", avatar_url: "" }),
     );
+    supabase.from("app_config").select("value").eq("key", "enable_customer_shop_selection").maybeSingle().then(({ data }) => {
+      const raw = (data as any)?.value;
+      setShopSelectionEnabled(raw === false || raw === "false" ? false : true);
+    });
   }, [user]);
+
+  const toggleShopSelection = async (next: boolean) => {
+    setSavingShopSel(true);
+    setShopSelectionEnabled(next);
+    const { error } = await (supabase as any)
+      .from("app_config")
+      .upsert({ key: "enable_customer_shop_selection", value: next }, { onConflict: "key" });
+    setSavingShopSel(false);
+    if (error) {
+      setShopSelectionEnabled(!next);
+      toast.error(error.message);
+    } else {
+      toast.success(`Customer shop selection ${next ? "enabled" : "disabled"}`);
+    }
+  };
+
 
   const saveProfile = async () => {
     if (!user) return;
@@ -127,7 +151,25 @@ function Page() {
           </div>
         </section>
 
+        {/* Storefront settings */}
+        <section className="rounded-3xl border border-border bg-card p-5 shadow-card">
+          <h2 className="font-display text-lg font-bold flex items-center gap-2 mb-4">
+            <ShoppingBag className="h-5 w-5 text-primary" /> Storefront
+          </h2>
+          <div className="flex items-start justify-between gap-4 rounded-2xl border border-border bg-background p-3">
+            <div className="min-w-0">
+              <div className="text-sm font-bold">Enable customer shop selection</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                When on, customers can pick which nearby shop fulfils an item on the product page.
+                When off, the system auto-assigns the best shop.
+              </div>
+            </div>
+            <Switch checked={shopSelectionEnabled} disabled={savingShopSel} onCheckedChange={toggleShopSelection} />
+          </div>
+        </section>
+
         {/* Help & Support */}
+
         <section className="rounded-3xl border border-border bg-card p-5 shadow-card">
           <h2 className="font-display text-lg font-bold flex items-center gap-2 mb-4">
             <LifeBuoy className="h-5 w-5 text-primary" /> Help & Support

@@ -89,6 +89,7 @@ export type Database = {
           id: string
           product_id: string
           quantity: number
+          shop_id: string | null
           updated_at: string
           user_id: string
           variant_id: string | null
@@ -98,6 +99,7 @@ export type Database = {
           id?: string
           product_id: string
           quantity?: number
+          shop_id?: string | null
           updated_at?: string
           user_id: string
           variant_id?: string | null
@@ -107,6 +109,7 @@ export type Database = {
           id?: string
           product_id?: string
           quantity?: number
+          shop_id?: string | null
           updated_at?: string
           user_id?: string
           variant_id?: string | null
@@ -117,6 +120,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
             referencedColumns: ["id"]
           },
           {
@@ -749,6 +759,7 @@ export type Database = {
           rejected_shop_ids: string[]
           routing_status: string | null
           shop_id: string | null
+          shop_selection_mode: string
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
           tax: number
@@ -785,6 +796,7 @@ export type Database = {
           rejected_shop_ids?: string[]
           routing_status?: string | null
           shop_id?: string | null
+          shop_selection_mode?: string
           status?: Database["public"]["Enums"]["order_status"]
           subtotal: number
           tax?: number
@@ -821,6 +833,7 @@ export type Database = {
           rejected_shop_ids?: string[]
           routing_status?: string | null
           shop_id?: string | null
+          shop_selection_mode?: string
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           tax?: number
@@ -2118,6 +2131,29 @@ export type Database = {
       haversine_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
+      }
+      list_eligible_shops_for_product: {
+        Args: {
+          _lat?: number
+          _lng?: number
+          _pincode?: string
+          _product_id: string
+          _variant_id?: string
+        }
+        Returns: {
+          delivery_minutes: number
+          distance_km: number
+          latitude: number
+          longitude: number
+          mrp: number
+          pincode: string
+          price: number
+          service_radius_km: number
+          shop_address: string
+          shop_id: string
+          shop_name: string
+          stock: number
+        }[]
       }
       notify_role: {
         Args: {

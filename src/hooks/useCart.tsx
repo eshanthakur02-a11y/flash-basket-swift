@@ -7,6 +7,7 @@ export interface CartLine {
   id: string;
   product_id: string;
   variant_id: string | null;
+  shop_id: string | null;
   quantity: number;
   product: {
     id: string;
@@ -28,6 +29,26 @@ export interface CartLine {
     stock: number;
     images: string[];
   } | null;
+  shop?: {
+    id: string;
+    name: string;
+    address: string | null;
+    pincode: string | null;
+    latitude: number | null;
+    longitude: number | null;
+  } | null;
+}
+
+export class CartShopConflictError extends Error {
+  constructor(
+    public currentShopId: string,
+    public newShopId: string,
+    public currentShopName?: string,
+    public newShopName?: string,
+  ) {
+    super("Cart contains items from a different shop");
+    this.name = "CartShopConflictError";
+  }
 }
 
 export function useCart() {
@@ -40,7 +61,9 @@ export function useCart() {
       if (!user) return [];
       const { data, error } = await (supabase as any)
         .from("cart_items")
-        .select("id, product_id, variant_id, quantity, products(id, name, slug, price, mrp, image_url, unit, stock), product_variants:variant_id(id, name, size, unit, selling_price, mrp, stock, images)")
+        .select(
+          "id, product_id, variant_id, shop_id, quantity, products(id, name, slug, price, mrp, image_url, unit, stock), product_variants:variant_id(id, name, size, unit, selling_price, mrp, stock, images), shops:shop_id(id, name, address, pincode, latitude, longitude)"
+        )
         .eq("user_id", user.id);
       if (error) throw error;
       return (data ?? [])
@@ -49,11 +72,12 @@ export function useCart() {
           id: row.id,
           product_id: row.product_id,
           variant_id: row.variant_id ?? null,
+          shop_id: row.shop_id ?? null,
           quantity: row.quantity,
           product: row.products,
           variant: row.product_variants ?? null,
+          shop: row.shops ?? null,
         }));
-
     },
     enabled: !!user,
   });
@@ -65,11 +89,51 @@ export function useCart() {
   const mrpTotal = items.reduce((s, l) => s + mrpOf(l) * l.quantity, 0);
   const savings = mrpTotal - subtotal;
   const totalQty = items.reduce((s, l) => s + l.quantity, 0);
+  const currentShop = items.find((l) => l.shop)?.shop ?? null;
+  const currentShopId = items.find((l) => l.shop_id)?.shop_id ?? null;
 
   const addMutation = useMutation({
-    mutationFn: async ({ productId, variantId = null, qty = 1 }: { productId: string; variantId?: string | null; qty?: number }) => {
+    mutationFn: async ({
+      productId,
+      variantId = null,
+      shopId = null,
+      qty = 1,
+      force = false,
+    }: {
+      productId: string;
+      variantId?: string | null;
+      shopId?: string | null;
+      qty?: number;
+      force?: boolean;
+    }) => {
       if (!user) throw new Error("Please sign in to add to cart");
-      const existing = items.find((l) => l.product_id === productId && (l.variant_id ?? null) === (variantId ?? null));
+
+      // Detect shop conflict
+      if (shopId && currentShopId && currentShopId !== shopId && !force) {
+        const newShop = (await supabase.from("shops").select("name").eq("id", shopId).maybeSingle()).data;
+        throw new CartShopConflictError(
+          currentShopId,
+          shopId,
+          currentShop?.name,
+          newShop?.name,
+        );
+      }
+
+      // If forcing, clear existing cart first (different shop)
+      if (force && currentShopId && currentShopId !== shopId) {
+        const { error: dErr } = await supabase.from("cart_items").delete().eq("user_id", user.id);
+        if (dErr) throw dErr;
+      }
+
+      const effectiveShopId = shopId ?? currentShopId;
+      const existing = force
+        ? undefined
+        : items.find(
+            (l) =>
+              l.product_id === productId &&
+              (l.variant_id ?? null) === (variantId ?? null) &&
+              (l.shop_id ?? null) === (effectiveShopId ?? null),
+          );
       if (existing) {
         const { error } = await supabase
           .from("cart_items")
@@ -77,14 +141,20 @@ export function useCart() {
           .eq("id", existing.id);
         if (error) throw error;
       } else {
-        const { error } = await (supabase as any)
-          .from("cart_items")
-          .insert({ user_id: user.id, product_id: productId, variant_id: variantId, quantity: qty });
+        const { error } = await (supabase as any).from("cart_items").insert({
+          user_id: user.id,
+          product_id: productId,
+          variant_id: variantId,
+          shop_id: effectiveShopId,
+          quantity: qty,
+        });
         if (error) throw error;
       }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart", user?.id] }),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      if (e.name !== "CartShopConflictError") toast.error(e.message);
+    },
   });
 
   const updateMutation = useMutation({
@@ -100,10 +170,24 @@ export function useCart() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart", user?.id] }),
   });
 
+  const changeShop = async (newShopId: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("cart_items")
+      .update({ shop_id: newShopId })
+      .eq("user_id", user.id);
+    if (error) return toast.error(error.message);
+    toast.success("Shop updated");
+    qc.invalidateQueries({ queryKey: ["cart", user.id] });
+  };
+
   const clear = async () => {
     if (!user) return;
     const { error } = await supabase.from("cart_items").delete().eq("user_id", user.id);
-    if (error) { toast.error("Could not clear cart: " + error.message); return; }
+    if (error) {
+      toast.error("Could not clear cart: " + error.message);
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["cart", user.id] });
   };
 
@@ -113,10 +197,15 @@ export function useCart() {
     mrpTotal,
     savings,
     totalQty,
+    currentShop,
+    currentShopId,
     loading: cartQuery.isLoading,
-    add: (productId: string, qty = 1, variantId: string | null = null) =>
-      addMutation.mutate({ productId, variantId, qty }),
+    add: (productId: string, qty = 1, variantId: string | null = null, shopId: string | null = null) =>
+      addMutation.mutateAsync({ productId, variantId, shopId, qty }),
+    addForce: (productId: string, qty = 1, variantId: string | null = null, shopId: string | null = null) =>
+      addMutation.mutateAsync({ productId, variantId, shopId, qty, force: true }),
     setQty: (lineId: string, qty: number) => updateMutation.mutate({ lineId, qty }),
+    changeShop,
     clear,
   };
 }

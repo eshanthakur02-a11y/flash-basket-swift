@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Minus, Plus, Trash2, ShoppingBag, Zap } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, Zap, Store } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
@@ -13,8 +13,9 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const { user } = useAuth();
-  const { items, subtotal, savings, setQty, loading } = useCart();
+  const { items, subtotal, savings, setQty, loading, currentShop, clear } = useCart();
   const navigate = useNavigate();
+
 
   if (!user) {
     return (
@@ -49,7 +50,33 @@ function CartPage() {
     <div className="mx-auto max-w-5xl px-4 py-6 grid md:grid-cols-[1fr_360px] gap-6">
       <div>
         <h1 className="font-display text-3xl font-extrabold mb-4">Your cart ({items.length})</h1>
+        {currentShop && (
+          <div className="mb-4 flex items-center justify-between rounded-2xl border border-border bg-card p-4 shadow-card">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 grid place-items-center text-primary shrink-0">
+                <Store className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Selected shop</div>
+                <div className="font-bold truncate">{currentShop.name}</div>
+                {currentShop.pincode && (
+                  <div className="text-xs text-muted-foreground truncate">PIN {currentShop.pincode}</div>
+                )}
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (confirm("Clear cart to shop at a different store?")) clear();
+              }}
+            >
+              Change shop
+            </Button>
+          </div>
+        )}
         <div className="space-y-3">
+
           <AnimatePresence>
             {items.map((l) => (
               <motion.div

@@ -1,13 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Clock, Star, ShieldCheck, Truck, Minus, Plus, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Clock, Star, ShieldCheck, Truck, Minus, Plus, ChevronLeft, ChevronRight, X, Store } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useCart } from "@/hooks/useCart";
+import { useCart, CartShopConflictError } from "@/hooks/useCart";
+import { useDeliveryContext } from "@/hooks/useDeliveryContext";
+import { ShopPicker, useEligibleShops, type EligibleShop } from "@/components/ShopPicker";
 import { Button } from "@/components/ui/button";
 import { rupees, pct } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 
 export const Route = createFileRoute("/product/$slug")({
   head: ({ params }) => ({ meta: [{ title: `${params.slug} — FlashBasket` }] }),
@@ -32,7 +40,8 @@ type Variant = {
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const { items, add, setQty } = useCart();
+  const { items, add, addForce, setQty, currentShop } = useCart();
+  const delivery = useDeliveryContext();
 
   const product = useQuery({
     queryKey: ["product", slug],
@@ -54,6 +63,16 @@ function ProductPage() {
     },
   });
 
+  const settings = useQuery({
+    queryKey: ["app-config", "enable_customer_shop_selection"],
+    queryFn: async () => {
+      const { data } = await supabase.from("app_config").select("value").eq("key", "enable_customer_shop_selection").maybeSingle();
+      const raw = (data as any)?.value;
+      return raw === false || raw === "false" ? false : true;
+    },
+  });
+  const shopSelectionEnabled = settings.data ?? true;
+
   const variants = variantsQ.data ?? [];
   const hasVariants = variants.length > 0;
   const defaultVariant = useMemo(
@@ -63,20 +82,83 @@ function ProductPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = hasVariants ? (variants.find((v) => v.id === selectedId) ?? defaultVariant) : null;
 
+  const eligibleQ = useEligibleShops({
+    productId: product.data?.id,
+    variantId: selected?.id ?? null,
+    pincode: delivery.pincode,
+    lat: delivery.lat,
+    lng: delivery.lng,
+    enabled: !!product.data?.id,
+  });
+  const eligibleShops = eligibleQ.data ?? [];
+  const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
+  const selectedShop: EligibleShop | null = useMemo(() => {
+    if (eligibleShops.length === 0) return null;
+    if (selectedShopId) {
+      const found = eligibleShops.find((s) => s.shop_id === selectedShopId);
+      if (found) return found;
+    }
+    // If a shop is already locked in via the cart, prefer it
+    if (currentShop) {
+      const inCart = eligibleShops.find((s) => s.shop_id === currentShop.id);
+      if (inCart) return inCart;
+    }
+    return eligibleShops[0];
+  }, [eligibleShops, selectedShopId, currentShop]);
+
+  const [conflict, setConflict] = useState<{ productId: string; variantId: string | null; shopId: string } | null>(null);
+
   if (product.isLoading) return <div className="mx-auto max-w-7xl px-4 py-10"><Skeleton className="h-96" /></div>;
   if (!product.data) return <div className="mx-auto max-w-7xl px-4 py-20 text-center">Product not found.</div>;
 
   const p = product.data;
 
-  // Effective values respect selected variant when present
-  const effPrice = selected?.selling_price ?? p.price;
-  const effMrp = selected?.mrp || (selected?.selling_price ?? p.mrp);
-  const effStock = selected?.stock ?? p.stock;
+  // Base effective values from variant (fallback: product)
+  const baseVariantPrice = selected?.selling_price ?? p.price;
+  const baseVariantMrp = selected?.mrp || (selected?.selling_price ?? p.mrp);
+  const baseVariantStock = selected?.stock ?? p.stock;
+
+  // Shop overrides variant pricing when one is selected
+  const effPrice = selectedShop?.price ?? baseVariantPrice;
+  const effMrp = selectedShop?.mrp ?? baseVariantMrp;
+  const effStock = selectedShop?.stock ?? baseVariantStock;
   const effImages = selected && selected.images.length > 0 ? selected.images : buildImageList(p);
   const effUnit = selected ? `${selected.size}${selected.unit ? " " + selected.unit : ""}` : p.unit;
+  const effDeliveryMinutes = selectedShop?.delivery_minutes ?? p.delivery_minutes;
 
-  const line = items.find((l) => l.product_id === p.id && (l.variant_id ?? null) === (selected?.id ?? null));
+  const line = items.find(
+    (l) =>
+      l.product_id === p.id &&
+      (l.variant_id ?? null) === (selected?.id ?? null) &&
+      (l.shop_id ?? null) === (selectedShop?.shop_id ?? null),
+  );
   const discount = pct(effPrice, effMrp);
+
+  async function handleAdd() {
+    if (!selectedShop && eligibleShops.length === 0 && delivery.pincode) {
+      toast.error("No shop currently delivers this item to your address.");
+      return;
+    }
+    try {
+      await add(p.id, 1, selected?.id ?? null, selectedShop?.shop_id ?? null);
+    } catch (e) {
+      if (e instanceof CartShopConflictError) {
+        setConflict({ productId: p.id, variantId: selected?.id ?? null, shopId: selectedShop!.shop_id });
+      }
+    }
+  }
+
+  async function confirmSwitchShop() {
+    if (!conflict) return;
+    try {
+      await addForce(conflict.productId, 1, conflict.variantId, conflict.shopId);
+      toast.success("Cart cleared and item added");
+    } catch {
+      /* toast handled in hook */
+    } finally {
+      setConflict(null);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -84,7 +166,7 @@ function ProductPage() {
 
       <div className="mt-4 grid md:grid-cols-2 gap-8">
         <motion.div
-          key={selected?.id ?? "base"}
+          key={`${selected?.id ?? "base"}-${selectedShop?.shop_id ?? "none"}`}
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
         >
@@ -93,14 +175,21 @@ function ProductPage() {
 
         <div>
           <div className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-            <Clock className="h-3 w-3" /> Delivery in {p.delivery_minutes} mins
+            <Clock className="h-3 w-3" /> Delivery in {effDeliveryMinutes} mins
           </div>
           <h1 className="mt-2 font-display text-3xl md:text-4xl font-extrabold">{p.name}</h1>
           {p.brand && <div className="text-muted-foreground mt-1">{p.brand}</div>}
           <div className="text-sm text-muted-foreground">{effUnit}</div>
 
-          <div className="mt-3 inline-flex items-center gap-1 rounded-md bg-success/20 text-success-foreground px-2 py-1 text-xs font-semibold">
-            <Star className="h-3 w-3 fill-current" /> {p.rating}
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <div className="inline-flex items-center gap-1 rounded-md bg-success/20 text-success-foreground px-2 py-1 text-xs font-semibold">
+              <Star className="h-3 w-3 fill-current" /> {p.rating}
+            </div>
+            {selectedShop && (
+              <div className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-xs font-semibold">
+                <Store className="h-3 w-3" /> {selectedShop.shop_name}
+              </div>
+            )}
           </div>
 
           {hasVariants && (
@@ -163,7 +252,7 @@ function ProductPage() {
                 <button onClick={() => setQty(line.id, line.quantity + 1)} className="h-12 w-12 grid place-items-center"><Plus /></button>
               </div>
             ) : (
-              <Button size="lg" onClick={() => add(p.id, 1, selected?.id ?? null)} className="rounded-xl gradient-primary text-primary-foreground font-bold h-12 px-8 shadow-glow">
+              <Button size="lg" onClick={handleAdd} className="rounded-xl gradient-primary text-primary-foreground font-bold h-12 px-8 shadow-glow">
                 Add to cart
               </Button>
             )}
@@ -172,8 +261,32 @@ function ProductPage() {
             </Link>
           </div>
 
+          {/* Available shops picker */}
+          {shopSelectionEnabled && eligibleShops.length > 1 && (
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-display text-xl font-bold flex items-center gap-2">
+                  <Store className="h-5 w-5 text-primary" /> Available shops
+                </h3>
+                <span className="text-xs text-muted-foreground">{eligibleShops.length} shops</span>
+              </div>
+              <ShopPicker
+                shops={eligibleShops}
+                loading={eligibleQ.isLoading}
+                selectedShopId={selectedShop?.shop_id ?? null}
+                onSelect={(s) => setSelectedShopId(s.shop_id)}
+              />
+            </div>
+          )}
+
+          {shopSelectionEnabled && eligibleShops.length === 0 && delivery.pincode && !eligibleQ.isLoading && (
+            <div className="mt-6 rounded-2xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+              No shop in your area ({delivery.pincode}) currently has this item in stock.
+            </div>
+          )}
+
           <div className="mt-8 grid grid-cols-3 gap-2">
-            <Perk icon={<Clock className="h-4 w-4" />} title="Super fast" sub="10 min delivery" />
+            <Perk icon={<Clock className="h-4 w-4" />} title="Super fast" sub={`${effDeliveryMinutes} min delivery`} />
             <Perk icon={<Truck className="h-4 w-4" />} title="Free shipping" sub="Above ₹199" />
             <Perk icon={<ShieldCheck className="h-4 w-4" />} title="100% authentic" sub="Quality assured" />
           </div>
@@ -186,9 +299,26 @@ function ProductPage() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={!!conflict} onOpenChange={(v) => !v && setConflict(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Different shop in your cart</AlertDialogTitle>
+            <AlertDialogDescription>
+              This product belongs to a different shop. A cart can only contain items from one shop.
+              Would you like to clear your current cart and switch shops?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep current cart</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmSwitchShop}>Clear cart & switch</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+
 
 function Perk({ icon, title, sub }: { icon: React.ReactNode; title: string; sub: string }) {
   return (
