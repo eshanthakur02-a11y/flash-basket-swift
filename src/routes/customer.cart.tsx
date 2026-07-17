@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Minus, Plus, Trash2, Zap } from "lucide-react";
+import { Minus, Plus, Trash2, Zap, Store } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,9 @@ export const Route = createFileRoute("/customer/cart")({
 });
 
 function AppCart() {
-  const { items, subtotal, savings, setQty, loading } = useCart();
+  const { items, subtotal, savings, setQty, loading, currentShop, clear } = useCart();
   const navigate = useNavigate();
+
 
   if (!loading && items.length === 0) {
     return (
