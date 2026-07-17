@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Clock, Star, ShieldCheck, Truck, Minus, Plus, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,22 @@ export const Route = createFileRoute("/product/$slug")({
   component: ProductPage,
 });
 
+type Variant = {
+  id: string;
+  name: string | null;
+  size: string;
+  unit: string | null;
+  weight: string | null;
+  mrp: number;
+  selling_price: number;
+  retail_price: number;
+  stock: number;
+  images: string[];
+  is_available: boolean;
+  is_default: boolean;
+  display_order: number;
+};
+
 function ProductPage() {
   const { slug } = Route.useParams();
   const { items, add, setQty } = useCart();
@@ -23,12 +39,44 @@ function ProductPage() {
     queryFn: async () => (await supabase.from("products").select("*").eq("slug", slug).maybeSingle()).data,
   });
 
+  const variantsQ = useQuery({
+    queryKey: ["product-variants", product.data?.id],
+    enabled: !!product.data?.id,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("product_variants")
+        .select("*")
+        .eq("product_id", product.data!.id)
+        .eq("is_available", true)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as Variant[];
+    },
+  });
+
+  const variants = variantsQ.data ?? [];
+  const hasVariants = variants.length > 0;
+  const defaultVariant = useMemo(
+    () => variants.find((v) => v.is_default) ?? variants[0],
+    [variants],
+  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = hasVariants ? (variants.find((v) => v.id === selectedId) ?? defaultVariant) : null;
+
   if (product.isLoading) return <div className="mx-auto max-w-7xl px-4 py-10"><Skeleton className="h-96" /></div>;
   if (!product.data) return <div className="mx-auto max-w-7xl px-4 py-20 text-center">Product not found.</div>;
 
   const p = product.data;
-  const line = items.find((l) => l.product_id === p.id);
-  const discount = pct(p.price, p.mrp);
+
+  // Effective values respect selected variant when present
+  const effPrice = selected?.selling_price ?? p.price;
+  const effMrp = selected?.mrp || (selected?.selling_price ?? p.mrp);
+  const effStock = selected?.stock ?? p.stock;
+  const effImages = selected && selected.images.length > 0 ? selected.images : buildImageList(p);
+  const effUnit = selected ? `${selected.size}${selected.unit ? " " + selected.unit : ""}` : p.unit;
+
+  const line = items.find((l) => l.product_id === p.id && (l.variant_id ?? null) === (selected?.id ?? null));
+  const discount = pct(effPrice, effMrp);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -36,13 +84,11 @@ function ProductPage() {
 
       <div className="mt-4 grid md:grid-cols-2 gap-8">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          key={selected?.id ?? "base"}
+          initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <ProductGallery
-            name={p.name}
-            images={buildImageList(p)}
-          />
+          <ProductGallery name={p.name} images={effImages} />
         </motion.div>
 
         <div>
@@ -51,17 +97,54 @@ function ProductPage() {
           </div>
           <h1 className="mt-2 font-display text-3xl md:text-4xl font-extrabold">{p.name}</h1>
           {p.brand && <div className="text-muted-foreground mt-1">{p.brand}</div>}
-          <div className="text-sm text-muted-foreground">{p.unit}</div>
+          <div className="text-sm text-muted-foreground">{effUnit}</div>
 
           <div className="mt-3 inline-flex items-center gap-1 rounded-md bg-success/20 text-success-foreground px-2 py-1 text-xs font-semibold">
             <Star className="h-3 w-3 fill-current" /> {p.rating}
           </div>
 
+          {hasVariants && (
+            <div className="mt-5">
+              <div className="text-xs font-bold uppercase text-muted-foreground tracking-wide mb-2">
+                Choose an option
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {variants.map((v) => {
+                  const active = selected?.id === v.id;
+                  const oos = v.stock <= 0;
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      disabled={oos}
+                      onClick={() => setSelectedId(v.id)}
+                      className={`rounded-xl border-2 px-3 py-2 text-left transition ${
+                        active ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                      } ${oos ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      <div className="text-sm font-bold">
+                        {v.size}
+                        {v.unit ? ` ${v.unit}` : ""}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {rupees(v.selling_price)}
+                        {v.mrp > v.selling_price && (
+                          <span className="ml-1 line-through">{rupees(v.mrp)}</span>
+                        )}
+                        {oos && <span className="ml-2 text-destructive">Out</span>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="mt-4 flex items-end gap-3">
-            <div className="text-3xl font-bold">{rupees(p.price)}</div>
-            {p.mrp > p.price && (
+            <div className="text-3xl font-bold">{rupees(effPrice)}</div>
+            {effMrp > effPrice && (
               <>
-                <div className="text-lg text-muted-foreground line-through">{rupees(p.mrp)}</div>
+                <div className="text-lg text-muted-foreground line-through">{rupees(effMrp)}</div>
                 <div className="rounded-md gradient-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
                   {discount}% OFF
                 </div>
@@ -71,7 +154,7 @@ function ProductPage() {
           <div className="text-xs text-muted-foreground">(Inclusive of all taxes)</div>
 
           <div className="mt-6 flex gap-3">
-            {p.stock <= 0 ? (
+            {effStock <= 0 ? (
               <Button disabled size="lg" className="rounded-xl">Out of stock</Button>
             ) : line ? (
               <div className="flex items-center gap-1 rounded-xl gradient-primary text-primary-foreground">
@@ -80,7 +163,7 @@ function ProductPage() {
                 <button onClick={() => setQty(line.id, line.quantity + 1)} className="h-12 w-12 grid place-items-center"><Plus /></button>
               </div>
             ) : (
-              <Button size="lg" onClick={() => add(p.id)} className="rounded-xl gradient-primary text-primary-foreground font-bold h-12 px-8 shadow-glow">
+              <Button size="lg" onClick={() => add(p.id, 1, selected?.id ?? null)} className="rounded-xl gradient-primary text-primary-foreground font-bold h-12 px-8 shadow-glow">
                 Add to cart
               </Button>
             )}
@@ -141,6 +224,7 @@ function ProductGallery({ images, name }: { images: string[]; name: string }) {
     );
   }
 
+  const safeIdx = Math.min(idx, images.length - 1);
   const go = (delta: number) => setIdx((i) => (i + delta + images.length) % images.length);
 
   return (
@@ -157,7 +241,7 @@ function ProductGallery({ images, name }: { images: string[]; name: string }) {
             setTouchX(null);
           }}
         >
-          <img src={images[idx]} alt={name} className="w-full h-full object-cover" />
+          <img src={images[safeIdx]} alt={name} loading="lazy" className="w-full h-full object-cover" />
           {images.length > 1 && (
             <>
               <button
@@ -182,7 +266,7 @@ function ProductGallery({ images, name }: { images: string[]; name: string }) {
                     key={i}
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setIdx(i); }}
-                    className={`h-1.5 rounded-full transition-all ${i === idx ? "w-6 bg-primary" : "w-1.5 bg-background/70"}`}
+                    className={`h-1.5 rounded-full transition-all ${i === safeIdx ? "w-6 bg-primary" : "w-1.5 bg-background/70"}`}
                     aria-label={`Go to image ${i + 1}`}
                   />
                 ))}
@@ -197,9 +281,9 @@ function ProductGallery({ images, name }: { images: string[]; name: string }) {
                 key={url + i}
                 type="button"
                 onClick={() => setIdx(i)}
-                className={`shrink-0 h-14 w-14 rounded-lg overflow-hidden border-2 transition ${i === idx ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"}`}
+                className={`shrink-0 h-14 w-14 rounded-lg overflow-hidden border-2 transition ${i === safeIdx ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"}`}
               >
-                <img src={url} alt="" className="h-full w-full object-cover" />
+                <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
               </button>
             ))}
           </div>
@@ -219,7 +303,7 @@ function ProductGallery({ images, name }: { images: string[]; name: string }) {
             <X className="h-5 w-5" />
           </button>
           <img
-            src={images[idx]}
+            src={images[safeIdx]}
             alt={name}
             className="max-h-[90vh] max-w-[95vw] object-contain"
             onClick={(e) => e.stopPropagation()}
