@@ -75,10 +75,20 @@ function CategoriesBrowse() {
     queryFn: async () => (await supabase.from("categories").select("*").order("display_order")).data ?? [],
   });
 
+  const { pincode } = useDeliveryContext();
   const counts = useQuery({
-    queryKey: ["cat-product-counts"],
+    queryKey: ["cat-product-counts", pincode],
     queryFn: async () => {
-      const { data } = await supabase.from("products").select("category_id");
+      const { data } = await (supabase as any).rpc("list_customer_products", {
+        _pincode: pincode,
+        _category_id: null,
+        _search: null,
+        _only_featured: false,
+        _only_bestseller: false,
+        _sort: "relevance",
+        _limit: 1000,
+        _ids: null,
+      });
       const map: Record<string, number> = {};
       (data ?? []).forEach((r: any) => {
         if (r.category_id) map[r.category_id] = (map[r.category_id] ?? 0) + 1;
