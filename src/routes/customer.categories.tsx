@@ -5,6 +5,7 @@ import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDeliveryContext } from "@/hooks/useDeliveryContext";
 
 
 const search = z.object({ q: z.string().optional(), chip: z.string().optional() });
