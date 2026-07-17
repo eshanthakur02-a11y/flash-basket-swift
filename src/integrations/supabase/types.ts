@@ -369,6 +369,36 @@ export type Database = {
           },
         ]
       }
+      locations: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          is_active: boolean
+          pincode: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          pincode: string
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          pincode?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_dispatch_log: {
         Row: {
           attempts: number
@@ -1138,33 +1168,42 @@ export type Database = {
         Row: {
           address: string | null
           avatar_url: string | null
+          city: string | null
           created_at: string
           email: string | null
           full_name: string | null
           id: string
           phone: string | null
+          pincode: string | null
+          state: string | null
           status: string
           updated_at: string
         }
         Insert: {
           address?: string | null
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id: string
           phone?: string | null
+          pincode?: string | null
+          state?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           address?: string | null
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
+          pincode?: string | null
+          state?: string | null
           status?: string
           updated_at?: string
         }
