@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
 import { toast } from "sonner";
 import {
   User as UserIcon, Mail, ShieldCheck, LogOut, LifeBuoy, MessageCircle, ChevronRight,
-  Bell, Store, Truck, Tag, Settings as SettingsIcon,
+  Bell, Store, Truck, Tag, Settings as SettingsIcon, ShoppingBag,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/admin/settings")({ component: Page });
 
