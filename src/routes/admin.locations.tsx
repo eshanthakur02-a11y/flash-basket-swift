@@ -87,7 +87,7 @@ function LocationsPage() {
   }
 
   return (
-    <RoleShell title="Locations" nav={ADMIN_NAV}>
+    <RoleShell role="admin" nav={ADMIN_NAV}>
       <div className="space-y-6">
         <section className="rounded-2xl border border-border bg-card p-5 shadow-card">
           <h2 className="font-display text-lg font-bold mb-3">Add location</h2>
