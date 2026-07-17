@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SearchableSelect } from "@/components/SearchableSelect";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocations, deriveLocationOptions } from "@/hooks/useLocations";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
@@ -20,9 +22,20 @@ function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [state, setState] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
+  const [pincode, setPincode] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const locationsQ = useLocations();
+  const { states, citiesByState, pincodesByCity } = useMemo(
+    () => deriveLocationOptions(locationsQ.data ?? []),
+    [locationsQ.data],
+  );
+  const cityOptions = state ? citiesByState.get(state) ?? [] : [];
+  const pincodeOptions = state && city ? pincodesByCity.get(`${state}|${city}`) ?? [] : [];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,8 +44,16 @@ function SignupPage() {
       toast.error("Enter a valid phone number");
       return;
     }
+    if (!state) return toast.error("Please select your state");
+    if (!city) return toast.error("Please select your city");
+    if (!pincode) return toast.error("Please select your PIN code");
+
     setSubmitting(true);
-    const { error } = await signUp(email, password, fullName, `+${digits}`);
+    const { error } = await signUp(email, password, fullName, `+${digits}`, {
+      state,
+      city,
+      pincode,
+    });
     setSubmitting(false);
     if (error) {
       toast.error(error.message || "Signup failed");
@@ -91,6 +112,46 @@ function SignupPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="h-11 rounded-xl mt-1"
+              />
+            </div>
+            <div>
+              <Label>State</Label>
+              <SearchableSelect
+                value={state}
+                onChange={(v) => {
+                  setState(v);
+                  setCity(null);
+                  setPincode(null);
+                }}
+                options={states}
+                placeholder={locationsQ.isLoading ? "Loading..." : "Select State"}
+                emptyText="No states found"
+                disabled={locationsQ.isLoading}
+              />
+            </div>
+            <div>
+              <Label>City</Label>
+              <SearchableSelect
+                value={city}
+                onChange={(v) => {
+                  setCity(v);
+                  setPincode(null);
+                }}
+                options={cityOptions}
+                placeholder={state ? "Select City" : "Select State first"}
+                emptyText="No cities found"
+                disabled={!state}
+              />
+            </div>
+            <div>
+              <Label>PIN Code</Label>
+              <SearchableSelect
+                value={pincode}
+                onChange={setPincode}
+                options={pincodeOptions}
+                placeholder={city ? "Select PIN Code" : "Select City first"}
+                emptyText="No PIN codes found"
+                disabled={!city}
               />
             </div>
             <div>

@@ -72,6 +72,7 @@ import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminLocationsRouteImport } from './routes/admin.locations'
 import { Route as AdminEarningsRouteImport } from './routes/admin.earnings'
 import { Route as AdminDeliveryPartnersRouteImport } from './routes/admin.delivery-partners'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
@@ -405,6 +406,11 @@ const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLocationsRoute = AdminLocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEarningsRoute = AdminEarningsRouteImport.update({
   id: '/earnings',
   path: '/earnings',
@@ -518,6 +524,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
   '/admin/earnings': typeof AdminEarningsRoute
+  '/admin/locations': typeof AdminLocationsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
@@ -600,6 +607,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
   '/admin/earnings': typeof AdminEarningsRoute
+  '/admin/locations': typeof AdminLocationsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
@@ -683,6 +691,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
   '/admin/earnings': typeof AdminEarningsRoute
+  '/admin/locations': typeof AdminLocationsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
@@ -767,6 +776,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/delivery-partners'
     | '/admin/earnings'
+    | '/admin/locations'
     | '/admin/notifications'
     | '/admin/offers'
     | '/admin/orders'
@@ -849,6 +859,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/delivery-partners'
     | '/admin/earnings'
+    | '/admin/locations'
     | '/admin/notifications'
     | '/admin/offers'
     | '/admin/orders'
@@ -931,6 +942,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/delivery-partners'
     | '/admin/earnings'
+    | '/admin/locations'
     | '/admin/notifications'
     | '/admin/offers'
     | '/admin/orders'
@@ -1458,6 +1470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNotificationsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/locations': {
+      id: '/admin/locations'
+      path: '/locations'
+      fullPath: '/admin/locations'
+      preLoaderRoute: typeof AdminLocationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/earnings': {
       id: '/admin/earnings'
       path: '/earnings'
@@ -1600,6 +1619,7 @@ interface AdminRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDeliveryPartnersRoute: typeof AdminDeliveryPartnersRoute
   AdminEarningsRoute: typeof AdminEarningsRoute
+  AdminLocationsRoute: typeof AdminLocationsRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminOffersRoute: typeof AdminOffersRoute
   AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
@@ -1621,6 +1641,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDeliveryPartnersRoute: AdminDeliveryPartnersRoute,
   AdminEarningsRoute: AdminEarningsRoute,
+  AdminLocationsRoute: AdminLocationsRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminOffersRoute: AdminOffersRoute,
   AdminOrdersRoute: AdminOrdersRouteWithChildren,

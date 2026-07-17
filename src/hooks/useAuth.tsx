@@ -12,7 +12,7 @@ interface AuthContextValue {
   roles: Role[];
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, phone?: string, extra?: { state?: string; city?: string; pincode?: string }) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -80,17 +80,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    phone?: string,
+    extra?: { state?: string; city?: string; pincode?: string },
+  ) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
-        data: { full_name: fullName, phone: phone ?? null },
+        data: {
+          full_name: fullName,
+          phone: phone ?? null,
+          state: extra?.state ?? null,
+          city: extra?.city ?? null,
+          pincode: extra?.pincode ?? null,
+        },
       },
     });
     return { error };
   };
+
 
   const signOut = async () => {
     await supabase.auth.signOut();

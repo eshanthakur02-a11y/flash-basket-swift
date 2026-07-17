@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { rupees } from "@/lib/format";
-import { LayoutDashboard, ListOrdered, Store, Users, Truck, BarChart, Bell, Settings, AlertTriangle, Wallet, UserPlus, Route as RouteIcon } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Store, Users, Truck, BarChart, Bell, Settings, AlertTriangle, Wallet, UserPlus, Route as RouteIcon, MapPin } from "lucide-react";
 
 const NAV = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/admin/routing", label: "Routing", icon: RouteIcon },
   { to: "/admin/payments", label: "Payments", icon: Wallet },
   { to: "/admin/shops", label: "Shops", icon: Store },
+  { to: "/admin/locations", label: "Locations", icon: MapPin },
   { to: "/admin/customers", label: "Users", icon: Users },
   { to: "/admin/role-requests", label: "Role requests", icon: UserPlus },
   { to: "/admin/delivery-partners", label: "Partners", icon: Truck },
@@ -20,6 +21,7 @@ const NAV = [
   { to: "/admin/notifications", label: "Notifications", icon: Bell },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
+
 
 export const Route = createFileRoute("/admin/dashboard")({
   head: () => ({ meta: [{ title: "Admin Dashboard — FlashBasket" }] }),

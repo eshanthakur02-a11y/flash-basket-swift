@@ -35,6 +35,20 @@ export function useDeliveryContext(): DeliveryContext & { ready: boolean } {
     },
   });
 
+  const profile = useQuery({
+    queryKey: ["profile-location", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("profiles")
+        .select("state, city, pincode")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return data ?? null;
+    },
+  });
+
+
   useEffect(() => {
     if (coordsTried) return;
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -51,12 +65,21 @@ export function useDeliveryContext(): DeliveryContext & { ready: boolean } {
     );
   }, [coordsTried]);
 
-  const pincode = (addr.data?.pincode as string | undefined) ?? null;
+  const pincode =
+    (addr.data?.pincode as string | undefined) ??
+    (profile.data?.pincode as string | undefined) ??
+    null;
+  const addressLabel = addr.data
+    ? `${addr.data.line1}, ${addr.data.city}`
+    : profile.data?.city && profile.data?.state
+    ? `${profile.data.city}, ${profile.data.state}`
+    : null;
   return {
     pincode,
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
-    addressLabel: addr.data ? `${addr.data.line1}, ${addr.data.city}` : null,
-    ready: !user || (addr.isFetched && coordsTried),
+    addressLabel,
+    ready: !user || ((addr.isFetched || profile.isFetched) && coordsTried),
   };
 }
+
