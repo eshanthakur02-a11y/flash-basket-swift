@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Minus, Plus, Trash2, ShoppingBag, Zap } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, Zap, Store } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
@@ -13,8 +13,9 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const { user } = useAuth();
-  const { items, subtotal, savings, setQty, loading } = useCart();
+  const { items, subtotal, savings, setQty, loading, currentShop, clear } = useCart();
   const navigate = useNavigate();
+
 
   if (!user) {
     return (
