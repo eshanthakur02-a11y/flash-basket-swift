@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Minus, Plus, Trash2, Zap, Store } from "lucide-react";
+import { Minus, Plus, Trash2, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
+import { CartShopSelector } from "@/components/CartShopSelector";
 
 export const Route = createFileRoute("/customer/cart")({
   head: () => ({ meta: [{ title: "Cart — FlashBasket" }] }),
