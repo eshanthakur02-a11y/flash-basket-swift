@@ -3,11 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Clock, ShieldCheck, Truck, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { ProductCardData } from "@/components/ProductCard";
 import { HeroBannerCarousel } from "@/components/customer/HeroBannerCarousel";
 import { QuickServices } from "@/components/customer/QuickServices";
 import { CategoryGrid, type CategoryLite } from "@/components/customer/CategoryGrid";
 import { ProductRail } from "@/components/customer/ProductRail";
+import { useCustomerProducts } from "@/hooks/useCustomerProducts";
 
 export const Route = createFileRoute("/customer/home")({
   head: () => ({
@@ -28,41 +28,9 @@ function CustomerHome() {
     },
   });
 
-  const featured = useQuery({
-    queryKey: ["app-featured"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
-        .eq("is_featured", true)
-        .limit(10);
-      return (data ?? []) as ProductCardData[];
-    },
-  });
-
-  const bestsellers = useQuery({
-    queryKey: ["app-best"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
-        .eq("is_bestseller", true)
-        .limit(10);
-      return (data ?? []) as ProductCardData[];
-    },
-  });
-
-  const deals = useQuery({
-    queryKey: ["app-deals"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
-        .order("price", { ascending: true })
-        .limit(10);
-      return (data ?? []) as ProductCardData[];
-    },
-  });
+  const featured = useCustomerProducts({ onlyFeatured: true, limit: 10, key: "featured" });
+  const bestsellers = useCustomerProducts({ onlyBestseller: true, limit: 10, key: "best" });
+  const deals = useCustomerProducts({ sort: "price_asc", limit: 10, key: "deals" });
 
   return (
     <motion.div

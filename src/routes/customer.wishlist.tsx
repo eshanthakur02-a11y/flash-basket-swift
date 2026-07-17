@@ -1,10 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { ProductCard, type ProductCardData } from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useCustomerProducts } from "@/hooks/useCustomerProducts";
 
 export const Route = createFileRoute("/customer/wishlist")({
   head: () => ({ meta: [{ title: "Favourites — FlashBasket" }] }),
@@ -14,17 +13,7 @@ export const Route = createFileRoute("/customer/wishlist")({
 function WishlistPage() {
   const { ids, loading: wlLoading } = useWishlist();
 
-  const products = useQuery({
-    queryKey: ["fav-products", ids],
-    queryFn: async () => {
-      if (ids.length === 0) return [];
-      const { data } = await supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock")
-        .in("id", ids);
-      return (data ?? []) as ProductCardData[];
-    },
-  });
+  const products = useCustomerProducts({ ids, limit: 100, key: "wishlist" });
 
   return (
     <div className="px-4 py-4">

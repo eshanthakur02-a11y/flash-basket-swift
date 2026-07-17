@@ -3,9 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { ProductCard, type ProductCardData } from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useCustomerProducts } from "@/hooks/useCustomerProducts";
 
 const search = z.object({ q: z.string().optional(), cat: z.string().optional() });
 
@@ -36,23 +37,18 @@ function ProductsPage() {
     queryFn: async () => (await supabase.from("categories").select("*").order("display_order")).data ?? [],
   });
 
-  const products = useQuery({
-    queryKey: ["products-list", q, cat, sort],
-    queryFn: async () => {
-      let qb = supabase
-        .from("products")
-        .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock, rating, category_id");
-      if (q) qb = qb.ilike("name", `%${q}%`);
-      if (cat) {
-        const catRow = (await supabase.from("categories").select("id").eq("slug", cat).maybeSingle()).data;
-        if (catRow) qb = qb.eq("category_id", catRow.id);
-      }
-      if (sort === "price-asc") qb = qb.order("price", { ascending: true });
-      else if (sort === "price-desc") qb = qb.order("price", { ascending: false });
-      else if (sort === "rating") qb = qb.order("rating", { ascending: false });
-      const { data } = await qb.limit(60);
-      return (data ?? []) as ProductCardData[];
-    },
+  const catRow = categories.data?.find((c: any) => c.slug === cat) ?? null;
+  const sortKey =
+    sort === "price-asc" ? "price_asc"
+    : sort === "price-desc" ? "price_desc"
+    : sort === "rating" ? "rating"
+    : "relevance";
+  const products = useCustomerProducts({
+    categoryId: catRow?.id ?? null,
+    search: q ?? null,
+    sort: sortKey,
+    limit: 60,
+    key: `list:${q ?? ""}:${cat ?? ""}:${sort}`,
   });
 
   return (
