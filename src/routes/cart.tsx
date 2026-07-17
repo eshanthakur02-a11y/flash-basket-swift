@@ -61,19 +61,21 @@ function CartPage() {
                 className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card"
               >
                 <Link to="/product/$slug" params={{ slug: l.product.slug }} className="shrink-0">
-                  {l.product.image_url ? (
-                    <img src={l.product.image_url} alt={l.product.name} className="h-20 w-20 rounded-xl object-cover" />
+                  {(l.variant?.images?.[0] ?? l.product.image_url) ? (
+                    <img src={l.variant?.images?.[0] ?? l.product.image_url!} alt={l.product.name} className="h-20 w-20 rounded-xl object-cover" />
                   ) : (
                     <div className="h-20 w-20 rounded-xl bg-secondary grid place-items-center text-3xl">🛒</div>
                   )}
                 </Link>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium line-clamp-1">{l.product.name}</div>
-                  <div className="text-xs text-muted-foreground">{l.product.unit}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {l.variant ? `${l.variant.size}${l.variant.unit ? " " + l.variant.unit : ""}` : l.product.unit}
+                  </div>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="font-bold">{rupees(l.product.price)}</span>
-                    {l.product.mrp > l.product.price && (
-                      <span className="text-xs text-muted-foreground line-through">{rupees(l.product.mrp)}</span>
+                    <span className="font-bold">{rupees(l.variant?.selling_price ?? l.product.price)}</span>
+                    {(l.variant?.mrp ?? l.product.mrp) > (l.variant?.selling_price ?? l.product.price) && (
+                      <span className="text-xs text-muted-foreground line-through">{rupees(l.variant?.mrp ?? l.product.mrp)}</span>
                     )}
                   </div>
                 </div>
