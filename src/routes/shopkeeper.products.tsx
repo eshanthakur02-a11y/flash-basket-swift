@@ -421,6 +421,9 @@ function CreateNewProduct({
         is_available: true,
       });
       if (sErr) throw sErr;
+      if (variants.filter((v) => !v._deleted).length > 0) {
+        await saveVariants(prod.id, variants);
+      }
       toast.success("Product created");
       onDone();
     } catch (e: any) {
