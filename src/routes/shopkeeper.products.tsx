@@ -255,12 +255,17 @@ function EditDialog({
     ? item.products.image_gallery
     : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
   const [gallery, setGallery] = useState<string[]>(initialGallery);
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!item.product_id) return;
+    loadVariants(item.product_id).then((rows) => setVariants(rows.map(rowToDraft))).catch(() => {});
+  }, [item.product_id]);
 
   async function save() {
     setSaving(true);
     try {
-      // Update product details
       if (item.product_id) {
         const { error: pErr } = await supabase
           .from("products")
@@ -273,6 +278,7 @@ function EditDialog({
           })
           .eq("id", item.product_id);
         if (pErr) throw pErr;
+        await saveVariants(item.product_id, variants);
       }
       // Update shop_products
       const { error } = await supabase
