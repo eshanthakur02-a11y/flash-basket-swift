@@ -35,6 +35,20 @@ export function useDeliveryContext(): DeliveryContext & { ready: boolean } {
     },
   });
 
+  const profile = useQuery({
+    queryKey: ["profile-location", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("profiles")
+        .select("state, city, pincode")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return data ?? null;
+    },
+  });
+
+
   useEffect(() => {
     if (coordsTried) return;
     if (typeof navigator === "undefined" || !navigator.geolocation) {
