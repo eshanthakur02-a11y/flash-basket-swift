@@ -25,13 +25,35 @@ function Page() {
   const [profile, setProfile] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [ticketOpen, setTicketOpen] = useState(false);
+  const [shopSelectionEnabled, setShopSelectionEnabled] = useState<boolean>(true);
+  const [savingShopSel, setSavingShopSel] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) =>
       setProfile(data ?? { id: user.id, full_name: "", phone: "", avatar_url: "" }),
     );
+    supabase.from("app_config").select("value").eq("key", "enable_customer_shop_selection").maybeSingle().then(({ data }) => {
+      const raw = (data as any)?.value;
+      setShopSelectionEnabled(raw === false || raw === "false" ? false : true);
+    });
   }, [user]);
+
+  const toggleShopSelection = async (next: boolean) => {
+    setSavingShopSel(true);
+    setShopSelectionEnabled(next);
+    const { error } = await (supabase as any)
+      .from("app_config")
+      .upsert({ key: "enable_customer_shop_selection", value: next }, { onConflict: "key" });
+    setSavingShopSel(false);
+    if (error) {
+      setShopSelectionEnabled(!next);
+      toast.error(error.message);
+    } else {
+      toast.success(`Customer shop selection ${next ? "enabled" : "disabled"}`);
+    }
+  };
+
 
   const saveProfile = async () => {
     if (!user) return;
