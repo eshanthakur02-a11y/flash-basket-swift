@@ -49,18 +49,20 @@ function AppCart() {
               exit={{ opacity: 0, x: -50 }}
               className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card"
             >
-              {l.product.image_url ? (
-                <img src={l.product.image_url} alt={l.product.name} className="h-16 w-16 rounded-xl object-cover" />
+              {(l.variant?.images?.[0] ?? l.product.image_url) ? (
+                <img src={l.variant?.images?.[0] ?? l.product.image_url!} alt={l.product.name} className="h-16 w-16 rounded-xl object-cover" />
               ) : (
                 <div className="h-16 w-16 rounded-xl bg-secondary grid place-items-center text-2xl">🛒</div>
               )}
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm line-clamp-1">{l.product.name}</div>
-                <div className="text-[11px] text-muted-foreground">{l.product.unit}</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {l.variant ? `${l.variant.size}${l.variant.unit ? " " + l.variant.unit : ""}` : l.product.unit}
+                </div>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="font-bold text-sm">{rupees(l.product.price)}</span>
-                  {l.product.mrp > l.product.price && (
-                    <span className="text-[11px] text-muted-foreground line-through">{rupees(l.product.mrp)}</span>
+                  <span className="font-bold text-sm">{rupees(l.variant?.selling_price ?? l.product.price)}</span>
+                  {(l.variant?.mrp ?? l.product.mrp) > (l.variant?.selling_price ?? l.product.price) && (
+                    <span className="text-[11px] text-muted-foreground line-through">{rupees(l.variant?.mrp ?? l.product.mrp)}</span>
                   )}
                 </div>
               </div>

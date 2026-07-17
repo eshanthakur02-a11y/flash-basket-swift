@@ -37,6 +37,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MultiImageInput } from "@/components/MultiImageInput";
+import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
+import { loadVariants, rowToDraft, saveVariants } from "@/lib/variants";
 import { rupees } from "@/lib/format";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
@@ -253,12 +255,17 @@ function EditDialog({
     ? item.products.image_gallery
     : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
   const [gallery, setGallery] = useState<string[]>(initialGallery);
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!item.product_id) return;
+    loadVariants(item.product_id).then((rows) => setVariants(rows.map(rowToDraft))).catch(() => {});
+  }, [item.product_id]);
 
   async function save() {
     setSaving(true);
     try {
-      // Update product details
       if (item.product_id) {
         const { error: pErr } = await supabase
           .from("products")
@@ -271,6 +278,7 @@ function EditDialog({
           })
           .eq("id", item.product_id);
         if (pErr) throw pErr;
+        await saveVariants(item.product_id, variants);
       }
       // Update shop_products
       const { error } = await supabase
@@ -317,6 +325,11 @@ function EditDialog({
           <label className="text-xs font-bold">Description</label>
           <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
+
+        <div className="pt-2 border-t border-border">
+          <VariantsEditor variants={variants} onChange={setVariants} />
+        </div>
+
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="text-xs font-bold">Your price ₹</label>
@@ -376,6 +389,7 @@ function CreateNewProduct({
   const [price, setPrice] = useState<number>(0);
   const [mrp, setMrp] = useState<number>(0);
   const [stock, setStock] = useState<number>(0);
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [saving, setSaving] = useState(false);
 
   async function save() {
@@ -407,6 +421,9 @@ function CreateNewProduct({
         is_available: true,
       });
       if (sErr) throw sErr;
+      if (variants.filter((v) => !v._deleted).length > 0) {
+        await saveVariants(prod.id, variants);
+      }
       toast.success("Product created");
       onDone();
     } catch (e: any) {
@@ -444,7 +461,13 @@ function CreateNewProduct({
         <label className="text-xs font-bold">Description</label>
         <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
+
+      <div className="pt-2 border-t border-border">
+        <VariantsEditor variants={variants} onChange={setVariants} />
+      </div>
+
       <div className="grid grid-cols-3 gap-3">
+
         <div>
           <label className="text-xs font-bold">Price ₹</label>
           <Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} />

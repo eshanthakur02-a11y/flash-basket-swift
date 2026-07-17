@@ -6,6 +6,7 @@ import { toast } from "sonner";
 export interface CartLine {
   id: string;
   product_id: string;
+  variant_id: string | null;
   quantity: number;
   product: {
     id: string;
@@ -17,6 +18,16 @@ export interface CartLine {
     unit: string;
     stock: number;
   };
+  variant?: {
+    id: string;
+    name: string | null;
+    size: string;
+    unit: string | null;
+    selling_price: number;
+    mrp: number;
+    stock: number;
+    images: string[];
+  } | null;
 }
 
 export function useCart() {
@@ -27,9 +38,9 @@ export function useCart() {
     queryKey: ["cart", user?.id],
     queryFn: async (): Promise<CartLine[]> => {
       if (!user) return [];
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("cart_items")
-        .select("id, product_id, quantity, products(id, name, slug, price, mrp, image_url, unit, stock)")
+        .select("id, product_id, variant_id, quantity, products(id, name, slug, price, mrp, image_url, unit, stock), product_variants:variant_id(id, name, size, unit, selling_price, mrp, stock, images)")
         .eq("user_id", user.id);
       if (error) throw error;
       return (data ?? [])
@@ -37,8 +48,10 @@ export function useCart() {
         .map((row: any) => ({
           id: row.id,
           product_id: row.product_id,
+          variant_id: row.variant_id ?? null,
           quantity: row.quantity,
           product: row.products,
+          variant: row.product_variants ?? null,
         }));
 
     },
@@ -46,15 +59,17 @@ export function useCart() {
   });
 
   const items = cartQuery.data ?? [];
-  const subtotal = items.reduce((s, l) => s + l.product.price * l.quantity, 0);
-  const mrpTotal = items.reduce((s, l) => s + l.product.mrp * l.quantity, 0);
+  const priceOf = (l: CartLine) => l.variant?.selling_price ?? l.product.price;
+  const mrpOf = (l: CartLine) => l.variant?.mrp ?? l.product.mrp;
+  const subtotal = items.reduce((s, l) => s + priceOf(l) * l.quantity, 0);
+  const mrpTotal = items.reduce((s, l) => s + mrpOf(l) * l.quantity, 0);
   const savings = mrpTotal - subtotal;
   const totalQty = items.reduce((s, l) => s + l.quantity, 0);
 
   const addMutation = useMutation({
-    mutationFn: async ({ productId, qty = 1 }: { productId: string; qty?: number }) => {
+    mutationFn: async ({ productId, variantId = null, qty = 1 }: { productId: string; variantId?: string | null; qty?: number }) => {
       if (!user) throw new Error("Please sign in to add to cart");
-      const existing = items.find((l) => l.product_id === productId);
+      const existing = items.find((l) => l.product_id === productId && (l.variant_id ?? null) === (variantId ?? null));
       if (existing) {
         const { error } = await supabase
           .from("cart_items")
@@ -62,9 +77,9 @@ export function useCart() {
           .eq("id", existing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from("cart_items")
-          .insert({ user_id: user.id, product_id: productId, quantity: qty });
+          .insert({ user_id: user.id, product_id: productId, variant_id: variantId, quantity: qty });
         if (error) throw error;
       }
     },
@@ -99,7 +114,8 @@ export function useCart() {
     savings,
     totalQty,
     loading: cartQuery.isLoading,
-    add: (productId: string, qty = 1) => addMutation.mutate({ productId, qty }),
+    add: (productId: string, qty = 1, variantId: string | null = null) =>
+      addMutation.mutate({ productId, variantId, qty }),
     setQty: (lineId: string, qty: number) => updateMutation.mutate({ lineId, qty }),
     clear,
   };
