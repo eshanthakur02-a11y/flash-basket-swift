@@ -42,6 +42,7 @@ function AppCart() {
 
       <CartShopSelector />
 
+      <div className="space-y-3">
         <AnimatePresence>
           {items.map((l) => (
             <motion.div
