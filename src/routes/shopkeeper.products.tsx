@@ -389,6 +389,7 @@ function CreateNewProduct({
   const [price, setPrice] = useState<number>(0);
   const [mrp, setMrp] = useState<number>(0);
   const [stock, setStock] = useState<number>(0);
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [saving, setSaving] = useState(false);
 
   async function save() {
