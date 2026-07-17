@@ -2196,6 +2196,23 @@ export type Database = {
           unit: string
         }[]
       }
+      list_eligible_shops_for_cart: {
+        Args: { _lat?: number; _lng?: number; _pincode?: string }
+        Returns: {
+          delivery_minutes: number
+          distance_km: number
+          latitude: number
+          longitude: number
+          mrp: number
+          pincode: string
+          price: number
+          service_radius_km: number
+          shop_address: string
+          shop_id: string
+          shop_name: string
+          stock: number
+        }[]
+      }
       list_eligible_shops_for_product: {
         Args: {
           _lat?: number

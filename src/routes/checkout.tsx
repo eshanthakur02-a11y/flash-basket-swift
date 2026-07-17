@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { openRazorpayCheckout } from "@/integrations/razorpay/checkout";
 import { createRazorpayOrder, verifyRazorpayPayment, recordPaymentFailure } from "@/lib/razorpay.functions";
 import { LocationPicker } from "@/components/maps/LocationPicker";
+import { CartShopSelector } from "@/components/CartShopSelector";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — FlashBasket" }] }),
@@ -228,6 +229,7 @@ function CheckoutPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 grid md:grid-cols-[1fr_360px] gap-6">
       <div className="space-y-6">
+        <CartShopSelector deliveryLat={coords?.lat} deliveryLng={coords?.lng} />
         {/* Address */}
         <section className="rounded-3xl border border-border bg-card p-5 shadow-card">
           <h2 className="font-display text-xl font-bold flex items-center gap-2">
