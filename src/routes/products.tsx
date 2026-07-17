@@ -3,9 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { ProductCard, type ProductCardData } from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useCustomerProducts } from "@/hooks/useCustomerProducts";
 
 const search = z.object({ q: z.string().optional(), cat: z.string().optional() });
 
