@@ -12,7 +12,7 @@ export const Route = createFileRoute("/customer/cart")({
 });
 
 function AppCart() {
-  const { items, subtotal, savings, setQty, loading, currentShop, clear } = useCart();
+  const { items, subtotal, savings, setQty, loading } = useCart();
   const navigate = useNavigate();
 
 
