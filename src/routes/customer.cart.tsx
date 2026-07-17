@@ -40,30 +40,7 @@ function AppCart() {
     <div className="px-4 py-4 pb-40">
       <h1 className="font-display text-2xl font-extrabold mb-4">Your cart ({items.length})</h1>
 
-      {currentShop && (
-        <div className="mb-3 flex items-center justify-between rounded-2xl border border-border bg-card p-3 shadow-card">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="h-9 w-9 rounded-xl bg-primary/10 grid place-items-center text-primary shrink-0">
-              <Store className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">Shop</div>
-              <div className="font-bold text-sm truncate">{currentShop.name}</div>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              if (confirm("Clear cart to shop at a different store?")) clear();
-            }}
-          >
-            Change
-          </Button>
-        </div>
-      )}
-
-      <div className="space-y-3">
+      <CartShopSelector />
 
         <AnimatePresence>
           {items.map((l) => (
