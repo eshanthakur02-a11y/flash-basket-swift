@@ -37,6 +37,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MultiImageInput } from "@/components/MultiImageInput";
+import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
+import { loadVariants, rowToDraft, saveVariants } from "@/lib/variants";
 import { rupees } from "@/lib/format";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
