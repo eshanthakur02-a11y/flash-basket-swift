@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ProductCard, type ProductCardData } from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCustomerProducts } from "@/hooks/useCustomerProducts";
 
 export const Route = createFileRoute("/category/$slug")({
   head: ({ params }) => ({ meta: [{ title: `${params.slug} — FlashBasket` }] }),
