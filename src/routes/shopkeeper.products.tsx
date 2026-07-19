@@ -634,9 +634,48 @@ function FromCatalog({
           <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
         </div>
       </div>
+      <DateRangeFields
+        mfg={mfgDate} exp={expDate}
+        onMfg={setMfgDate} onExp={setExpDate}
+      />
       <DialogFooter>
         <Button disabled={saving} onClick={save}>{saving ? "Adding..." : "Add to inventory"}</Button>
       </DialogFooter>
     </div>
   );
 }
+
+function DateRangeFields({
+  mfg, exp, onMfg, onExp,
+}: { mfg: string; exp: string; onMfg: (v: string) => void; onExp: (v: string) => void }) {
+  const st = expiryStatus(exp);
+  const shelf = mfg && exp ? Math.max(0, Math.round((new Date(exp).getTime() - new Date(mfg).getTime()) / 86400000)) : null;
+  return (
+    <div className="pt-2 border-t border-border space-y-2">
+      <div className="text-xs font-bold text-muted-foreground">Manufacturing & Expiry (optional)</div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-bold flex items-center gap-1">📅 Mfg date</label>
+          <Input type="date" value={mfg} onChange={(e) => onMfg(e.target.value)} max={exp || undefined} />
+        </div>
+        <div>
+          <label className="text-xs font-bold flex items-center gap-1">📅 Expiry date</label>
+          <Input type="date" value={exp} onChange={(e) => onExp(e.target.value)} min={mfg || undefined} />
+        </div>
+      </div>
+      {(shelf !== null || st.status !== "none") && (
+        <div className="flex flex-wrap gap-2 text-[11px]">
+          {shelf !== null && (
+            <span className="px-2 py-0.5 rounded-full bg-secondary font-semibold">Shelf life: {shelf} days</span>
+          )}
+          {st.status !== "none" && (
+            <span className={`px-2 py-0.5 rounded-full border font-semibold ${st.color}`}>
+              {st.emoji} {st.label}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
