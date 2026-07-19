@@ -275,8 +275,11 @@ function EditDialog({
     ? item.products.image_gallery
     : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
   const [gallery, setGallery] = useState<string[]>(initialGallery);
+  const [mfgDate, setMfgDate] = useState<string>(item.manufacturing_date ?? "");
+  const [expDate, setExpDate] = useState<string>(item.expiry_date ?? "");
   const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [saving, setSaving] = useState(false);
+
 
   useEffect(() => {
     if (!item.product_id) return;
