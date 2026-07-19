@@ -105,6 +105,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // Coordinate auth transitions with the router + query cache exactly once.
+  // Filtered so hourly TOKEN_REFRESHED / INITIAL_SESSION events don't
+  // trigger a cache-wide refetch storm.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_OUT") {
+        // Drop protected data so no stale query hits the API without a token.
+        queryClient.clear();
+      } else {
+        queryClient.invalidateQueries();
+      }
+      router.invalidate();
+    });
+    return () => subscription.unsubscribe();
+  }, [queryClient, router]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -113,3 +132,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+
