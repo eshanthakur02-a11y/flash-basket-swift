@@ -374,9 +374,14 @@ function EditDialog({
             <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
           </div>
         </div>
+        <DateRangeFields
+          mfg={mfgDate} exp={expDate}
+          onMfg={setMfgDate} onExp={setExpDate}
+        />
         <label className="flex items-center gap-2 text-sm">
           <Switch checked={available} onCheckedChange={setAvailable} />Available to customers
         </label>
+
       </div>
       <DialogFooter>
         <Button disabled={saving || !name || gallery.length === 0} onClick={save}>{saving ? "Saving..." : "Save"}</Button>
