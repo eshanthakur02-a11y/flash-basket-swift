@@ -210,9 +210,6 @@ function Page() {
                               <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
                                 {st.emoji} {st.statusLabel}
                               </span>
-                              <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
-                                {st.label}
-                              </span>
                             </div>
                           );
                         })()}
