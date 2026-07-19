@@ -306,9 +306,16 @@ function EditDialog({
       // Update shop_products
       const { error } = await supabase
         .from("shop_products")
-        .update({ price, stock, is_available: available })
+        .update({
+          price,
+          stock,
+          is_available: available,
+          manufacturing_date: mfgDate || null,
+          expiry_date: expDate || null,
+        } as any)
         .eq("id", item.id);
       if (error) throw error;
+
       toast.success("Updated");
       onSaved();
     } catch (e: any) {
