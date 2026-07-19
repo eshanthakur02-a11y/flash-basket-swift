@@ -49,7 +49,7 @@ function Page() {
         active: rows.filter(r => r.status !== "resolved" && r.status !== "closed").slice(0, 30),
       };
     },
-    refetchInterval: 15000,
+    refetchInterval: 30000,
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["support-dash-complaints"] });

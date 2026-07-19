@@ -38,7 +38,7 @@ function Page() {
         delivery_type?: string | null; fast_delivery_fee?: number | null; placed_at?: string;
       }>;
     },
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 
   const accept = async (id: string) => {

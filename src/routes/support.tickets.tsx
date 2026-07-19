@@ -50,7 +50,7 @@ function Page() {
       if (error) throw error;
       return (data ?? []) as any[];
     },
-    refetchInterval: 20000,
+    refetchInterval: 30000,
   });
 
   const filtered = (tickets.data ?? []).filter(t =>
