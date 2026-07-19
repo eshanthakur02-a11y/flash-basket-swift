@@ -37,6 +37,7 @@ import { Route as ShopkeeperProductsRouteImport } from './routes/shopkeeper.prod
 import { Route as ShopkeeperOrdersRouteImport } from './routes/shopkeeper.orders'
 import { Route as ShopkeeperOffersRouteImport } from './routes/shopkeeper.offers'
 import { Route as ShopkeeperNotificationsRouteImport } from './routes/shopkeeper.notifications'
+import { Route as ShopkeeperInventoryInsightsRouteImport } from './routes/shopkeeper.inventory-insights'
 import { Route as ShopkeeperEarningsRouteImport } from './routes/shopkeeper.earnings'
 import { Route as ShopkeeperDeliveryRouteImport } from './routes/shopkeeper.delivery'
 import { Route as ShopkeeperDashboardRouteImport } from './routes/shopkeeper.dashboard'
@@ -231,6 +232,12 @@ const ShopkeeperNotificationsRoute = ShopkeeperNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => ShopkeeperRoute,
 } as any)
+const ShopkeeperInventoryInsightsRoute =
+  ShopkeeperInventoryInsightsRouteImport.update({
+    id: '/inventory-insights',
+    path: '/inventory-insights',
+    getParentRoute: () => ShopkeeperRoute,
+  } as any)
 const ShopkeeperEarningsRoute = ShopkeeperEarningsRouteImport.update({
   id: '/earnings',
   path: '/earnings',
@@ -560,6 +567,7 @@ export interface FileRoutesByFullPath {
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
+  '/shopkeeper/inventory-insights': typeof ShopkeeperInventoryInsightsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/offers': typeof ShopkeeperOffersRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
@@ -643,6 +651,7 @@ export interface FileRoutesByTo {
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
+  '/shopkeeper/inventory-insights': typeof ShopkeeperInventoryInsightsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/offers': typeof ShopkeeperOffersRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
@@ -727,6 +736,7 @@ export interface FileRoutesById {
   '/shopkeeper/dashboard': typeof ShopkeeperDashboardRoute
   '/shopkeeper/delivery': typeof ShopkeeperDeliveryRoute
   '/shopkeeper/earnings': typeof ShopkeeperEarningsRoute
+  '/shopkeeper/inventory-insights': typeof ShopkeeperInventoryInsightsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/offers': typeof ShopkeeperOffersRoute
   '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
@@ -812,6 +822,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
+    | '/shopkeeper/inventory-insights'
     | '/shopkeeper/notifications'
     | '/shopkeeper/offers'
     | '/shopkeeper/orders'
@@ -895,6 +906,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
+    | '/shopkeeper/inventory-insights'
     | '/shopkeeper/notifications'
     | '/shopkeeper/offers'
     | '/shopkeeper/orders'
@@ -978,6 +990,7 @@ export interface FileRouteTypes {
     | '/shopkeeper/dashboard'
     | '/shopkeeper/delivery'
     | '/shopkeeper/earnings'
+    | '/shopkeeper/inventory-insights'
     | '/shopkeeper/notifications'
     | '/shopkeeper/offers'
     | '/shopkeeper/orders'
@@ -1223,6 +1236,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/shopkeeper/notifications'
       preLoaderRoute: typeof ShopkeeperNotificationsRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
+    '/shopkeeper/inventory-insights': {
+      id: '/shopkeeper/inventory-insights'
+      path: '/inventory-insights'
+      fullPath: '/shopkeeper/inventory-insights'
+      preLoaderRoute: typeof ShopkeeperInventoryInsightsRouteImport
       parentRoute: typeof ShopkeeperRoute
     }
     '/shopkeeper/earnings': {
@@ -1734,6 +1754,7 @@ interface ShopkeeperRouteChildren {
   ShopkeeperDashboardRoute: typeof ShopkeeperDashboardRoute
   ShopkeeperDeliveryRoute: typeof ShopkeeperDeliveryRoute
   ShopkeeperEarningsRoute: typeof ShopkeeperEarningsRoute
+  ShopkeeperInventoryInsightsRoute: typeof ShopkeeperInventoryInsightsRoute
   ShopkeeperNotificationsRoute: typeof ShopkeeperNotificationsRoute
   ShopkeeperOffersRoute: typeof ShopkeeperOffersRoute
   ShopkeeperOrdersRoute: typeof ShopkeeperOrdersRouteWithChildren
@@ -1748,6 +1769,7 @@ const ShopkeeperRouteChildren: ShopkeeperRouteChildren = {
   ShopkeeperDashboardRoute: ShopkeeperDashboardRoute,
   ShopkeeperDeliveryRoute: ShopkeeperDeliveryRoute,
   ShopkeeperEarningsRoute: ShopkeeperEarningsRoute,
+  ShopkeeperInventoryInsightsRoute: ShopkeeperInventoryInsightsRoute,
   ShopkeeperNotificationsRoute: ShopkeeperNotificationsRoute,
   ShopkeeperOffersRoute: ShopkeeperOffersRoute,
   ShopkeeperOrdersRoute: ShopkeeperOrdersRouteWithChildren,
