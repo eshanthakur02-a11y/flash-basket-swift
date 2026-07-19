@@ -291,6 +291,8 @@ function EditDialog({
   }, [item.product_id]);
 
   async function save() {
+    const dErr = dateRangeError(mfgDate, expDate);
+    if (dErr) { toast.error(dErr); return; }
     setSaving(true);
     try {
       if (item.product_id) {
