@@ -573,6 +573,8 @@ function FromCatalog({
 
   async function save() {
     if (!selected) return;
+    const dErr = dateRangeError(mfgDate, expDate);
+    if (dErr) { toast.error(dErr); return; }
     setSaving(true);
     const { error } = await supabase.from("shop_products").insert({
       shop_id: shopId,
