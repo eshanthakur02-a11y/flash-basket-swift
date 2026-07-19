@@ -256,7 +256,7 @@ function ProductPage() {
                 Add to cart
               </Button>
             )}
-            <Link to="/cart" className="inline-flex items-center rounded-xl border-2 border-foreground px-6 font-bold hover:bg-foreground hover:text-background transition">
+            <Link to="/customer/cart" className="inline-flex items-center rounded-xl border-2 border-foreground px-6 font-bold hover:bg-foreground hover:text-background transition">
               Go to cart
             </Link>
           </div>
