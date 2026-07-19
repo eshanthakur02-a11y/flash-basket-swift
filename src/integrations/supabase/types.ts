@@ -2179,6 +2179,29 @@ export type Database = {
         Returns: string
       }
       current_user_partner_id: { Args: never; Returns: string }
+      debug_shop_routing: {
+        Args: {
+          _lat: number
+          _lng: number
+          _order_id?: string
+          _pincode: string
+        }
+        Returns: {
+          distance_km: number
+          eligible: boolean
+          has_owner: boolean
+          is_open: boolean
+          missing_items: number
+          pincode_match: boolean
+          previously_rejected: boolean
+          reason: string
+          service_radius_km: number
+          shop_id: string
+          shop_name: string
+          shop_pincode: string
+          within_radius: boolean
+        }[]
+      }
       delete_delivery_partner: {
         Args: { _partner_id: string }
         Returns: undefined
