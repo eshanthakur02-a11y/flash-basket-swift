@@ -141,6 +141,26 @@ function Page() {
               <Stat label="Delivered today" value={String(orders.data?.filter(o => o.status === "delivered").length ?? 0)} />
             </section>
 
+            {(expiry.data && (expiry.data.expired + expiry.data.week + expiry.data.month) > 0) && (
+              <section className="mt-4 rounded-2xl border border-orange-300 bg-orange-50 dark:bg-orange-950/30 p-4 flex items-start gap-3 flex-wrap">
+                <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm">⚠ Inventory Alerts</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {expiry.data.expired > 0 && <span className="mr-3">🔴 <b>{expiry.data.expired}</b> expired</span>}
+                    {expiry.data.week > 0 && <span className="mr-3">🟠 <b>{expiry.data.week}</b> expire this week</span>}
+                    {expiry.data.month > 0 && <span className="mr-3">🟡 <b>{expiry.data.month}</b> expire this month</span>}
+                    {expiry.data.valueAtRisk > 0 && <span>· Value at risk: <b>{rupees(expiry.data.valueAtRisk)}</b></span>}
+                  </div>
+                </div>
+                <Button asChild size="sm" variant="outline" className="rounded-xl">
+                  <Link to="/shopkeeper/inventory-insights">View details →</Link>
+                </Button>
+              </section>
+            )}
+
+
+
             <section className="mt-6">
               <h2 className="font-bold mb-3">Live orders</h2>
               <div className="space-y-3">
