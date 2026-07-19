@@ -522,12 +522,17 @@ function CreateNewProduct({
           <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
         </div>
       </div>
+      <DateRangeFields
+        mfg={mfgDate} exp={expDate}
+        onMfg={setMfgDate} onExp={setExpDate}
+      />
       <DialogFooter>
         <Button disabled={saving} onClick={save}>{saving ? "Creating..." : "Create product"}</Button>
       </DialogFooter>
     </div>
   );
 }
+
 
 function FromCatalog({
   shopId, existingProductIds, onDone,
