@@ -1471,6 +1471,7 @@ export type Database = {
           id: string
           initial_stock: number | null
           is_available: boolean
+          manufacturing_date: string | null
           price: number
           product_id: string
           shop_id: string
@@ -1483,6 +1484,7 @@ export type Database = {
           id?: string
           initial_stock?: number | null
           is_available?: boolean
+          manufacturing_date?: string | null
           price: number
           product_id: string
           shop_id: string
@@ -1495,6 +1497,7 @@ export type Database = {
           id?: string
           initial_stock?: number | null
           is_available?: boolean
+          manufacturing_date?: string | null
           price?: number
           product_id?: string
           shop_id?: string
@@ -2242,6 +2245,7 @@ export type Database = {
           stock: number
         }[]
       }
+      notify_expiring_products: { Args: never; Returns: undefined }
       notify_role: {
         Args: {
           _body: string
