@@ -696,21 +696,16 @@ function DateRangeFields({
       {err ? (
         <p className="text-[11px] font-semibold text-destructive">{err}</p>
       ) : (
-        (shelf !== null || remaining !== null || st.status !== "none") && (
+        (shelf !== null || st.status !== "none") && (
           <div className="flex flex-wrap gap-2 text-[11px]">
             {shelf !== null && (
               <span className="px-2 py-0.5 rounded-full bg-secondary font-semibold">
                 Shelf life: {shelf} Day{shelf === 1 ? "" : "s"}
               </span>
             )}
-            {remaining !== null && (
-              <span className={`px-2 py-0.5 rounded-full border font-semibold ${st.color}`}>
-                {st.emoji} {st.label}
-              </span>
-            )}
             {st.status !== "none" && (
               <span className={`px-2 py-0.5 rounded-full border font-semibold ${st.color}`}>
-                Status: {st.statusLabel}
+                {st.emoji} Status: {st.statusLabel}
               </span>
             )}
           </div>
