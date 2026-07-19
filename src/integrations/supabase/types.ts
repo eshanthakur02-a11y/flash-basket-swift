@@ -1286,6 +1286,57 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_assignment_history: {
+        Row: {
+          assigned_at: string
+          attempt_number: number
+          created_at: string
+          id: string
+          order_id: string
+          reason: string | null
+          responded_at: string | null
+          shop_id: string | null
+          status: string
+        }
+        Insert: {
+          assigned_at?: string
+          attempt_number?: number
+          created_at?: string
+          id?: string
+          order_id: string
+          reason?: string | null
+          responded_at?: string | null
+          shop_id?: string | null
+          status: string
+        }
+        Update: {
+          assigned_at?: string
+          attempt_number?: number
+          created_at?: string
+          id?: string
+          order_id?: string
+          reason?: string | null
+          responded_at?: string | null
+          shop_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_assignment_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_assignment_history_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shop_categories: {
         Row: {
           created_at: string
@@ -2054,6 +2105,10 @@ export type Database = {
         Args: { _order_id: string; _partner_id: string }
         Returns: undefined
       }
+      admin_reassign_shop: {
+        Args: { _order_id: string; _shop_id: string }
+        Returns: undefined
+      }
       admin_record_refund: {
         Args: { _amount: number; _payment_id: string; _refund_id: string }
         Returns: undefined
@@ -2395,7 +2450,10 @@ export type Database = {
           rating: number
         }[]
       }
-      shop_reject_order: { Args: { _order_id: string }; Returns: undefined }
+      shop_reject_order: {
+        Args: { _order_id: string; _reason?: string }
+        Returns: undefined
+      }
       shop_set_team: {
         Args: { _partner_ids: string[]; _shop_id: string }
         Returns: undefined

@@ -113,8 +113,9 @@ function Page() {
     if (error) toast.error(error.message); else toast.success("Order accepted");
   };
   const reject = async (id: string) => {
-    const { error } = await supabase.rpc("shop_reject_order", { _order_id: id });
-    if (error) toast.error(error.message); else toast.success("Order rejected — re-routing");
+    const reason = window.prompt("Reason for rejecting this order? (optional)") ?? null;
+    const { error } = await (supabase.rpc as any)("shop_reject_order", { _order_id: id, _reason: reason });
+    if (error) toast.error(error.message); else toast.success("Order rejected — re-routing to next shop");
   };
   const pack = async (id: string) => {
     const { error } = await supabase.rpc("shop_mark_packed", { _order_id: id });
