@@ -541,7 +541,10 @@ function FromCatalog({
   const [selected, setSelected] = useState<CatalogProduct | null>(null);
   const [price, setPrice] = useState<number>(0);
   const [stock, setStock] = useState<number>(0);
+  const [mfgDate, setMfgDate] = useState<string>("");
+  const [expDate, setExpDate] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
 
   const catalog = useQuery({
     queryKey: ["catalog-add", q],
