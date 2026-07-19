@@ -56,6 +56,9 @@ type ShopProduct = {
   stock: number;
   is_available: boolean;
   product_id: string;
+  manufacturing_date: string | null;
+  expiry_date: string | null;
+
   products: {
     id: string;
     name: string;
