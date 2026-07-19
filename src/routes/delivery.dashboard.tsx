@@ -167,7 +167,7 @@ function Page() {
       return list.map((o: any) => ({ ...o, shop: shopMap[o.shop_id] }));
     },
     enabled: !!partner,
-    refetchInterval: 8000,
+    refetchInterval: 30000,
   });
 
   const toggleOnline = async (v: boolean) => {
@@ -198,7 +198,7 @@ function Page() {
         .limit(20);
       return sortFastFirst(data ?? []);
     },
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 
   const assigned = useQuery({
@@ -214,7 +214,7 @@ function Page() {
       return sortFastFirst(data ?? []);
     },
     enabled: !!partner,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 
   const acceptAvailable = async (id: string) => {

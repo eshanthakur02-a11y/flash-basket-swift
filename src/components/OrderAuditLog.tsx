@@ -35,7 +35,7 @@ export function OrderAuditLog({ orderId }: { orderId: string }) {
       if (error) throw error;
       return (data ?? []) as Row[];
     },
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
 
   return (

@@ -74,7 +74,7 @@ function Page() {
       return data ?? [];
     },
     enabled: !!shopId,
-    refetchInterval: 8000,
+    refetchInterval: 30000,
   });
 
   const team = useQuery({
@@ -86,7 +86,7 @@ function Page() {
       return (data ?? []) as TeamPartner[];
     },
     enabled: !!shopId,
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
 
   // Realtime updates: any change to a delivery partner or to our shop's orders refreshes the view
@@ -115,7 +115,7 @@ function Page() {
       return data ?? [];
     },
     enabled: !!shopId,
-    refetchInterval: 15000,
+    refetchInterval: 30000,
   });
 
   const perfByPartner = useMemo(() => {

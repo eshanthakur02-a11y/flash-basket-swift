@@ -57,13 +57,13 @@ function Page() {
         partners: partners.data?.length ?? 0,
       };
     },
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
 
   const recent = useQuery({
     queryKey: ["admin-recent"],
     queryFn: async () => (await supabase.from("orders").select("id, order_number, status, total, placed_at").order("placed_at", { ascending: false }).limit(20)).data ?? [],
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
 
   return (
