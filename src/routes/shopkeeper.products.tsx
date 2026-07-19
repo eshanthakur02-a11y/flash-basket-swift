@@ -666,7 +666,6 @@ function DateRangeFields({
 }: { mfg: string; exp: string; onMfg: (v: string) => void; onExp: (v: string) => void }) {
   const st = expiryStatus(exp, mfg);
   const shelf = shelfLifeDays(mfg, exp);
-  const remaining = daysUntil(exp);
   const err = dateRangeError(mfg, exp);
 
   return (
