@@ -110,7 +110,7 @@ function Page() {
       if (!shopId) return [] as ShopProduct[];
       const { data, error } = await supabase
         .from("shop_products")
-        .select("id, price, stock, is_available, product_id, products(id, name, unit, image_url, cover_image, image_gallery, mrp, price, description, brand, category_id)")
+        .select("id, price, stock, is_available, product_id, manufacturing_date, expiry_date, products(id, name, unit, image_url, cover_image, image_gallery, mrp, price, description, brand, category_id)")
         .eq("shop_id", shopId)
         .order("created_at", { ascending: false })
         .limit(500);
