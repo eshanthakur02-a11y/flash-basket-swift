@@ -457,8 +457,11 @@ function CreateNewProduct({
         price,
         stock,
         is_available: true,
-      });
+        manufacturing_date: mfgDate || null,
+        expiry_date: expDate || null,
+      } as any);
       if (sErr) throw sErr;
+
       if (variants.filter((v) => !v._deleted).length > 0) {
         await saveVariants(prod.id, variants);
       }
