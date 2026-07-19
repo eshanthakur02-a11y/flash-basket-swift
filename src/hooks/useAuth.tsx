@@ -26,12 +26,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [rolesLoading, setRolesLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      // Only react to identity transitions. TOKEN_REFRESHED (~hourly + on focus)
+      // and INITIAL_SESSION (every mount) would otherwise thrash role reloads
+      // and query caches.
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") {
+        // Still update the session ref so useServerFn/attach reads the latest token.
+        setSession(s);
+        return;
+      }
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
         setRolesLoading(true);
-        // defer DB call
+        // Defer DB call so we don't block the auth callback.
         setTimeout(() => loadRoles(s.user.id), 0);
       } else {
         setRoles([]);
@@ -53,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
 
   async function loadRoles(userId: string) {
     try {
