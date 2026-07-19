@@ -144,6 +144,9 @@ function Page() {
       <div className="p-4 md:p-6 max-w-6xl mx-auto">
         <div className="flex items-center gap-3 flex-wrap">
           <h1 className="font-display text-3xl font-extrabold flex-1">Inventory</h1>
+          <Button asChild variant="outline" size="sm" className="gap-1">
+            <Link to="/shopkeeper/inventory-insights"><BarChart3 className="h-4 w-4" />Insights</Link>
+          </Button>
           {shopId && (
             <Dialog open={addOpen} onOpenChange={setAddOpen}>
               <DialogTrigger asChild>
