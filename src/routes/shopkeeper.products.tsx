@@ -41,7 +41,7 @@ import { MultiImageInput } from "@/components/MultiImageInput";
 import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
 import { loadVariants, rowToDraft, saveVariants } from "@/lib/variants";
 import { rupees } from "@/lib/format";
-import { expiryStatus } from "@/lib/expiry";
+import { expiryStatus, shelfLifeDays, daysUntil } from "@/lib/expiry";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
 
@@ -203,12 +203,16 @@ function Page() {
                           {!sp.is_available && <span className="text-xs bg-muted px-2 rounded-full">Hidden</span>}
                         </div>
                         {(() => {
-                          const st = expiryStatus(sp.expiry_date);
+                          const st = expiryStatus(sp.expiry_date, sp.manufacturing_date);
                           if (st.status === "none") return null;
                           return (
-                            <div className={`mt-1 inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
-                              <span>📅</span>
-                              <span>{st.emoji} {st.label}</span>
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
+                                {st.emoji} {st.statusLabel}
+                              </span>
+                              <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
+                                {st.label}
+                              </span>
                             </div>
                           );
                         })()}
@@ -287,6 +291,8 @@ function EditDialog({
   }, [item.product_id]);
 
   async function save() {
+    const dErr = dateRangeError(mfgDate, expDate);
+    if (dErr) { toast.error(dErr); return; }
     setSaving(true);
     try {
       if (item.product_id) {
@@ -435,6 +441,8 @@ function CreateNewProduct({
       toast.error("Name, at least one image and category are required");
       return;
     }
+    const dErr = dateRangeError(mfgDate, expDate);
+    if (dErr) { toast.error(dErr); return; }
     setSaving(true);
     try {
       const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -565,6 +573,8 @@ function FromCatalog({
 
   async function save() {
     if (!selected) return;
+    const dErr = dateRangeError(mfgDate, expDate);
+    if (dErr) { toast.error(dErr); return; }
     setSaving(true);
     const { error } = await supabase.from("shop_products").insert({
       shop_id: shopId,
@@ -645,37 +655,75 @@ function FromCatalog({
   );
 }
 
+export function dateRangeError(mfg: string, exp: string): string | null {
+  if (!mfg || !exp) return null;
+  const m = new Date(mfg);
+  const e = new Date(exp);
+  if (isNaN(m.getTime()) || isNaN(e.getTime())) return null;
+  if (e.getTime() <= m.getTime()) return "Expiry date must be later than the manufacturing date.";
+  return null;
+}
+
 function DateRangeFields({
   mfg, exp, onMfg, onExp,
 }: { mfg: string; exp: string; onMfg: (v: string) => void; onExp: (v: string) => void }) {
-  const st = expiryStatus(exp);
-  const shelf = mfg && exp ? Math.max(0, Math.round((new Date(exp).getTime() - new Date(mfg).getTime()) / 86400000)) : null;
+  const st = expiryStatus(exp, mfg);
+  const shelf = shelfLifeDays(mfg, exp);
+  const remaining = daysUntil(exp);
+  const err = dateRangeError(mfg, exp);
+
   return (
     <div className="pt-2 border-t border-border space-y-2">
-      <div className="text-xs font-bold text-muted-foreground">Manufacturing & Expiry (optional)</div>
+      <div className="text-xs font-bold text-muted-foreground">Manufacturing &amp; Expiry (optional)</div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="text-xs font-bold flex items-center gap-1">📅 Mfg date</label>
-          <Input type="date" value={mfg} onChange={(e) => onMfg(e.target.value)} max={exp || undefined} />
+          <Input
+            type="date"
+            value={mfg}
+            onChange={(e) => onMfg(e.target.value)}
+            max={exp || undefined}
+          />
         </div>
         <div>
           <label className="text-xs font-bold flex items-center gap-1">📅 Expiry date</label>
-          <Input type="date" value={exp} onChange={(e) => onExp(e.target.value)} min={mfg || undefined} />
+          <Input
+            type="date"
+            value={exp}
+            onChange={(e) => onExp(e.target.value)}
+            min={mfg || undefined}
+          />
         </div>
       </div>
-      {(shelf !== null || st.status !== "none") && (
-        <div className="flex flex-wrap gap-2 text-[11px]">
-          {shelf !== null && (
-            <span className="px-2 py-0.5 rounded-full bg-secondary font-semibold">Shelf life: {shelf} days</span>
-          )}
-          {st.status !== "none" && (
-            <span className={`px-2 py-0.5 rounded-full border font-semibold ${st.color}`}>
-              {st.emoji} {st.label}
-            </span>
-          )}
-        </div>
+
+      {err ? (
+        <p className="text-[11px] font-semibold text-destructive">{err}</p>
+      ) : (
+        (shelf !== null || remaining !== null || st.status !== "none") && (
+          <div className="flex flex-wrap gap-2 text-[11px]">
+            {shelf !== null && (
+              <span className="px-2 py-0.5 rounded-full bg-secondary font-semibold">
+                Shelf life: {shelf} Day{shelf === 1 ? "" : "s"}
+              </span>
+            )}
+            {remaining !== null && (
+              <span className={`px-2 py-0.5 rounded-full border font-semibold ${st.color}`}>
+                {st.emoji} {st.label}
+              </span>
+            )}
+            {st.status !== "none" && (
+              <span className={`px-2 py-0.5 rounded-full border font-semibold ${st.color}`}>
+                Status: {st.statusLabel}
+              </span>
+            )}
+          </div>
+        )
       )}
+      <p className="text-[10px] text-muted-foreground">
+        Values are calculated automatically from the dates you pick.
+      </p>
     </div>
   );
 }
+
 
