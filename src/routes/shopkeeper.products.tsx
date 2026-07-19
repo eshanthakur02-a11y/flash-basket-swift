@@ -41,7 +41,9 @@ import { MultiImageInput } from "@/components/MultiImageInput";
 import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
 import { loadVariants, rowToDraft, saveVariants } from "@/lib/variants";
 import { rupees } from "@/lib/format";
+import { expiryStatus } from "@/lib/expiry";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
+
 
 export const Route = createFileRoute("/shopkeeper/products")({
   head: () => ({ meta: [{ title: "Products — Shopkeeper" }] }),
