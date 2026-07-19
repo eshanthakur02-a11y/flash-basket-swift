@@ -80,8 +80,8 @@ function Page() {
       return data ?? [];
     },
     enabled: !!shopId,
-    refetchInterval: 10000,
   });
+
 
   const expiry = useQuery({
     queryKey: ["shop-expiry-summary", shopId],
