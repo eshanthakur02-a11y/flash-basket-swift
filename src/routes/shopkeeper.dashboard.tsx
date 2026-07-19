@@ -83,6 +83,31 @@ function Page() {
     refetchInterval: 10000,
   });
 
+  const expiry = useQuery({
+    queryKey: ["shop-expiry-summary", shopId],
+    queryFn: async () => {
+      if (!shopId) return { expired: 0, week: 0, month: 0, valueAtRisk: 0 };
+      const { data } = await (supabase as any)
+        .from("shop_products")
+        .select("stock, price, expiry_date, is_available")
+        .eq("shop_id", shopId)
+        .not("expiry_date", "is", null);
+      const rows = (data ?? []) as { stock: number; price: number; expiry_date: string; is_available: boolean }[];
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      let expired = 0, week = 0, month = 0, valueAtRisk = 0;
+      for (const r of rows) {
+        const d = new Date(r.expiry_date); d.setHours(0, 0, 0, 0);
+        const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
+        if (diff < 0) { expired++; valueAtRisk += Number(r.price) * Number(r.stock); }
+        else if (diff <= 7) { week++; valueAtRisk += Number(r.price) * Number(r.stock); }
+        else if (diff <= 30) { month++; }
+      }
+      return { expired, week, month, valueAtRisk };
+    },
+    enabled: !!shopId,
+  });
+
+
   const accept = async (id: string) => {
     const { error } = await supabase.rpc("shop_accept_order", { _order_id: id });
     if (error) toast.error(error.message); else toast.success("Order accepted");
