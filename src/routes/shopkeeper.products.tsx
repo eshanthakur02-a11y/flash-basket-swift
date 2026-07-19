@@ -572,7 +572,10 @@ function FromCatalog({
       price,
       stock,
       is_available: true,
-    });
+      manufacturing_date: mfgDate || null,
+      expiry_date: expDate || null,
+    } as any);
+
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Added to inventory");
