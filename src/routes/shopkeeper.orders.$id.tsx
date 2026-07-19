@@ -33,9 +33,10 @@ function Page() {
     else { toast.success("Order accepted"); q.refetch(); }
   };
   const reject = async () => {
-    const { error } = await supabase.rpc("shop_reject_order", { _order_id: o.id });
+    const reason = window.prompt("Reason for rejecting this order? (optional)") ?? null;
+    const { error } = await (supabase.rpc as any)("shop_reject_order", { _order_id: o.id, _reason: reason });
     if (error) toast.error(error.message);
-    else { toast.success("Order rejected — re-routing"); q.refetch(); }
+    else { toast.success("Order rejected — re-routing to next shop"); q.refetch(); }
   };
   const pack = async () => {
     const { error } = await supabase.rpc("shop_mark_packed", { _order_id: o.id });
