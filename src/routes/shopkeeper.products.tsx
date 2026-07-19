@@ -203,12 +203,16 @@ function Page() {
                           {!sp.is_available && <span className="text-xs bg-muted px-2 rounded-full">Hidden</span>}
                         </div>
                         {(() => {
-                          const st = expiryStatus(sp.expiry_date);
+                          const st = expiryStatus(sp.expiry_date, sp.manufacturing_date);
                           if (st.status === "none") return null;
                           return (
-                            <div className={`mt-1 inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
-                              <span>📅</span>
-                              <span>{st.emoji} {st.label}</span>
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
+                                {st.emoji} {st.statusLabel}
+                              </span>
+                              <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
+                                {st.label}
+                              </span>
                             </div>
                           );
                         })()}
