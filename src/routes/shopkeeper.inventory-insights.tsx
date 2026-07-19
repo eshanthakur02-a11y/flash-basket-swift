@@ -375,13 +375,15 @@ function Page() {
             </div>
 
             <Tabs defaultValue="products" className="w-full">
-              <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
-                <TabsTrigger value="products">Products</TabsTrigger>
-                <TabsTrigger value="best">Best Selling</TabsTrigger>
-                <TabsTrigger value="lowest">Lowest Selling</TabsTrigger>
-                <TabsTrigger value="expiry">Expiry</TabsTrigger>
-                <TabsTrigger value="movement">Movement</TabsTrigger>
-              </TabsList>
+              <div className="w-full overflow-x-auto -mx-1 px-1">
+                <TabsList className="inline-flex md:grid md:grid-cols-5 md:w-full w-max gap-1">
+                  <TabsTrigger value="products" className="whitespace-nowrap">Products</TabsTrigger>
+                  <TabsTrigger value="best" className="whitespace-nowrap">Best Selling</TabsTrigger>
+                  <TabsTrigger value="lowest" className="whitespace-nowrap">Lowest Selling</TabsTrigger>
+                  <TabsTrigger value="expiry" className="whitespace-nowrap">Expiry</TabsTrigger>
+                  <TabsTrigger value="movement" className="whitespace-nowrap">Movement</TabsTrigger>
+                </TabsList>
+              </div>
 
               {/* SECTION 2 + 8: Products table with filters */}
               <TabsContent value="products" className="mt-4 space-y-3">
