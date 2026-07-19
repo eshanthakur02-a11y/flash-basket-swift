@@ -425,7 +425,10 @@ function CreateNewProduct({
   const [mrp, setMrp] = useState<number>(0);
   const [stock, setStock] = useState<number>(0);
   const [variants, setVariants] = useState<VariantDraft[]>([]);
+  const [mfgDate, setMfgDate] = useState<string>("");
+  const [expDate, setExpDate] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
 
   async function save() {
     if (!name || gallery.length === 0 || !categoryId) {
