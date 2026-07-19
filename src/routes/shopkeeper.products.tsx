@@ -41,7 +41,9 @@ import { MultiImageInput } from "@/components/MultiImageInput";
 import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
 import { loadVariants, rowToDraft, saveVariants } from "@/lib/variants";
 import { rupees } from "@/lib/format";
+import { expiryStatus } from "@/lib/expiry";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
+
 
 export const Route = createFileRoute("/shopkeeper/products")({
   head: () => ({ meta: [{ title: "Products — Shopkeeper" }] }),
@@ -54,6 +56,9 @@ type ShopProduct = {
   stock: number;
   is_available: boolean;
   product_id: string;
+  manufacturing_date: string | null;
+  expiry_date: string | null;
+
   products: {
     id: string;
     name: string;
@@ -105,7 +110,7 @@ function Page() {
       if (!shopId) return [] as ShopProduct[];
       const { data, error } = await supabase
         .from("shop_products")
-        .select("id, price, stock, is_available, product_id, products(id, name, unit, image_url, cover_image, image_gallery, mrp, price, description, brand, category_id)")
+        .select("id, price, stock, is_available, product_id, manufacturing_date, expiry_date, products(id, name, unit, image_url, cover_image, image_gallery, mrp, price, description, brand, category_id)")
         .eq("shop_id", shopId)
         .order("created_at", { ascending: false })
         .limit(500);
@@ -190,15 +195,26 @@ function Page() {
                       <div className="flex-1 min-w-0">
                         <div className="font-bold text-sm truncate">{sp.products?.name ?? "—"}</div>
                         <div className="text-xs text-muted-foreground">{sp.products?.unit}</div>
-                        <div className="mt-1 flex items-center gap-2 text-sm">
+                        <div className="mt-1 flex items-center gap-2 text-sm flex-wrap">
                           <span className="font-bold text-primary">{rupees(sp.price)}</span>
                           <span className={`text-xs ${sp.stock <= 5 ? "text-destructive font-bold" : "text-muted-foreground"}`}>
                             Stock: {sp.stock}
                           </span>
                           {!sp.is_available && <span className="text-xs bg-muted px-2 rounded-full">Hidden</span>}
                         </div>
+                        {(() => {
+                          const st = expiryStatus(sp.expiry_date);
+                          if (st.status === "none") return null;
+                          return (
+                            <div className={`mt-1 inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${st.color}`}>
+                              <span>📅</span>
+                              <span>{st.emoji} {st.label}</span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
+
                     <div className="flex border-t border-border">
                       <button onClick={() => { setEditing(sp); setEditOpen(true); }} className="flex-1 flex items-center justify-center gap-1 py-2 text-sm font-semibold hover:bg-secondary">
                         <Pencil className="h-4 w-4" />Edit
@@ -259,8 +275,11 @@ function EditDialog({
     ? item.products.image_gallery
     : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
   const [gallery, setGallery] = useState<string[]>(initialGallery);
+  const [mfgDate, setMfgDate] = useState<string>(item.manufacturing_date ?? "");
+  const [expDate, setExpDate] = useState<string>(item.expiry_date ?? "");
   const [variants, setVariants] = useState<VariantDraft[]>([]);
   const [saving, setSaving] = useState(false);
+
 
   useEffect(() => {
     if (!item.product_id) return;
@@ -287,9 +306,16 @@ function EditDialog({
       // Update shop_products
       const { error } = await supabase
         .from("shop_products")
-        .update({ price, stock, is_available: available })
+        .update({
+          price,
+          stock,
+          is_available: available,
+          manufacturing_date: mfgDate || null,
+          expiry_date: expDate || null,
+        } as any)
         .eq("id", item.id);
       if (error) throw error;
+
       toast.success("Updated");
       onSaved();
     } catch (e: any) {
@@ -348,9 +374,14 @@ function EditDialog({
             <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
           </div>
         </div>
+        <DateRangeFields
+          mfg={mfgDate} exp={expDate}
+          onMfg={setMfgDate} onExp={setExpDate}
+        />
         <label className="flex items-center gap-2 text-sm">
           <Switch checked={available} onCheckedChange={setAvailable} />Available to customers
         </label>
+
       </div>
       <DialogFooter>
         <Button disabled={saving || !name || gallery.length === 0} onClick={save}>{saving ? "Saving..." : "Save"}</Button>
@@ -394,7 +425,10 @@ function CreateNewProduct({
   const [mrp, setMrp] = useState<number>(0);
   const [stock, setStock] = useState<number>(0);
   const [variants, setVariants] = useState<VariantDraft[]>([]);
+  const [mfgDate, setMfgDate] = useState<string>("");
+  const [expDate, setExpDate] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
 
   async function save() {
     if (!name || gallery.length === 0 || !categoryId) {
@@ -423,8 +457,11 @@ function CreateNewProduct({
         price,
         stock,
         is_available: true,
-      });
+        manufacturing_date: mfgDate || null,
+        expiry_date: expDate || null,
+      } as any);
       if (sErr) throw sErr;
+
       if (variants.filter((v) => !v._deleted).length > 0) {
         await saveVariants(prod.id, variants);
       }
@@ -485,12 +522,17 @@ function CreateNewProduct({
           <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
         </div>
       </div>
+      <DateRangeFields
+        mfg={mfgDate} exp={expDate}
+        onMfg={setMfgDate} onExp={setExpDate}
+      />
       <DialogFooter>
         <Button disabled={saving} onClick={save}>{saving ? "Creating..." : "Create product"}</Button>
       </DialogFooter>
     </div>
   );
 }
+
 
 function FromCatalog({
   shopId, existingProductIds, onDone,
@@ -499,7 +541,10 @@ function FromCatalog({
   const [selected, setSelected] = useState<CatalogProduct | null>(null);
   const [price, setPrice] = useState<number>(0);
   const [stock, setStock] = useState<number>(0);
+  const [mfgDate, setMfgDate] = useState<string>("");
+  const [expDate, setExpDate] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
 
   const catalog = useQuery({
     queryKey: ["catalog-add", q],
@@ -527,7 +572,10 @@ function FromCatalog({
       price,
       stock,
       is_available: true,
-    });
+      manufacturing_date: mfgDate || null,
+      expiry_date: expDate || null,
+    } as any);
+
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Added to inventory");
@@ -586,9 +634,48 @@ function FromCatalog({
           <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
         </div>
       </div>
+      <DateRangeFields
+        mfg={mfgDate} exp={expDate}
+        onMfg={setMfgDate} onExp={setExpDate}
+      />
       <DialogFooter>
         <Button disabled={saving} onClick={save}>{saving ? "Adding..." : "Add to inventory"}</Button>
       </DialogFooter>
     </div>
   );
 }
+
+function DateRangeFields({
+  mfg, exp, onMfg, onExp,
+}: { mfg: string; exp: string; onMfg: (v: string) => void; onExp: (v: string) => void }) {
+  const st = expiryStatus(exp);
+  const shelf = mfg && exp ? Math.max(0, Math.round((new Date(exp).getTime() - new Date(mfg).getTime()) / 86400000)) : null;
+  return (
+    <div className="pt-2 border-t border-border space-y-2">
+      <div className="text-xs font-bold text-muted-foreground">Manufacturing & Expiry (optional)</div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-bold flex items-center gap-1">📅 Mfg date</label>
+          <Input type="date" value={mfg} onChange={(e) => onMfg(e.target.value)} max={exp || undefined} />
+        </div>
+        <div>
+          <label className="text-xs font-bold flex items-center gap-1">📅 Expiry date</label>
+          <Input type="date" value={exp} onChange={(e) => onExp(e.target.value)} min={mfg || undefined} />
+        </div>
+      </div>
+      {(shelf !== null || st.status !== "none") && (
+        <div className="flex flex-wrap gap-2 text-[11px]">
+          {shelf !== null && (
+            <span className="px-2 py-0.5 rounded-full bg-secondary font-semibold">Shelf life: {shelf} days</span>
+          )}
+          {st.status !== "none" && (
+            <span className={`px-2 py-0.5 rounded-full border font-semibold ${st.color}`}>
+              {st.emoji} {st.label}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+

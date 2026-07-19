@@ -7,7 +7,9 @@ import { RoleShell } from "@/components/RoleShell";
 import { Button } from "@/components/ui/button";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
-import { LayoutDashboard, ListOrdered, Package, Wallet, Bell, Star, Settings, Check, X, PackageCheck, Truck, Tag } from "lucide-react";
+import { LayoutDashboard, ListOrdered, Package, Wallet, Bell, Star, Settings, Check, X, PackageCheck, Truck, Tag, AlertTriangle } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+
 
 
 
@@ -81,6 +83,31 @@ function Page() {
     refetchInterval: 10000,
   });
 
+  const expiry = useQuery({
+    queryKey: ["shop-expiry-summary", shopId],
+    queryFn: async () => {
+      if (!shopId) return { expired: 0, week: 0, month: 0, valueAtRisk: 0 };
+      const { data } = await (supabase as any)
+        .from("shop_products")
+        .select("stock, price, expiry_date, is_available")
+        .eq("shop_id", shopId)
+        .not("expiry_date", "is", null);
+      const rows = (data ?? []) as { stock: number; price: number; expiry_date: string; is_available: boolean }[];
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      let expired = 0, week = 0, month = 0, valueAtRisk = 0;
+      for (const r of rows) {
+        const d = new Date(r.expiry_date); d.setHours(0, 0, 0, 0);
+        const diff = Math.round((d.getTime() - today.getTime()) / 86400000);
+        if (diff < 0) { expired++; valueAtRisk += Number(r.price) * Number(r.stock); }
+        else if (diff <= 7) { week++; valueAtRisk += Number(r.price) * Number(r.stock); }
+        else if (diff <= 30) { month++; }
+      }
+      return { expired, week, month, valueAtRisk };
+    },
+    enabled: !!shopId,
+  });
+
+
   const accept = async (id: string) => {
     const { error } = await supabase.rpc("shop_accept_order", { _order_id: id });
     if (error) toast.error(error.message); else toast.success("Order accepted");
@@ -113,6 +140,26 @@ function Page() {
               <Stat label="In progress" value={String(orders.data?.filter(o => ["accepted_by_shop", "packed"].includes(o.status)).length ?? 0)} />
               <Stat label="Delivered today" value={String(orders.data?.filter(o => o.status === "delivered").length ?? 0)} />
             </section>
+
+            {(expiry.data && (expiry.data.expired + expiry.data.week + expiry.data.month) > 0) && (
+              <section className="mt-4 rounded-2xl border border-orange-300 bg-orange-50 dark:bg-orange-950/30 p-4 flex items-start gap-3 flex-wrap">
+                <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-sm">⚠ Inventory Alerts</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {expiry.data.expired > 0 && <span className="mr-3">🔴 <b>{expiry.data.expired}</b> expired</span>}
+                    {expiry.data.week > 0 && <span className="mr-3">🟠 <b>{expiry.data.week}</b> expire this week</span>}
+                    {expiry.data.month > 0 && <span className="mr-3">🟡 <b>{expiry.data.month}</b> expire this month</span>}
+                    {expiry.data.valueAtRisk > 0 && <span>· Value at risk: <b>{rupees(expiry.data.valueAtRisk)}</b></span>}
+                  </div>
+                </div>
+                <Button asChild size="sm" variant="outline" className="rounded-xl">
+                  <Link to="/shopkeeper/inventory-insights">View details →</Link>
+                </Button>
+              </section>
+            )}
+
+
 
             <section className="mt-6">
               <h2 className="font-bold mb-3">Live orders</h2>
