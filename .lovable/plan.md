@@ -1,99 +1,77 @@
-# FlashBasket — Premium Customer App Redesign
+# FlashBasket Stability & Performance Pass
 
-Goal: make the customer mobile experience feel like a real ₹100M+ quick-commerce app (Blinkit / Zepto / Instamart). Mobile-first, dense, product-led, no demo vibes.
+## Scope
 
-## Scope (frontend only)
+No redesign. No feature removal. Only correctness, stability, performance.
 
-- Home screen (`/customer/home` and `/` for signed-in customers)
-- Bottom navigation
-- Header (mobile customer surface)
-- Product card visual refresh
-- Skeleton/shimmer states
-- Optional: Profile shell tweaks to absorb "Wishlist" entry
+The request lists 12 areas. I'll tackle them in priority order and stop for your review after each phase so we don't spend a huge amount on speculative changes.
 
-Out of scope this pass: Cart, Checkout, Category, Orders flows (will keep working; visual polish in a follow-up if you want).
+## Phase 1 — High-signal bug hunt (do first)
 
-## Design system additions (`src/styles.css`)
+Concrete, reproducible issues I can find and fix without guessing.
 
-- Lock palette tokens: primary `#84CC16`, secondary `#0F172A`, bg `#F8FAFC`, card `#FFFFFF`, accent `#F59E0B`
-- Add gradients: `--gradient-hero` (lime → accent), `--gradient-banner-*` for rotating banner variants
-- Add shadows: `--shadow-card-premium`, `--shadow-float`
-- Radius scale tuned (16/20/24)
-- `.shimmer` utility for loading states
+1. **"No Shop Assigned" false positives**
+   - Re-audit `find_nearest_shop_for_order`, `find_best_shop_for_cart`, `list_eligible_shops_for_cart`, `place_order`, and the recently-fixed reject loop.
+   - Verify: pincode gate, `owner_id IS NOT NULL`, `is_open`, `service_radius_km`, stock ≥ qty, and that `rejected_shop_ids` isn't being fed with duplicates or stale UUIDs.
+   - Add a `debug_shop_routing(_order_id)` RPC that returns per-shop pass/fail reasons for admins.
 
-## Components
+2. **Realtime & subscription leaks**
+   - Grep every `supabase.channel(...)` — confirm each is inside `useEffect` with cleanup. Fix any that subscribe at component scope (per Cloud Realtime rules; leaks cause reconnection loops → freezes + billing).
 
-1. **`CustomerHeader`** (new, mobile-first)
-   - Compact row: location pill ("Deliver in 10 min · Home ▼"), bell, avatar
-   - Sticky premium search bar: search icon + voice mic + camera (image search). Camera opens file input (accept=image/*, capture); placeholder hook for future matching.
+3. **Loading states that can hang**
+   - Any `useQuery` whose `enabled` gate can leave the UI blank (no skeleton, no empty state). Add skeleton + empty + error+retry to the top-traffic screens: customer home, cart, checkout, orders, shopkeeper dashboard/orders, delivery available-orders/task, admin orders.
 
-2. **`HeroBannerCarousel`** (new)
-   - Framer Motion auto-rotating banners (3–4 slides), swipeable, dot indicators
-   - Compact height (~150px), gradient backgrounds + emoji/illustration, CTA pill
+4. **JWT-expired 401 storm (already visible in network logs)**
+   - Current `onAuthStateChange` handling may not be filtering `TOKEN_REFRESHED` / `INITIAL_SESSION`, causing bulk refetches against a cleared session → 401s. Audit `__root.tsx` and `useAuth`, apply the documented filter (identity transitions only).
 
-3. **`QuickServices`** (new)
-   - Horizontal scroll chips with colored icon tiles (Milk/Fruits/Veg/Snacks/Beverages/Personal Care) → link to category
+5. **Router-level correctness**
+   - Verify each `createFileRoute` string matches its filename (blank pages on refresh usually come from mismatch).
+   - Confirm every layout route with children renders `<Outlet />`.
+   - Confirm no `beforeLoad`-gated protected routes live at top level (must be under `_authenticated/`).
 
-4. **`CategoryGrid`** (refresh existing categories block)
-   - 4-col grid, 2 rows, rounded soft-tinted tiles, bigger icons, tighter labels
+## Phase 2 — Performance
 
-5. **`DealsRail`, `TrendingRail`, `RecommendedRail`**
-   - Reuse `ProductCard` in a tighter "compact" variant; section headers with emoji + "See all"
+6. **Query defaults & caching**
+   - Set sensible `staleTime` / `gcTime` on the shared `QueryClient` (e.g. 30s stale, 5min gc). Right now every mount refetches — this is a big reason the app "feels slow when first opened."
+   - Add `defaultPreloadStaleTime: 0` if missing (per Query integration rules).
 
-6. **`NearbyShops`** (new, optional if shops data exists; otherwise skip gracefully)
-   - Horizontal cards: name, distance, ETA, rating
+7. **Heavy home-page fan-out**
+   - `customer.home.tsx` currently fires 3+ `list_customer_products` RPCs (featured/bestseller/price_asc) plus profile, address, cart, notifications on every render. Batch/parallelise via one RPC or a single loader; memoize hero images; lazy-load the 3D hero.
 
-7. **`FloatingCartBar`** (new)
-   - Sticky above bottom nav when cart has items: "X items · ₹Total · View cart →"
-   - Slide-in animation via Framer Motion
+8. **Bundle / initial load**
+   - Move `Hero3D`, Leaflet, Recharts, `react-three-fiber`, Framer Motion-only pages behind `React.lazy` + `<ClientOnly>` where possible. Verify no server route statically imports browser-only modules.
 
-8. **`BottomNav` refresh**
-   - Items: Home / Categories / Cart / Orders / Profile (remove Favourites)
-   - Floating pill style with active indicator, larger active icon, subtle blur bg
+9. **Image optimization**
+   - Confirm banner and product images use responsive sizes, `loading="lazy"` for non-LCP, and one `preload` link only for the LCP hero.
 
-9. **`ProductCard` polish**
-   - Tighter padding, better price hierarchy, lime ADD button, discount chip in accent
-   - Skeleton shimmer variant
+## Phase 3 — Cross-role integration
 
-## Profile
+10. **End-to-end smoke via Playwright** (headless, in sandbox)
+    - Customer places order → shopkeeper accepts → delivery partner claims → status updates propagate → admin sees it. Screenshot each step; only file bugs for regressions I can prove.
 
-- Add "Wishlist" entry inside `/customer/profile` (and/or `/account`) so removing Favourites tab doesn't lose access.
+11. **RPC/response shape sanity**
+    - Slow queries via `supabase--slow_queries`, add indexes where the top offenders warrant it.
 
-## Routing notes
+## What I will NOT do without asking
 
-- Home (`src/routes/customer.home.tsx`) gets the full new layout.
-- Public landing `src/routes/index.tsx` stays as-is unless it shows the same customer home (will verify).
-- `Layout.tsx` already conditionally hides the marketing header on `/customer/*` — confirm and ensure new `CustomerHeader` mounts inside the customer shell instead.
+- Rewrite any working screen for aesthetics.
+- Change the auth architecture, roles table, or payment flow.
+- Rip out the 3D hero, OneSignal, Google Maps, Razorpay, or Realtime.
+- Ship "improvements" I can't measure or prove.
 
-## Tech
+## Deliverables per phase
 
-- React + Tailwind v4 tokens in `src/styles.css`
-- Framer Motion for banner carousel, floating cart, page enter
-- Lucide icons throughout
-- All data via existing Supabase queries (categories, featured, bestsellers). New rails reuse same products query with different filters/limits — no schema changes.
+Each phase ends with:
+- A short list of concrete fixes made (files + one-line summary each).
+- Screenshots or log evidence for anything user-visible.
+- A stop point where you can say "continue" or "skip the rest."
 
-## Deliverables
+## Technical notes
 
-New files:
-- `src/components/customer/CustomerHeader.tsx`
-- `src/components/customer/HeroBannerCarousel.tsx`
-- `src/components/customer/QuickServices.tsx`
-- `src/components/customer/CategoryGrid.tsx`
-- `src/components/customer/ProductRail.tsx`
-- `src/components/customer/FloatingCartBar.tsx`
-- `src/components/customer/SkeletonCard.tsx`
+- Migration(s) needed for: `debug_shop_routing` RPC, any missing indexes surfaced by `slow_queries`.
+- Client changes: `src/router.tsx` (Query defaults), `src/routes/__root.tsx` (auth listener filter), targeted route files for skeleton/empty/error states, `React.lazy` splits.
+- No changes to auto-generated files (`routeTree.gen.ts`, `supabase/client.ts`, `types.ts`).
 
-Edited:
-- `src/styles.css` — tokens, gradients, shimmer
-- `src/routes/customer.home.tsx` — compose new sections
-- `src/components/BottomNav.tsx` — new items + floating style
-- `src/components/ProductCard.tsx` — visual polish
-- `src/routes/customer.profile.tsx` — add Wishlist entry
-- `src/components/Layout.tsx` — mount `CustomerHeader` + `FloatingCartBar` for customer routes
+## Ask
 
-## Quality bar
-
-- No empty space on mobile 390px viewport
-- Every section above the fold has a clear product/CTA hook
-- Smooth 60fps animations, no layout shift
-- Skeleton states for every async section
+Approve this phased approach, or tell me to jump straight to a specific phase (e.g. "just fix No-Shop-Assigned and the freezes; skip the rest"). Given the breadth of the request, phased delivery keeps quality high and avoids collateral damage.
