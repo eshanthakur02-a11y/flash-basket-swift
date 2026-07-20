@@ -47,17 +47,22 @@ export function OrderDetailView({ id }: { id: string }) {
     queryKey: ["order", id],
     queryFn: async () => {
       const { data: o } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
-      const { data: it } = await supabase.from("order_items").select("*").eq("order_id", id);
+      if (!o) return null;
+      // Fetch children (if parent) + all their items
+      const { data: children } = await supabase.from("orders").select("*, shops(id,name,address,latitude,longitude)").eq("parent_order_id", id);
+      const kids = (children ?? []) as any[];
+      const itemOrderIds = kids.length > 0 ? kids.map((c) => c.id) : [id];
+      const { data: it } = await supabase.from("order_items").select("*").in("order_id", itemOrderIds);
       let shop: any = null, partner: any = null;
-      if (o?.shop_id) {
-        const { data } = await supabase.from("shops").select("id,name,latitude,longitude,address,city").eq("id", o.shop_id).maybeSingle();
+      if ((o as any).shop_id) {
+        const { data } = await supabase.from("shops").select("id,name,latitude,longitude,address,city").eq("id", (o as any).shop_id).maybeSingle();
         shop = data;
       }
-      if (o?.partner_id) {
+      if ((o as any).partner_id) {
         const { data } = await supabase.rpc("get_order_partner_tracking", { _order_id: id });
         partner = Array.isArray(data) ? data[0] ?? null : data;
       }
-      return o ? { ...o, items: it ?? [], shop, partner } : null;
+      return { ...o, items: it ?? [], shop, partner, children: kids };
     },
   });
 
