@@ -136,7 +136,7 @@ function Page() {
       const since = new Date(Date.now() - days * 86400000).toISOString();
       const { data, error } = await supabase
         .from("orders")
-        .select("id, status, placed_at, order_items(product_id, name, image_url, quantity, price, variant_label)")
+        .select("id, status, placed_at, order_items!order_items_order_id_fkey(product_id, name, image_url, quantity, price, variant_label)")
         .eq("shop_id", shopId)
         .gte("placed_at", since)
         .limit(2000);

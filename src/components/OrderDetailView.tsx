@@ -47,17 +47,22 @@ export function OrderDetailView({ id }: { id: string }) {
     queryKey: ["order", id],
     queryFn: async () => {
       const { data: o } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
-      const { data: it } = await supabase.from("order_items").select("*").eq("order_id", id);
+      if (!o) return null;
+      // Fetch children (if parent) + all their items
+      const { data: children } = await supabase.from("orders").select("*, shops(id,name,address,latitude,longitude)").eq("parent_order_id", id);
+      const kids = (children ?? []) as any[];
+      const itemOrderIds = kids.length > 0 ? kids.map((c) => c.id) : [id];
+      const { data: it } = await supabase.from("order_items").select("*").in("order_id", itemOrderIds);
       let shop: any = null, partner: any = null;
-      if (o?.shop_id) {
-        const { data } = await supabase.from("shops").select("id,name,latitude,longitude,address,city").eq("id", o.shop_id).maybeSingle();
+      if ((o as any).shop_id) {
+        const { data } = await supabase.from("shops").select("id,name,latitude,longitude,address,city").eq("id", (o as any).shop_id).maybeSingle();
         shop = data;
       }
-      if (o?.partner_id) {
+      if ((o as any).partner_id) {
         const { data } = await supabase.rpc("get_order_partner_tracking", { _order_id: id });
         partner = Array.isArray(data) ? data[0] ?? null : data;
       }
-      return o ? { ...o, items: it ?? [], shop, partner } : null;
+      return { ...o, items: it ?? [], shop, partner, children: kids };
     },
   });
 
@@ -225,6 +230,32 @@ export function OrderDetailView({ id }: { id: string }) {
             </div>
           )}
         </div>
+      )}
+
+      {(o as any).children && (o as any).children.length > 1 && (
+        <section className="mt-6 rounded-3xl border border-border bg-card p-5 shadow-card">
+          <h2 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
+            <Store className="h-4 w-4 text-primary" /> Delivering from {(o as any).children.length} shops
+          </h2>
+          <div className="space-y-3">
+            {(o as any).children.map((c: any) => {
+              const childItems = o.items.filter((it: any) => it.order_id === c.id);
+              return (
+                <div key={c.id} className="rounded-2xl border border-border p-3">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold truncate">{c.shops?.name ?? "Shop"}</div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {c.status.replace(/_/g, " ")} · {childItems.length} item{childItems.length !== 1 ? "s" : ""}
+                      </div>
+                    </div>
+                    <div className="text-sm font-bold">{rupees(c.subtotal)}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
 
       <section className="mt-6 rounded-3xl border border-border bg-card p-5 shadow-card">

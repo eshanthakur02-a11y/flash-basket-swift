@@ -51,7 +51,7 @@ function Page() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("*, order_items(*), shops(name,address,latitude,longitude,phone)")
+        .select("*, order_items!order_items_order_id_fkey(*), shops(name,address,latitude,longitude,phone)")
         .eq("id", id)
         .maybeSingle();
       if (error) throw error;

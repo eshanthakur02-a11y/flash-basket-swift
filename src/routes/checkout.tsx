@@ -151,20 +151,31 @@ function CheckoutPage() {
     const addressWithCoords: any = { ...addr, lat, lng };
 
     setPlacing(true);
-    const { data, error } = await supabase.rpc("place_order", {
+    const { data, error } = await (supabase as any).rpc("place_multi_shop_order", {
       _address: addressWithCoords,
       _payment_method: method,
       _coupon_code: appliedCoupon?.code ?? undefined,
       _delivery_instruction: instruction || undefined,
+      _lat: lat,
+      _lng: lng,
+      _pincode: addressWithCoords.pincode ?? null,
       _delivery_type: deliveryType,
-    } as any);
+    });
 
     if (error) {
       setPlacing(false);
-      console.error("place_order error:", error);
+      console.error("place_multi_shop_order error:", error);
+      if (String(error.message || "").includes("no_coverage")) {
+        return toast.error("No combination of shops in your area can supply every item in your cart. Please remove unavailable items or change address.");
+      }
       return toast.error(error.message || "Could not place order");
     }
-    const orderId = data as string;
+    const row = Array.isArray(data) ? data[0] : data;
+    const orderId = row?.parent_order_id ?? row?.parent_order_id;
+    if (!orderId) {
+      setPlacing(false);
+      return toast.error("Order created but no id returned");
+    }
 
     if (method === "cod") {
       setPlacing(false);
