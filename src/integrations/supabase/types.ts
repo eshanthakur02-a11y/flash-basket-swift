@@ -369,6 +369,64 @@ export type Database = {
           },
         ]
       }
+      inventory_reservations: {
+        Row: {
+          child_order_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          parent_order_id: string
+          quantity: number
+          released: boolean
+          released_reason: string | null
+          shop_product_id: string
+        }
+        Insert: {
+          child_order_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          parent_order_id: string
+          quantity: number
+          released?: boolean
+          released_reason?: string | null
+          shop_product_id: string
+        }
+        Update: {
+          child_order_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          parent_order_id?: string
+          quantity?: number
+          released?: boolean
+          released_reason?: string | null
+          shop_product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_reservations_child_order_id_fkey"
+            columns: ["child_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_reservations_parent_order_id_fkey"
+            columns: ["parent_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_reservations_shop_product_id_fkey"
+            columns: ["shop_product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           city: string
@@ -637,6 +695,7 @@ export type Database = {
       }
       order_items: {
         Row: {
+          child_order_id: string | null
           created_at: string
           id: string
           image_url: string | null
@@ -645,11 +704,14 @@ export type Database = {
           price: number
           product_id: string | null
           quantity: number
+          shop_id: string | null
+          shop_product_id: string | null
           unit: string | null
           variant_id: string | null
           variant_label: string | null
         }
         Insert: {
+          child_order_id?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
@@ -658,11 +720,14 @@ export type Database = {
           price: number
           product_id?: string | null
           quantity: number
+          shop_id?: string | null
+          shop_product_id?: string | null
           unit?: string | null
           variant_id?: string | null
           variant_label?: string | null
         }
         Update: {
+          child_order_id?: string | null
           created_at?: string
           id?: string
           image_url?: string | null
@@ -671,11 +736,20 @@ export type Database = {
           price?: number
           product_id?: string | null
           quantity?: number
+          shop_id?: string | null
+          shop_product_id?: string | null
           unit?: string | null
           variant_id?: string | null
           variant_label?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "order_items_child_order_id_fkey"
+            columns: ["child_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "order_items_order_id_fkey"
             columns: ["order_id"]
@@ -688,6 +762,20 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_shop_product_id_fkey"
+            columns: ["shop_product_id"]
+            isOneToOne: false
+            referencedRelation: "shop_products"
             referencedColumns: ["id"]
           },
           {
@@ -779,15 +867,21 @@ export type Database = {
           fast_delivery_fee: number
           handling_fee: number
           id: string
+          is_parent: boolean
           order_number: string
           paid_at: string | null
+          parent_order_id: string | null
           partner_id: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
+          pickup_otp: string | null
+          pickup_verified_at: string | null
           placed_at: string
+          prep_time_minutes: number | null
           ready_for_pickup_at: string | null
           rejected_shop_ids: string[]
           routing_status: string | null
+          shop_count: number
           shop_id: string | null
           shop_selection_mode: string
           status: Database["public"]["Enums"]["order_status"]
@@ -816,15 +910,21 @@ export type Database = {
           fast_delivery_fee?: number
           handling_fee?: number
           id?: string
+          is_parent?: boolean
           order_number?: string
           paid_at?: string | null
+          parent_order_id?: string | null
           partner_id?: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          pickup_otp?: string | null
+          pickup_verified_at?: string | null
           placed_at?: string
+          prep_time_minutes?: number | null
           ready_for_pickup_at?: string | null
           rejected_shop_ids?: string[]
           routing_status?: string | null
+          shop_count?: number
           shop_id?: string | null
           shop_selection_mode?: string
           status?: Database["public"]["Enums"]["order_status"]
@@ -853,15 +953,21 @@ export type Database = {
           fast_delivery_fee?: number
           handling_fee?: number
           id?: string
+          is_parent?: boolean
           order_number?: string
           paid_at?: string | null
+          parent_order_id?: string | null
           partner_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          pickup_otp?: string | null
+          pickup_verified_at?: string | null
           placed_at?: string
+          prep_time_minutes?: number | null
           ready_for_pickup_at?: string | null
           rejected_shop_ids?: string[]
           routing_status?: string | null
+          shop_count?: number
           shop_id?: string | null
           shop_selection_mode?: string
           status?: Database["public"]["Enums"]["order_status"]
@@ -872,6 +978,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_parent_order_id_fkey"
+            columns: ["parent_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_partner_id_fkey"
             columns: ["partner_id"]
@@ -979,6 +1092,61 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pickup_events: {
+        Row: {
+          actor_user_id: string | null
+          child_order_id: string | null
+          created_at: string
+          detail: Json | null
+          event: string
+          id: string
+          parent_order_id: string
+          shop_id: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          child_order_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          event: string
+          id?: string
+          parent_order_id: string
+          shop_id?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          child_order_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          event?: string
+          id?: string
+          parent_order_id?: string
+          shop_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pickup_events_child_order_id_fkey"
+            columns: ["child_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pickup_events_parent_order_id_fkey"
+            columns: ["parent_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pickup_events_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
             referencedColumns: ["id"]
           },
         ]
@@ -2084,6 +2252,15 @@ export type Database = {
           vehicle: string
         }[]
       }
+      admin_order_timeline: {
+        Args: { _parent_id: string }
+        Returns: {
+          actor: string
+          at: string
+          detail: Json
+          event: string
+        }[]
+      }
       admin_partner_performance: {
         Args: never
         Returns: {
@@ -2205,6 +2382,10 @@ export type Database = {
       delete_delivery_partner: {
         Args: { _partner_id: string }
         Returns: undefined
+      }
+      effective_available_stock: {
+        Args: { _shop_product_id: string }
+        Returns: number
       }
       find_best_shop_for_cart: {
         Args: {
@@ -2389,6 +2570,24 @@ export type Database = {
         Args: { _eta_minutes?: number; _order_id?: string; _status: string }
         Returns: undefined
       }
+      place_multi_shop_order: {
+        Args: {
+          _address: Json
+          _coupon_code?: string
+          _delivery_instruction?: string
+          _delivery_type?: string
+          _lat?: number
+          _lng?: number
+          _payment_method: string
+          _pincode?: string
+        }
+        Returns: {
+          order_number: string
+          parent_order_id: string
+          shop_count: number
+          total: number
+        }[]
+      }
       place_order: {
         Args: {
           _address: Json
@@ -2399,14 +2598,39 @@ export type Database = {
         }
         Returns: string
       }
+      plan_multi_shop_cart: {
+        Args: { _lat: number; _lng: number; _pincode: string; _user: string }
+        Returns: {
+          distance_km: number
+          image_url: string
+          price: number
+          product_id: string
+          product_name: string
+          quantity: number
+          shop_id: string
+          shop_name: string
+          shop_product_id: string
+          unit: string
+          variant_id: string
+        }[]
+      }
       post_ticket_message: {
         Args: { _body: string; _is_internal?: boolean; _ticket_id: string }
         Returns: string
       }
       reassign_stale_orders: { Args: never; Returns: number }
+      release_expired_reservations: { Args: never; Returns: number }
       restore_order_stock: { Args: { _order_id: string }; Returns: undefined }
+      rider_verify_pickup: {
+        Args: { _child_id: string; _otp: string }
+        Returns: undefined
+      }
       send_onesignal_push: {
         Args: { _notification_id: string }
+        Returns: undefined
+      }
+      shop_accept_child: {
+        Args: { _child_id: string; _prep_minutes?: number }
         Returns: undefined
       }
       shop_accept_order: { Args: { _order_id: string }; Returns: undefined }
@@ -2456,6 +2680,7 @@ export type Database = {
           vehicle: string
         }[]
       }
+      shop_mark_child_ready: { Args: { _child_id: string }; Returns: undefined }
       shop_mark_collected: { Args: { _order_id: string }; Returns: undefined }
       shop_mark_packed: { Args: { _order_id: string }; Returns: undefined }
       shop_partner_performance: {
@@ -2472,6 +2697,10 @@ export type Database = {
           phone: string
           rating: number
         }[]
+      }
+      shop_reject_child: {
+        Args: { _child_id: string; _reason?: string }
+        Returns: Json
       }
       shop_reject_order: {
         Args: { _order_id: string; _reason?: string }
