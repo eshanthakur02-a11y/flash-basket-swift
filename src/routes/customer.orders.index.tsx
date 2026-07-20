@@ -32,7 +32,7 @@ function AppOrders() {
       if (!user) return [];
       const { data } = await supabase
         .from("orders")
-        .select("*, items:order_items(id,name,image_url,quantity), shop:shops(name)")
+        .select("*, items:order_items!order_items_order_id_fkey(id,name,image_url,quantity), shop:shops(name)")
         .eq("user_id", user.id)
         .order("placed_at", { ascending: false });
       return data ?? [];
