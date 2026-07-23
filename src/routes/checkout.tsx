@@ -336,32 +336,44 @@ function CheckoutPage() {
         {/* Delivery option */}
         <section className="rounded-3xl border border-border bg-card p-5 shadow-card">
           <h2 className="font-display text-xl font-bold">Delivery option</h2>
+          {activePincode && !zone.isLoading && !zone.data && (
+            <p className="mt-2 text-xs text-amber-600">
+              No delivery zone configured for PIN {activePincode}. Showing defaults; ask the admin to add this PIN Code.
+            </p>
+          )}
           <div className="mt-3 grid gap-3">
-            {[
-              { id: "fast_delivery", icon: "⚡", title: "Fast Delivery", sub: "Delivery in 15–30 minutes", fee: "+₹100" },
-              { id: "standard_delivery", icon: "🚚", title: "Standard Delivery", sub: "Delivery in 30–60 minutes", fee: "Free" },
-              { id: "pickup", icon: "🏪", title: "Store Pickup", sub: "Pick up from the shop yourself", fee: "Free" },
-            ].map((o) => (
-              <label
-                key={o.id}
-                className={`flex items-center gap-3 rounded-2xl border-2 p-4 cursor-pointer ${deliveryType === o.id ? "border-primary bg-primary/5" : "border-border"}`}
-              >
-                <input
-                  type="radio"
-                  name="delivery_type"
-                  checked={deliveryType === (o.id as any)}
-                  onChange={() => setDeliveryType(o.id as any)}
-                />
-                <span className="text-2xl leading-none">{o.icon}</span>
-                <div className="flex-1">
-                  <div className="font-bold flex items-center justify-between">
-                    <span>{o.title}</span>
-                    <span className={`text-sm ${o.fee === "Free" ? "text-primary" : "text-foreground"}`}>{o.fee}</span>
+            {tiers.map((o) => {
+              const disabled = o.minOrder != null && subtotal < o.minOrder;
+              return (
+                <label
+                  key={o.id}
+                  className={`flex items-center gap-3 rounded-2xl border-2 p-4 ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"} ${deliveryType === o.id ? "border-primary bg-primary/5" : "border-border"}`}
+                >
+                  <input
+                    type="radio"
+                    name="delivery_type"
+                    disabled={disabled}
+                    checked={deliveryType === o.id}
+                    onChange={() => setDeliveryType(o.id)}
+                  />
+                  <span className="text-2xl leading-none">{o.icon}</span>
+                  <div className="flex-1">
+                    <div className="font-bold flex items-center justify-between">
+                      <span>{o.title}</span>
+                      <span className={`text-sm ${o.fee === 0 ? "text-primary" : "text-foreground"}`}>
+                        {o.fee === 0 ? "Free" : `+${rupees(o.fee)}`}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{o.sub}</div>
+                    {o.minOrder != null && (
+                      <div className="text-[11px] text-muted-foreground">
+                        Min order {rupees(o.minOrder)}{disabled ? ` — add ${rupees(o.minOrder - subtotal)} more` : ""}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xs text-muted-foreground">{o.sub}</div>
-                </div>
-              </label>
-            ))}
+                </label>
+              );
+            })}
           </div>
         </section>
 
