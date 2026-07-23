@@ -51,24 +51,53 @@ function CheckoutPage() {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
-  const [deliveryType, setDeliveryType] = useState<"fast_delivery" | "standard_delivery" | "pickup">("standard_delivery");
+  const [deliveryType, setDeliveryType] = useState<"fast_delivery" | "standard_delivery" | "express_delivery" | "pickup">("standard_delivery");
   const [placing, setPlacing] = useState(false);
   const mounted = useRef(true);
   useEffect(() => () => { mounted.current = false; }, []);
   const safeSetPlacing = (v: boolean) => { if (mounted.current) setPlacing(v); };
 
-  const useMyLocation = () => {
-    if (!navigator.geolocation) return toast.error("Geolocation not available");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => { setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }); toast.success("Location captured"); },
-      () => toast.error("Could not get location — using default city center"),
-    );
-  };
+  const selectedAddrObj = addresses.data?.find((a) => a.id === selectedAddr) ?? null;
+  const activePincode = (selectedAddrObj as any)?.pincode ?? null;
 
-  const deliveryFee = deliveryType === "fast_delivery" ? 100 : 0;
+  const zone = useQuery({
+    queryKey: ["delivery-zone", activePincode],
+    enabled: !!activePincode,
+    queryFn: async () => {
+      const { data } = await (supabase as any).rpc("get_delivery_options_for_pincode", { _pincode: activePincode });
+      const row = Array.isArray(data) ? data[0] : data;
+      return row ?? null;
+    },
+  });
+
+  const tiers = (() => {
+    const z: any = zone.data;
+    const arr: Array<{ id: "standard_delivery" | "fast_delivery" | "express_delivery" | "pickup"; icon: string; title: string; sub: string; fee: number; minOrder: number | null }> = [];
+    if (!z) {
+      arr.push({ id: "standard_delivery", icon: "🚚", title: "Standard Delivery", sub: "45–60 minutes", fee: 0, minOrder: null });
+      arr.push({ id: "fast_delivery", icon: "⚡", title: "Fast Delivery", sub: "20–30 minutes", fee: 100, minOrder: null });
+    } else {
+      if (z.standard_enabled) arr.push({ id: "standard_delivery", icon: "🚚", title: "Standard Delivery", sub: `${z.standard_eta_minutes} minutes`, fee: Number(z.standard_fee) || 0, minOrder: z.minimum_order_standard != null ? Number(z.minimum_order_standard) : null });
+      if (z.fast_enabled) arr.push({ id: "fast_delivery", icon: "⚡", title: "Fast Delivery", sub: `${z.fast_eta_minutes} minutes`, fee: Number(z.fast_fee) || 0, minOrder: z.minimum_order_fast != null ? Number(z.minimum_order_fast) : null });
+      if (z.express_enabled) arr.push({ id: "express_delivery", icon: "🚀", title: "Express Delivery", sub: `${z.express_eta_minutes} minutes`, fee: Number(z.express_fee) || 0, minOrder: z.minimum_order_express != null ? Number(z.minimum_order_express) : null });
+    }
+    arr.push({ id: "pickup", icon: "🏪", title: "Store Pickup", sub: "Pick up from the shop yourself", fee: 0, minOrder: null });
+    return arr;
+  })();
+
+  // Auto-switch away from a disabled tier when zone loads
+  useEffect(() => {
+    if (!tiers.some((t) => t.id === deliveryType)) {
+      setDeliveryType(tiers[0]?.id ?? "standard_delivery");
+    }
+  }, [zone.data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const selectedTier = tiers.find((t) => t.id === deliveryType) ?? tiers[0];
+  const deliveryFee = selectedTier?.fee ?? 0;
   const handling = 5;
   const discount = appliedCoupon?.discount ?? 0;
   const total = Math.max(0, subtotal - discount) + deliveryFee + handling;
+  const minOrderNotMet = selectedTier?.minOrder != null && subtotal < selectedTier.minOrder;
 
   // Re-validate coupon when subtotal changes (cart updates)
   useEffect(() => {
