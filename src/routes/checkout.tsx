@@ -454,13 +454,18 @@ function CheckoutPage() {
           {appliedCoupon && (
             <Row label={`Coupon (${appliedCoupon.code})`} value={`- ${rupees(appliedCoupon.discount)}`} />
           )}
-          <Row label={deliveryType === "pickup" ? "Pickup" : deliveryType === "fast_delivery" ? "Fast delivery" : "Delivery"} value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
+          <Row label={selectedTier ? `${selectedTier.title} (${selectedTier.sub})` : "Delivery"} value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
           <Row label="Handling" value={rupees(handling)} />
           <div className="my-3 h-px bg-border" />
           <Row label="To pay" value={rupees(total)} bold />
+          {minOrderNotMet && selectedTier?.minOrder != null && (
+            <div className="mt-2 text-xs text-destructive">
+              Add {rupees(selectedTier.minOrder - subtotal)} more to use {selectedTier.title}.
+            </div>
+          )}
           <motion.div whileTap={{ scale: 0.97 }}>
             <Button
-              disabled={placing || !selectedAddr}
+              disabled={placing || !selectedAddr || minOrderNotMet}
               onClick={place}
               className="mt-5 w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold shadow-glow"
             >
