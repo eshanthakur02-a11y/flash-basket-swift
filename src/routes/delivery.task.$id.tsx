@@ -138,7 +138,7 @@ function Page() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground">Order</p>
-                  <p className="font-semibold">{data.order_number}</p>
+                  <p className="font-semibold flex items-center gap-2">{data.order_number} <DeliveryTypeBadge type={data.delivery_type} size="xs" /></p>
                 </div>
                 <Badge variant="secondary">{String(data.status).replace(/_/g, " ")}</Badge>
               </div>
