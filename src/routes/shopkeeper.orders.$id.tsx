@@ -52,7 +52,10 @@ function Page() {
       <div className="p-6 max-w-3xl space-y-5">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="font-display text-2xl font-bold">{o.order_number}</h1>
+            <h1 className="font-display text-2xl font-bold flex items-center gap-2">
+              {o.order_number}
+              <DeliveryTypeBadge type={o.delivery_type} size="sm" />
+            </h1>
             <div className="text-sm text-muted-foreground mt-1">{o.status.replace(/_/g," ")} • {rupees(o.total)}</div>
             {isChild && <div className="text-xs text-primary font-semibold mt-1">Part of a multi-shop order</div>}
           </div>
