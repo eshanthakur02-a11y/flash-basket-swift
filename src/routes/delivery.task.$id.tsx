@@ -11,6 +11,7 @@ import { RouteMap } from "@/components/maps/RouteMap";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin, Package, Phone, Store, LayoutDashboard, PackageOpen, History, Wallet, User } from "lucide-react";
+import { MultiShopPickupPanel } from "@/components/MultiShopPickupPanel";
 
 const NAV = [
   { to: "/delivery/dashboard", label: "Home", icon: LayoutDashboard },
