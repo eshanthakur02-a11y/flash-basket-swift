@@ -8,6 +8,7 @@ import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 import { OrderAuditLog } from "@/components/OrderAuditLog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { DeliveryTypeBadge } from "@/components/FastDeliveryBadge";
 
 export const Route = createFileRoute("/shopkeeper/orders/$id")({
   head: () => ({ meta: [{ title: "Order — Shopkeeper" }] }),
