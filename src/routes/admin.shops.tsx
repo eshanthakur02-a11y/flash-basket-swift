@@ -560,9 +560,9 @@ function EditShopDialog({ shop, onClose, onDone }: { shop: ShopRow; onClose: () 
     setBusy(true);
     const { error } = await supabase.rpc("admin_update_shop", {
       _shop_id: shop.id,
-      _name: name.trim(), _address: address.trim(), _city: city.trim(), _state: stateVal.trim() || null,
-      _pincode: pincode.trim(), _phone: phone.trim() || null,
-      _lat: loc.lat, _lng: loc.lng, _radius: r, _is_open: isOpen, _logo_url: logoUrl.trim() || null,
+      _name: name.trim(), _address: address.trim(), _city: city.trim(), _state: stateVal.trim() || undefined,
+      _pincode: pincode.trim(), _phone: phone.trim() || undefined,
+      _lat: loc.lat, _lng: loc.lng, _radius: r, _is_open: isOpen, _logo_url: logoUrl.trim() || undefined,
     });
     setBusy(false);
     if (error) toast.error(error.message);
