@@ -71,10 +71,10 @@ function Page() {
   }, [zones.data, q, filter]);
 
   const save = async (z: Zone) => {
-    if (!z.state || !z.city || !z.pin_code) return toast.error("State, City and PIN Code are required");
-    if (!/^\d{4,10}$/.test(z.pin_code)) return toast.error("Invalid PIN Code");
+    if (!z.state || !z.city || !z.pin_code) { toast.error("State, City and PIN Code are required"); return; }
+    if (!/^\d{4,10}$/.test(z.pin_code)) { toast.error("Invalid PIN Code"); return; }
     const { error } = await (supabase as any).rpc("admin_upsert_delivery_zone", { _data: z });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(z.id ? "Zone updated" : "Zone added");
     setEdit(null);
     qc.invalidateQueries({ queryKey: ["admin-delivery-zones"] });
