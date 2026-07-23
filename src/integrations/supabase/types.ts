@@ -369,6 +369,75 @@ export type Database = {
           },
         ]
       }
+      delivery_zone_settings: {
+        Row: {
+          city: string
+          created_at: string
+          delivery_radius_km: number
+          express_enabled: boolean
+          express_eta_minutes: string
+          express_fee: number
+          fast_enabled: boolean
+          fast_eta_minutes: string
+          fast_fee: number
+          id: string
+          is_active: boolean
+          minimum_order_express: number | null
+          minimum_order_fast: number | null
+          minimum_order_standard: number | null
+          pin_code: string
+          standard_enabled: boolean
+          standard_eta_minutes: string
+          standard_fee: number
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          delivery_radius_km?: number
+          express_enabled?: boolean
+          express_eta_minutes?: string
+          express_fee?: number
+          fast_enabled?: boolean
+          fast_eta_minutes?: string
+          fast_fee?: number
+          id?: string
+          is_active?: boolean
+          minimum_order_express?: number | null
+          minimum_order_fast?: number | null
+          minimum_order_standard?: number | null
+          pin_code: string
+          standard_enabled?: boolean
+          standard_eta_minutes?: string
+          standard_fee?: number
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          delivery_radius_km?: number
+          express_enabled?: boolean
+          express_eta_minutes?: string
+          express_fee?: number
+          fast_enabled?: boolean
+          fast_eta_minutes?: string
+          fast_fee?: number
+          id?: string
+          is_active?: boolean
+          minimum_order_express?: number | null
+          minimum_order_fast?: number | null
+          minimum_order_standard?: number | null
+          pin_code?: string
+          standard_enabled?: boolean
+          standard_eta_minutes?: string
+          standard_fee?: number
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inventory_reservations: {
         Row: {
           child_order_id: string | null
@@ -2160,7 +2229,39 @@ export type Database = {
         }
         Returns: string
       }
+      admin_delete_delivery_zone: { Args: { _id: string }; Returns: undefined }
       admin_delete_shop: { Args: { _shop_id: string }; Returns: undefined }
+      admin_duplicate_delivery_zone: {
+        Args: { _id: string; _new_pin: string }
+        Returns: {
+          city: string
+          created_at: string
+          delivery_radius_km: number
+          express_enabled: boolean
+          express_eta_minutes: string
+          express_fee: number
+          fast_enabled: boolean
+          fast_eta_minutes: string
+          fast_fee: number
+          id: string
+          is_active: boolean
+          minimum_order_express: number | null
+          minimum_order_fast: number | null
+          minimum_order_standard: number | null
+          pin_code: string
+          standard_enabled: boolean
+          standard_eta_minutes: string
+          standard_fee: number
+          state: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "delivery_zone_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_list_complaints: {
         Args: never
         Returns: {
@@ -2182,6 +2283,37 @@ export type Database = {
           title: string
           user_id: string
         }[]
+      }
+      admin_list_delivery_zones: {
+        Args: never
+        Returns: {
+          city: string
+          created_at: string
+          delivery_radius_km: number
+          express_enabled: boolean
+          express_eta_minutes: string
+          express_fee: number
+          fast_enabled: boolean
+          fast_eta_minutes: string
+          fast_fee: number
+          id: string
+          is_active: boolean
+          minimum_order_express: number | null
+          minimum_order_fast: number | null
+          minimum_order_standard: number | null
+          pin_code: string
+          standard_enabled: boolean
+          standard_eta_minutes: string
+          standard_fee: number
+          state: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "delivery_zone_settings"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       admin_list_payments: {
         Args: {
@@ -2387,6 +2519,37 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_upsert_delivery_zone: {
+        Args: { _data: Json }
+        Returns: {
+          city: string
+          created_at: string
+          delivery_radius_km: number
+          express_enabled: boolean
+          express_eta_minutes: string
+          express_fee: number
+          fast_enabled: boolean
+          fast_eta_minutes: string
+          fast_fee: number
+          id: string
+          is_active: boolean
+          minimum_order_express: number | null
+          minimum_order_fast: number | null
+          minimum_order_standard: number | null
+          pin_code: string
+          standard_enabled: boolean
+          standard_eta_minutes: string
+          standard_fee: number
+          state: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "delivery_zone_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       assign_ticket: {
         Args: { _agent_id: string; _ticket_id: string }
         Returns: undefined
@@ -2474,6 +2637,27 @@ export type Database = {
       find_nearest_shop_for_order: {
         Args: { _order_id: string }
         Returns: string
+      }
+      get_delivery_options_for_pincode: {
+        Args: { _pincode: string }
+        Returns: {
+          city: string
+          express_enabled: boolean
+          express_eta_minutes: string
+          express_fee: number
+          fast_enabled: boolean
+          fast_eta_minutes: string
+          fast_fee: number
+          is_active: boolean
+          minimum_order_express: number
+          minimum_order_fast: number
+          minimum_order_standard: number
+          pin_code: string
+          standard_enabled: boolean
+          standard_eta_minutes: string
+          standard_fee: number
+          state: string
+        }[]
       }
       get_order_partner_tracking: {
         Args: { _order_id: string }
