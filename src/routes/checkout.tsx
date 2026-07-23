@@ -51,24 +51,53 @@ function CheckoutPage() {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [instruction, setInstruction] = useState("");
   const [method, setMethod] = useState<"cod" | "razorpay">("cod");
-  const [deliveryType, setDeliveryType] = useState<"fast_delivery" | "standard_delivery" | "pickup">("standard_delivery");
+  const [deliveryType, setDeliveryType] = useState<"fast_delivery" | "standard_delivery" | "express_delivery" | "pickup">("standard_delivery");
   const [placing, setPlacing] = useState(false);
   const mounted = useRef(true);
   useEffect(() => () => { mounted.current = false; }, []);
   const safeSetPlacing = (v: boolean) => { if (mounted.current) setPlacing(v); };
 
-  const useMyLocation = () => {
-    if (!navigator.geolocation) return toast.error("Geolocation not available");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => { setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }); toast.success("Location captured"); },
-      () => toast.error("Could not get location — using default city center"),
-    );
-  };
+  const selectedAddrObj = addresses.data?.find((a) => a.id === selectedAddr) ?? null;
+  const activePincode = (selectedAddrObj as any)?.pincode ?? null;
 
-  const deliveryFee = deliveryType === "fast_delivery" ? 100 : 0;
+  const zone = useQuery({
+    queryKey: ["delivery-zone", activePincode],
+    enabled: !!activePincode,
+    queryFn: async () => {
+      const { data } = await (supabase as any).rpc("get_delivery_options_for_pincode", { _pincode: activePincode });
+      const row = Array.isArray(data) ? data[0] : data;
+      return row ?? null;
+    },
+  });
+
+  const tiers = (() => {
+    const z: any = zone.data;
+    const arr: Array<{ id: "standard_delivery" | "fast_delivery" | "express_delivery" | "pickup"; icon: string; title: string; sub: string; fee: number; minOrder: number | null }> = [];
+    if (!z) {
+      arr.push({ id: "standard_delivery", icon: "🚚", title: "Standard Delivery", sub: "45–60 minutes", fee: 0, minOrder: null });
+      arr.push({ id: "fast_delivery", icon: "⚡", title: "Fast Delivery", sub: "20–30 minutes", fee: 100, minOrder: null });
+    } else {
+      if (z.standard_enabled) arr.push({ id: "standard_delivery", icon: "🚚", title: "Standard Delivery", sub: `${z.standard_eta_minutes} minutes`, fee: Number(z.standard_fee) || 0, minOrder: z.minimum_order_standard != null ? Number(z.minimum_order_standard) : null });
+      if (z.fast_enabled) arr.push({ id: "fast_delivery", icon: "⚡", title: "Fast Delivery", sub: `${z.fast_eta_minutes} minutes`, fee: Number(z.fast_fee) || 0, minOrder: z.minimum_order_fast != null ? Number(z.minimum_order_fast) : null });
+      if (z.express_enabled) arr.push({ id: "express_delivery", icon: "🚀", title: "Express Delivery", sub: `${z.express_eta_minutes} minutes`, fee: Number(z.express_fee) || 0, minOrder: z.minimum_order_express != null ? Number(z.minimum_order_express) : null });
+    }
+    arr.push({ id: "pickup", icon: "🏪", title: "Store Pickup", sub: "Pick up from the shop yourself", fee: 0, minOrder: null });
+    return arr;
+  })();
+
+  // Auto-switch away from a disabled tier when zone loads
+  useEffect(() => {
+    if (!tiers.some((t) => t.id === deliveryType)) {
+      setDeliveryType(tiers[0]?.id ?? "standard_delivery");
+    }
+  }, [zone.data]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const selectedTier = tiers.find((t) => t.id === deliveryType) ?? tiers[0];
+  const deliveryFee = selectedTier?.fee ?? 0;
   const handling = 5;
   const discount = appliedCoupon?.discount ?? 0;
   const total = Math.max(0, subtotal - discount) + deliveryFee + handling;
+  const minOrderNotMet = selectedTier?.minOrder != null && subtotal < selectedTier.minOrder;
 
   // Re-validate coupon when subtotal changes (cart updates)
   useEffect(() => {
@@ -307,32 +336,44 @@ function CheckoutPage() {
         {/* Delivery option */}
         <section className="rounded-3xl border border-border bg-card p-5 shadow-card">
           <h2 className="font-display text-xl font-bold">Delivery option</h2>
+          {activePincode && !zone.isLoading && !zone.data && (
+            <p className="mt-2 text-xs text-amber-600">
+              No delivery zone configured for PIN {activePincode}. Showing defaults; ask the admin to add this PIN Code.
+            </p>
+          )}
           <div className="mt-3 grid gap-3">
-            {[
-              { id: "fast_delivery", icon: "⚡", title: "Fast Delivery", sub: "Delivery in 15–30 minutes", fee: "+₹100" },
-              { id: "standard_delivery", icon: "🚚", title: "Standard Delivery", sub: "Delivery in 30–60 minutes", fee: "Free" },
-              { id: "pickup", icon: "🏪", title: "Store Pickup", sub: "Pick up from the shop yourself", fee: "Free" },
-            ].map((o) => (
-              <label
-                key={o.id}
-                className={`flex items-center gap-3 rounded-2xl border-2 p-4 cursor-pointer ${deliveryType === o.id ? "border-primary bg-primary/5" : "border-border"}`}
-              >
-                <input
-                  type="radio"
-                  name="delivery_type"
-                  checked={deliveryType === (o.id as any)}
-                  onChange={() => setDeliveryType(o.id as any)}
-                />
-                <span className="text-2xl leading-none">{o.icon}</span>
-                <div className="flex-1">
-                  <div className="font-bold flex items-center justify-between">
-                    <span>{o.title}</span>
-                    <span className={`text-sm ${o.fee === "Free" ? "text-primary" : "text-foreground"}`}>{o.fee}</span>
+            {tiers.map((o) => {
+              const disabled = o.minOrder != null && subtotal < o.minOrder;
+              return (
+                <label
+                  key={o.id}
+                  className={`flex items-center gap-3 rounded-2xl border-2 p-4 ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"} ${deliveryType === o.id ? "border-primary bg-primary/5" : "border-border"}`}
+                >
+                  <input
+                    type="radio"
+                    name="delivery_type"
+                    disabled={disabled}
+                    checked={deliveryType === o.id}
+                    onChange={() => setDeliveryType(o.id)}
+                  />
+                  <span className="text-2xl leading-none">{o.icon}</span>
+                  <div className="flex-1">
+                    <div className="font-bold flex items-center justify-between">
+                      <span>{o.title}</span>
+                      <span className={`text-sm ${o.fee === 0 ? "text-primary" : "text-foreground"}`}>
+                        {o.fee === 0 ? "Free" : `+${rupees(o.fee)}`}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{o.sub}</div>
+                    {o.minOrder != null && (
+                      <div className="text-[11px] text-muted-foreground">
+                        Min order {rupees(o.minOrder)}{disabled ? ` — add ${rupees(o.minOrder - subtotal)} more` : ""}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-xs text-muted-foreground">{o.sub}</div>
-                </div>
-              </label>
-            ))}
+                </label>
+              );
+            })}
           </div>
         </section>
 
@@ -413,13 +454,18 @@ function CheckoutPage() {
           {appliedCoupon && (
             <Row label={`Coupon (${appliedCoupon.code})`} value={`- ${rupees(appliedCoupon.discount)}`} />
           )}
-          <Row label={deliveryType === "pickup" ? "Pickup" : deliveryType === "fast_delivery" ? "Fast delivery" : "Delivery"} value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
+          <Row label={selectedTier ? `${selectedTier.title} (${selectedTier.sub})` : "Delivery"} value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
           <Row label="Handling" value={rupees(handling)} />
           <div className="my-3 h-px bg-border" />
           <Row label="To pay" value={rupees(total)} bold />
+          {minOrderNotMet && selectedTier?.minOrder != null && (
+            <div className="mt-2 text-xs text-destructive">
+              Add {rupees(selectedTier.minOrder - subtotal)} more to use {selectedTier.title}.
+            </div>
+          )}
           <motion.div whileTap={{ scale: 0.97 }}>
             <Button
-              disabled={placing || !selectedAddr}
+              disabled={placing || !selectedAddr || minOrderNotMet}
               onClick={place}
               className="mt-5 w-full h-12 rounded-xl gradient-primary text-primary-foreground font-bold shadow-glow"
             >

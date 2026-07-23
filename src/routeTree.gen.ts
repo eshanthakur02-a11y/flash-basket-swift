@@ -74,6 +74,7 @@ import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminLocationsRouteImport } from './routes/admin.locations'
 import { Route as AdminEarningsRouteImport } from './routes/admin.earnings'
+import { Route as AdminDeliveryPricingRouteImport } from './routes/admin.delivery-pricing'
 import { Route as AdminDeliveryPartnersRouteImport } from './routes/admin.delivery-partners'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
@@ -417,6 +418,11 @@ const AdminEarningsRoute = AdminEarningsRouteImport.update({
   path: '/earnings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDeliveryPricingRoute = AdminDeliveryPricingRouteImport.update({
+  id: '/delivery-pricing',
+  path: '/delivery-pricing',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDeliveryPartnersRoute = AdminDeliveryPartnersRouteImport.update({
   id: '/delivery-partners',
   path: '/delivery-partners',
@@ -523,6 +529,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
+  '/admin/delivery-pricing': typeof AdminDeliveryPricingRoute
   '/admin/earnings': typeof AdminEarningsRoute
   '/admin/locations': typeof AdminLocationsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -606,6 +613,7 @@ export interface FileRoutesByTo {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
+  '/admin/delivery-pricing': typeof AdminDeliveryPricingRoute
   '/admin/earnings': typeof AdminEarningsRoute
   '/admin/locations': typeof AdminLocationsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -690,6 +698,7 @@ export interface FileRoutesById {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery-partners': typeof AdminDeliveryPartnersRoute
+  '/admin/delivery-pricing': typeof AdminDeliveryPricingRoute
   '/admin/earnings': typeof AdminEarningsRoute
   '/admin/locations': typeof AdminLocationsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -775,6 +784,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
+    | '/admin/delivery-pricing'
     | '/admin/earnings'
     | '/admin/locations'
     | '/admin/notifications'
@@ -858,6 +868,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
+    | '/admin/delivery-pricing'
     | '/admin/earnings'
     | '/admin/locations'
     | '/admin/notifications'
@@ -941,6 +952,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery-partners'
+    | '/admin/delivery-pricing'
     | '/admin/earnings'
     | '/admin/locations'
     | '/admin/notifications'
@@ -1484,6 +1496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEarningsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/delivery-pricing': {
+      id: '/admin/delivery-pricing'
+      path: '/delivery-pricing'
+      fullPath: '/admin/delivery-pricing'
+      preLoaderRoute: typeof AdminDeliveryPricingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/delivery-partners': {
       id: '/admin/delivery-partners'
       path: '/delivery-partners'
@@ -1618,6 +1637,7 @@ interface AdminRouteChildren {
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDeliveryPartnersRoute: typeof AdminDeliveryPartnersRoute
+  AdminDeliveryPricingRoute: typeof AdminDeliveryPricingRoute
   AdminEarningsRoute: typeof AdminEarningsRoute
   AdminLocationsRoute: typeof AdminLocationsRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
@@ -1640,6 +1660,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCustomersRoute: AdminCustomersRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDeliveryPartnersRoute: AdminDeliveryPartnersRoute,
+  AdminDeliveryPricingRoute: AdminDeliveryPricingRoute,
   AdminEarningsRoute: AdminEarningsRoute,
   AdminLocationsRoute: AdminLocationsRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
