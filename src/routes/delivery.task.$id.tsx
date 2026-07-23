@@ -11,6 +11,7 @@ import { RouteMap } from "@/components/maps/RouteMap";
 import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { ArrowLeft, MapPin, Package, Phone, Store, LayoutDashboard, PackageOpen, History, Wallet, User } from "lucide-react";
+import { MultiShopPickupPanel } from "@/components/MultiShopPickupPanel";
 
 const NAV = [
   { to: "/delivery/dashboard", label: "Home", icon: LayoutDashboard },
@@ -82,8 +83,56 @@ function Page() {
         {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {!isLoading && !data && <p className="text-sm text-muted-foreground">Task not found.</p>}
 
-        {data && (
+        {data && data.is_parent && (
           <>
+            <MultiShopPickupPanel
+              parentId={id}
+              parent={{
+                order_number: data.order_number,
+                total: Number(data.total),
+                shop_count: Number(data.shop_count ?? 0),
+                delivery_type: data.delivery_type ?? null,
+                fast_delivery_fee: data.fast_delivery_fee ?? null,
+              }}
+              onAllPickedUp={() => refetch()}
+            />
+            <Card className="p-4">
+              <p className="text-xs uppercase text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> Deliver to</p>
+              {(() => {
+                const addr = (data.address ?? {}) as Record<string, any>;
+                return (
+                  <>
+                    <p className="font-semibold mt-1">{addr.full_name || "Customer"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {[addr.line1, addr.line2, addr.city, addr.pincode].filter(Boolean).join(", ")}
+                    </p>
+                    {addr.phone && (
+                      <a href={`tel:${addr.phone}`} className="mt-2 inline-flex items-center gap-1 text-sm text-primary">
+                        <Phone className="h-3 w-3" /> {addr.phone}
+                      </a>
+                    )}
+                  </>
+                );
+              })()}
+              {data.delivery_instruction && (
+                <p className="mt-2 text-xs italic text-muted-foreground">Note: {data.delivery_instruction}</p>
+              )}
+            </Card>
+            <div className="fixed bottom-20 left-0 right-0 px-4">
+              <div className="mx-auto max-w-md">
+                {data.status === "out_for_delivery" ? (
+                  <Button className="w-full" onClick={deliver}>Mark as delivered</Button>
+                ) : (
+                  <Button className="w-full" disabled variant="secondary">Complete all pickups to proceed</Button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
+        {data && !data.is_parent && (
+          <>
+
             <Card className="p-4">
               <div className="flex items-center justify-between">
                 <div>

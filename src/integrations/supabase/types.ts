@@ -857,6 +857,7 @@ export type Database = {
           cancel_reason: string | null
           cancelled_at: string | null
           coupon_code: string | null
+          current_pickup_index: number
           delivery_fee: number
           delivery_instruction: string | null
           delivery_lat: number | null
@@ -875,6 +876,8 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status: Database["public"]["Enums"]["payment_status"]
           pickup_otp: string | null
+          pickup_route_computed_at: string | null
+          pickup_sequence: Json | null
           pickup_verified_at: string | null
           placed_at: string
           prep_time_minutes: number | null
@@ -900,6 +903,7 @@ export type Database = {
           cancel_reason?: string | null
           cancelled_at?: string | null
           coupon_code?: string | null
+          current_pickup_index?: number
           delivery_fee?: number
           delivery_instruction?: string | null
           delivery_lat?: number | null
@@ -918,6 +922,8 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           pickup_otp?: string | null
+          pickup_route_computed_at?: string | null
+          pickup_sequence?: Json | null
           pickup_verified_at?: string | null
           placed_at?: string
           prep_time_minutes?: number | null
@@ -943,6 +949,7 @@ export type Database = {
           cancel_reason?: string | null
           cancelled_at?: string | null
           coupon_code?: string | null
+          current_pickup_index?: number
           delivery_fee?: number
           delivery_instruction?: string | null
           delivery_lat?: number | null
@@ -961,6 +968,8 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           payment_status?: Database["public"]["Enums"]["payment_status"]
           pickup_otp?: string | null
+          pickup_route_computed_at?: string | null
+          pickup_sequence?: Json | null
           pickup_verified_at?: string | null
           placed_at?: string
           prep_time_minutes?: number | null
@@ -2526,6 +2535,10 @@ export type Database = {
         Returns: string
       }
       partner_accept_order: { Args: { _order_id: string }; Returns: undefined }
+      partner_accept_parent: {
+        Args: { _parent_id: string }
+        Returns: undefined
+      }
       partner_available_orders: {
         Args: never
         Returns: {
@@ -2541,6 +2554,23 @@ export type Database = {
           total: number
         }[]
       }
+      partner_available_parent_orders: {
+        Args: never
+        Returns: {
+          city: string
+          delivery_type: string
+          fast_delivery_fee: number
+          first_pickup_lat: number
+          first_pickup_lng: number
+          items_count: number
+          order_number: string
+          parent_id: string
+          pincode: string
+          ready_at: string
+          shop_count: number
+          total: number
+        }[]
+      }
       partner_check_in: { Args: never; Returns: string }
       partner_check_out: { Args: never; Returns: undefined }
       partner_decline_assignment: {
@@ -2551,6 +2581,22 @@ export type Database = {
       partner_mark_delivered: {
         Args: { _order_id: string }
         Returns: undefined
+      }
+      partner_parent_pickup_stops: {
+        Args: { _parent_id: string }
+        Returns: {
+          child_id: string
+          items_count: number
+          pickup_verified_at: string
+          seq: number
+          shop_address: string
+          shop_id: string
+          shop_lat: number
+          shop_lng: number
+          shop_name: string
+          shop_phone: string
+          status: Database["public"]["Enums"]["order_status"]
+        }[]
       }
       partner_send_eta_update: {
         Args: {
@@ -2566,6 +2612,10 @@ export type Database = {
         Returns: string
       }
       partner_today_hours: { Args: { _partner_id: string }; Returns: number }
+      partner_update_location: {
+        Args: { _lat: number; _lng: number }
+        Returns: undefined
+      }
       partner_update_status: {
         Args: { _eta_minutes?: number; _order_id?: string; _status: string }
         Returns: undefined
@@ -2617,6 +2667,17 @@ export type Database = {
       post_ticket_message: {
         Args: { _body: string; _is_internal?: boolean; _ticket_id: string }
         Returns: string
+      }
+      rank_riders_for_parent: {
+        Args: { _limit?: number; _parent_id: string }
+        Returns: {
+          active_order_count: number
+          distance_km: number
+          partner_id: string
+          rating: number
+          score: number
+          user_id: string
+        }[]
       }
       reassign_stale_orders: { Args: never; Returns: number }
       release_expired_reservations: { Args: never; Returns: number }
