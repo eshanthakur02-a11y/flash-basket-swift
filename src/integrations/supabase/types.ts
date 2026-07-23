@@ -1757,12 +1757,15 @@ export type Database = {
           id: string
           is_open: boolean
           latitude: number
+          logo_url: string | null
           longitude: number
           name: string
           owner_id: string | null
           phone: string | null
           pincode: string
           service_radius_km: number
+          state: string | null
+          status: string
           updated_at: string
         }
         Insert: {
@@ -1772,12 +1775,15 @@ export type Database = {
           id?: string
           is_open?: boolean
           latitude: number
+          logo_url?: string | null
           longitude: number
           name: string
           owner_id?: string | null
           phone?: string | null
           pincode: string
           service_radius_km?: number
+          state?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -1787,12 +1793,15 @@ export type Database = {
           id?: string
           is_open?: boolean
           latitude?: number
+          logo_url?: string | null
           longitude?: number
           name?: string
           owner_id?: string | null
           phone?: string | null
           pincode?: string
           service_radius_km?: number
+          state?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
@@ -2151,6 +2160,7 @@ export type Database = {
         }
         Returns: string
       }
+      admin_delete_shop: { Args: { _shop_id: string }; Returns: undefined }
       admin_list_complaints: {
         Args: never
         Returns: {
@@ -2212,19 +2222,30 @@ export type Database = {
       admin_list_shops: {
         Args: never
         Returns: {
+          acceptance_rate: number
           address: string
+          avg_rating: number
           city: string
           created_at: string
           id: string
           is_open: boolean
           latitude: number
+          logo_url: string
           longitude: number
+          monthly_revenue: number
           name: string
           owner_email: string
           owner_id: string
+          owner_name: string
+          owner_phone: string
+          owner_status: string
           phone: string
           pincode: string
           service_radius_km: number
+          state: string
+          status: string
+          today_orders: number
+          total_orders: number
           updated_at: string
         }[]
       }
@@ -2314,6 +2335,20 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      admin_search_users: {
+        Args: { _limit?: number; _q: string }
+        Returns: {
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          status: string
+        }[]
+      }
+      admin_set_shop_status: {
+        Args: { _shop_id: string; _status: string }
+        Returns: undefined
+      }
       admin_set_support_agent: {
         Args: { _is_active?: boolean; _user_email: string }
         Returns: string
@@ -2332,6 +2367,23 @@ export type Database = {
         Args: {
           _order_id: string
           _status: Database["public"]["Enums"]["order_status"]
+        }
+        Returns: undefined
+      }
+      admin_update_shop: {
+        Args: {
+          _address?: string
+          _city?: string
+          _is_open?: boolean
+          _lat?: number
+          _lng?: number
+          _logo_url?: string
+          _name?: string
+          _phone?: string
+          _pincode?: string
+          _radius?: number
+          _shop_id: string
+          _state?: string
         }
         Returns: undefined
       }
