@@ -319,7 +319,10 @@ function ZoneDialog({ zone, onClose, onSave }: { zone: Zone; onClose: () => void
   );
 }
 
-function TierBlock({ title, enabled, fee, eta, min, onEnabled, onFee, onEta, onMin }: any) {
+function TierBlock({ title, enabled, fee, eta, min, onEnabled, onFee, onEta, onMin }: {
+  title: string; enabled: boolean; fee: any; eta: string; min: any;
+  onEnabled: (v: boolean) => void; onFee: (v: string) => void; onEta: (v: string) => void; onMin: (v: string) => void;
+}) {
   return (
     <div className="rounded-xl border border-border p-3 space-y-3">
       <div className="flex items-center justify-between">
