@@ -150,12 +150,17 @@ function Page() {
             </h1>
             <p className="text-sm text-muted-foreground mt-1">Add or remove delivery boys, reassign live orders, and monitor performance.</p>
           </div>
-          <Dialog open={addOpen} onOpenChange={setAddOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto shrink-0 whitespace-nowrap"><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
-            </DialogTrigger>
-            <AddPartnerDialog shops={shops.data ?? []} onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["admin-partners"] }); }} />
-          </Dialog>
+          <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
+            <Button asChild variant="outline" className="w-full sm:w-auto whitespace-nowrap">
+              <Link to="/admin/delivery-pricing"><Truck className="h-4 w-4 mr-1" />Delivery Pricing</Link>
+            </Button>
+            <Dialog open={addOpen} onOpenChange={setAddOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto shrink-0 whitespace-nowrap"><UserPlus className="h-4 w-4 mr-1" />Add delivery boy</Button>
+              </DialogTrigger>
+              <AddPartnerDialog shops={shops.data ?? []} onDone={() => { setAddOpen(false); qc.invalidateQueries({ queryKey: ["admin-partners"] }); }} />
+            </Dialog>
+          </div>
         </header>
 
         <section className="grid md:grid-cols-3 gap-3">
