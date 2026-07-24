@@ -435,22 +435,25 @@ function CreateNewProduct({
 
   async function save() {
     if (!name.trim()) return toast.error("Product name is required");
-    if (gallery.length === 0) return toast.error("Upload at least 1 product image");
     if (!categoryId) return toast.error("Please select a category");
 
     const activeVariants = variants.filter((v) => !v._deleted);
 
     if (productType === "simple") {
+      if (gallery.length === 0) return toast.error("Upload at least 1 product image");
       if (!unit.trim()) return toast.error("Unit is required");
       if (!(price > 0)) return toast.error("Price must be greater than 0");
       if (stock < 0) return toast.error("Stock cannot be negative");
     } else {
       if (activeVariants.length === 0) return toast.error("Add at least 1 variant");
       for (const v of activeVariants) {
-        if (!v.size.trim() && !v.name.trim()) return toast.error("Every variant needs a name (e.g. 500 ml)");
-        if (!v.unit.trim()) return toast.error(`Variant "${v.size || v.name}" needs a unit`);
-        if (!(v.selling_price > 0)) return toast.error(`Variant "${v.size || v.name}" needs a price`);
-        if (v.stock < 0) return toast.error(`Variant "${v.size || v.name}" has invalid stock`);
+        const vLabel = v.name || v.size || "Variant";
+        if (!v.name.trim() && !v.size.trim()) return toast.error("Every variant needs a name");
+        if (!v.unit.trim()) return toast.error(`Variant "${vLabel}" needs a unit`);
+        if (!(v.selling_price > 0)) return toast.error(`Variant "${vLabel}" needs a price`);
+        if (v.stock < 0) return toast.error(`Variant "${vLabel}" has invalid stock`);
+        if (!v.images || v.images.length === 0) return toast.error(`Variant "${vLabel}" needs at least 1 image`);
+        if (v.images.length > 6) return toast.error(`Variant "${vLabel}" can have at most 6 images`);
       }
     }
 
@@ -553,9 +556,11 @@ function CreateNewProduct({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-3">
-          <MultiImageInput value={gallery} onChange={setGallery} label="Product images (1–6)" required />
-        </div>
+        {productType === "simple" && (
+          <div className="rounded-2xl border border-border bg-card p-3">
+            <MultiImageInput value={gallery} onChange={setGallery} label="Product images (1–6)" required />
+          </div>
+        )}
 
         <div className="rounded-2xl border border-border bg-card p-3 space-y-3">
           <div>
