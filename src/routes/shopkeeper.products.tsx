@@ -418,6 +418,7 @@ function AddProductDialog({
 function CreateNewProduct({
   shopId, categories, onDone,
 }: { shopId: string; categories: Category[]; onDone: () => void }) {
+  const [productType, setProductType] = useState<"simple" | "variants">("simple");
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [unit, setUnit] = useState("1 pc");
@@ -432,42 +433,72 @@ function CreateNewProduct({
   const [expDate, setExpDate] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
-
   async function save() {
-    if (!name || gallery.length === 0 || !categoryId) {
-      toast.error("Name, at least one image and category are required");
-      return;
+    if (!name.trim()) return toast.error("Product name is required");
+    if (gallery.length === 0) return toast.error("Upload at least 1 product image");
+    if (!categoryId) return toast.error("Please select a category");
+
+    const activeVariants = variants.filter((v) => !v._deleted);
+
+    if (productType === "simple") {
+      if (!unit.trim()) return toast.error("Unit is required");
+      if (!(price > 0)) return toast.error("Price must be greater than 0");
+      if (stock < 0) return toast.error("Stock cannot be negative");
+    } else {
+      if (activeVariants.length === 0) return toast.error("Add at least 1 variant");
+      for (const v of activeVariants) {
+        if (!v.size.trim() && !v.name.trim()) return toast.error("Every variant needs a name (e.g. 500 ml)");
+        if (!v.unit.trim()) return toast.error(`Variant "${v.size || v.name}" needs a unit`);
+        if (!(v.selling_price > 0)) return toast.error(`Variant "${v.size || v.name}" needs a price`);
+        if (v.stock < 0) return toast.error(`Variant "${v.size || v.name}" has invalid stock`);
+      }
     }
+
     const dErr = dateRangeError(mfgDate, expDate);
     if (dErr) { toast.error(dErr); return; }
+
     setSaving(true);
     try {
       const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
+      const isVariantMode = productType === "variants";
+      const defaultV = isVariantMode
+        ? (activeVariants.find((v) => v.is_default) ?? activeVariants[0])
+        : null;
+      const basePrice = isVariantMode ? (defaultV?.selling_price ?? 0) : price;
+      const baseMrp = isVariantMode ? (defaultV?.mrp || defaultV?.selling_price || 0) : (mrp || price);
+      const baseUnit = isVariantMode ? (defaultV?.unit || defaultV?.size || "1 pc") : unit;
+
       const { data: prod, error: pErr } = await supabase
         .from("products")
         .insert({
-          name, slug, description, image_url: gallery[0] ?? null,
+          name, slug, description,
+          image_url: gallery[0] ?? null,
           cover_image: gallery[0] ?? null,
           image_gallery: gallery,
-          category_id: categoryId, brand, unit,
-          price, mrp: mrp || price, stock: 0,
+          category_id: categoryId, brand, unit: baseUnit,
+          price: basePrice, mrp: baseMrp, stock: 0,
           is_available: true,
         })
         .select("id")
         .single();
       if (pErr) throw pErr;
+
+      const shopStock = isVariantMode
+        ? activeVariants.reduce((s, v) => s + (Number(v.stock) || 0), 0)
+        : stock;
+
       const { error: sErr } = await supabase.from("shop_products").insert({
         shop_id: shopId,
         product_id: prod.id,
-        price,
-        stock,
+        price: basePrice,
+        stock: shopStock,
         is_available: true,
         manufacturing_date: mfgDate || null,
         expiry_date: expDate || null,
       } as any);
       if (sErr) throw sErr;
 
-      if (variants.filter((v) => !v._deleted).length > 0) {
+      if (isVariantMode) {
         await saveVariants(prod.id, variants);
       }
       toast.success("Product created");
@@ -480,63 +511,117 @@ function CreateNewProduct({
   }
 
   return (
-    <div className="space-y-3">
-      <MultiImageInput value={gallery} onChange={setGallery} label="Product images" required />
-      <div>
-        <label className="text-xs font-bold">Name</label>
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Amul Gold Milk" />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs font-bold">Brand</label>
-          <Input value={brand} onChange={(e) => setBrand(e.target.value)} />
+    <div className="relative">
+      <div className="space-y-4 pb-20">
+        <div className="rounded-2xl border border-border bg-secondary/40 p-3">
+          <div className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wide">Product Type</div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setProductType("simple")}
+              className={`rounded-xl border p-3 text-left transition ${
+                productType === "simple"
+                  ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                  : "border-border bg-card hover:bg-secondary"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`h-4 w-4 rounded-full border-2 grid place-items-center ${productType === "simple" ? "border-primary" : "border-muted-foreground"}`}>
+                  {productType === "simple" && <span className="h-2 w-2 rounded-full bg-primary" />}
+                </span>
+                <span className="font-bold text-sm">Simple Product</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1 ml-6">One price, one stock</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setProductType("variants")}
+              className={`rounded-xl border p-3 text-left transition ${
+                productType === "variants"
+                  ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                  : "border-border bg-card hover:bg-secondary"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`h-4 w-4 rounded-full border-2 grid place-items-center ${productType === "variants" ? "border-primary" : "border-muted-foreground"}`}>
+                  {productType === "variants" && <span className="h-2 w-2 rounded-full bg-primary" />}
+                </span>
+                <span className="font-bold text-sm">With Variants</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-1 ml-6">e.g. 500 ml, 1 L, 1 kg</p>
+            </button>
+          </div>
         </div>
-        <div>
-          <label className="text-xs font-bold">Unit</label>
-          <Input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="500g, 1L, 1 pc" />
+
+        <div className="rounded-2xl border border-border bg-card p-3">
+          <MultiImageInput value={gallery} onChange={setGallery} label="Product images (1–6)" required />
         </div>
-      </div>
-      <div>
-        <label className="text-xs font-bold">Category</label>
-        <Select value={categoryId} onValueChange={setCategoryId}>
-          <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-          <SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-        </Select>
-      </div>
-      <div>
-        <label className="text-xs font-bold">Description</label>
-        <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+
+        <div className="rounded-2xl border border-border bg-card p-3 space-y-3">
+          <div>
+            <label className="text-xs font-bold">Name <span className="text-destructive">*</span></label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Amul Gold Milk" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold">Brand</label>
+              <Input value={brand} onChange={(e) => setBrand(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-bold">Category <span className="text-destructive">*</span></label>
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-bold">Description</label>
+            <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+          </div>
+        </div>
+
+        {productType === "simple" && (
+          <div className="rounded-2xl border border-border bg-card p-3 space-y-3">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Pricing &amp; stock</div>
+            <div>
+              <label className="text-xs font-bold">Unit <span className="text-destructive">*</span></label>
+              <Input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="500g, 1L, 1 pc" />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs font-bold">Price ₹ <span className="text-destructive">*</span></label>
+                <Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
+              </div>
+              <div>
+                <label className="text-xs font-bold">MRP ₹</label>
+                <Input type="number" value={mrp} onChange={(e) => setMrp(Number(e.target.value))} />
+              </div>
+              <div>
+                <label className="text-xs font-bold">Stock <span className="text-destructive">*</span></label>
+                <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
+              </div>
+            </div>
+            <DateRangeFields mfg={mfgDate} exp={expDate} onMfg={setMfgDate} onExp={setExpDate} />
+          </div>
+        )}
+
+        {productType === "variants" && (
+          <div className="rounded-2xl border border-border bg-card p-3">
+            <VariantsEditor variants={variants} onChange={setVariants} />
+          </div>
+        )}
       </div>
 
-      <div className="pt-2 border-t border-border">
-        <VariantsEditor variants={variants} onChange={setVariants} />
+      <div className="sticky bottom-0 left-0 right-0 -mx-6 px-6 py-3 bg-background/95 backdrop-blur border-t border-border">
+        <Button className="w-full" disabled={saving} onClick={save}>
+          {saving ? "Creating..." : "Create Product"}
+        </Button>
       </div>
-
-      <div className="grid grid-cols-3 gap-3">
-
-        <div>
-          <label className="text-xs font-bold">Price ₹</label>
-          <Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
-        </div>
-        <div>
-          <label className="text-xs font-bold">MRP ₹</label>
-          <Input type="number" value={mrp} onChange={(e) => setMrp(Number(e.target.value))} />
-        </div>
-        <div>
-          <label className="text-xs font-bold">Stock</label>
-          <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
-        </div>
-      </div>
-      <DateRangeFields
-        mfg={mfgDate} exp={expDate}
-        onMfg={setMfgDate} onExp={setExpDate}
-      />
-      <DialogFooter>
-        <Button disabled={saving} onClick={save}>{saving ? "Creating..." : "Create product"}</Button>
-      </DialogFooter>
     </div>
   );
 }
+
 
 
 function FromCatalog({
