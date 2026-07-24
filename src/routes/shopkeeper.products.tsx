@@ -556,9 +556,11 @@ function CreateNewProduct({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-3">
-          <MultiImageInput value={gallery} onChange={setGallery} label="Product images (1–6)" required />
-        </div>
+        {productType === "simple" && (
+          <div className="rounded-2xl border border-border bg-card p-3">
+            <MultiImageInput value={gallery} onChange={setGallery} label="Product images (1–6)" required />
+          </div>
+        )}
 
         <div className="rounded-2xl border border-border bg-card p-3 space-y-3">
           <div>
