@@ -201,8 +201,8 @@ function VariantCard({
           <MultiImageInput
             value={value.images}
             onChange={(images) => onChange({ images })}
-            label="Variant images (up to 6)"
-            required={false}
+            label="Variant images (1–6)"
+            required
           />
 
           <div className="flex items-center gap-4 pt-1">
