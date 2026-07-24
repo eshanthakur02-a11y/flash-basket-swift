@@ -126,11 +126,13 @@ function VariantCard({
   value,
   onChange,
   onRemove,
+  onDuplicate,
 }: {
   index: number;
   value: VariantDraft;
   onChange: (patch: Partial<VariantDraft>) => void;
   onRemove: () => void;
+  onDuplicate: () => void;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -149,10 +151,14 @@ function VariantCard({
           Variant {index + 1}
           {value.size && <span className="ml-2 text-muted-foreground font-normal">· {value.size}</span>}
         </div>
-        <Button type="button" size="sm" variant="ghost" onClick={onRemove}>
+        <Button type="button" size="sm" variant="ghost" onClick={onDuplicate} aria-label="Duplicate variant">
+          <Copy className="h-4 w-4" />
+        </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={onRemove} aria-label="Delete variant">
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </div>
+
 
       {open && (
         <div className="p-3 pt-0 space-y-3">
