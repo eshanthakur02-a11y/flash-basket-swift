@@ -70,6 +70,21 @@ export function VariantsEditor({
     onChange(next);
   };
 
+  const duplicate = (idx: number) => {
+    const src = visible[idx];
+    const copy: VariantDraft = {
+      ...src,
+      id: undefined,
+      is_default: false,
+      display_order: visible.length,
+      name: src.name ? `${src.name} (copy)` : src.name,
+      sku: "",
+      barcode: "",
+      images: [...src.images],
+    };
+    onChange([...variants, copy]);
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
