@@ -112,6 +112,7 @@ export function VariantsEditor({
               value={v}
               onChange={(patch) => update(i, patch)}
               onRemove={() => remove(i)}
+              onDuplicate={() => duplicate(i)}
             />
           ))}
         </div>
