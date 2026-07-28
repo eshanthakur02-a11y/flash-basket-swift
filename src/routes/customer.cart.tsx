@@ -33,8 +33,7 @@ function AppCart() {
   }
 
   const deliveryFee = subtotal >= 199 ? 0 : 25;
-  const handling = 5;
-  const total = subtotal + deliveryFee + handling;
+  const total = subtotal + deliveryFee;
 
   return (
     <div className="px-4 py-4 pb-40">
