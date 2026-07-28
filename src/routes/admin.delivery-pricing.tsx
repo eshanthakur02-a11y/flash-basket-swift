@@ -29,6 +29,14 @@ type Zone = {
   standard_enabled: boolean; standard_fee: number | string; standard_eta_minutes: string; minimum_order_standard: number | string | null;
   fast_enabled: boolean; fast_fee: number | string; fast_eta_minutes: string; minimum_order_fast: number | string | null;
   express_enabled: boolean; express_fee: number | string; express_eta_minutes: string; minimum_order_express: number | string | null;
+  handling_enabled?: boolean;
+  handling_type?: "fixed" | "percent";
+  default_handling_fee?: number | string;
+  handling_percentage?: number | string;
+  free_handling_above?: number | string | null;
+  standard_handling_fee?: number | string | null;
+  fast_handling_fee?: number | string | null;
+  express_handling_fee?: number | string | null;
 };
 
 const empty: Zone = {
@@ -37,6 +45,8 @@ const empty: Zone = {
   standard_enabled: true, standard_fee: 20, standard_eta_minutes: "45-60", minimum_order_standard: null,
   fast_enabled: true, fast_fee: 49, fast_eta_minutes: "20-30", minimum_order_fast: null,
   express_enabled: false, express_fee: 99, express_eta_minutes: "10-15", minimum_order_express: null,
+  handling_enabled: false, handling_type: "fixed", default_handling_fee: 5, handling_percentage: 0,
+  free_handling_above: null, standard_handling_fee: null, fast_handling_fee: null, express_handling_fee: null,
 };
 
 function Page() {
@@ -309,6 +319,55 @@ function ZoneDialog({ zone, onClose, onSave }: { zone: Zone; onClose: () => void
           onEta={(v) => set("express_eta_minutes", v)}
           onMin={(v) => set("minimum_order_express", v)}
         />
+
+        <div className="rounded-xl border border-border p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold">📦 Handling Charges</div>
+            <div className="flex items-center gap-2">
+              <Switch checked={!!z.handling_enabled} onCheckedChange={(v) => set("handling_enabled", v)} />
+              <Label>{z.handling_enabled ? "Enabled" : "Disabled"}</Label>
+            </div>
+          </div>
+          {z.handling_enabled && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Field label="Fee Type">
+                  <Select value={z.handling_type ?? "fixed"} onValueChange={(v) => set("handling_type", v as any)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixed">Fixed Amount (₹)</SelectItem>
+                      <SelectItem value="percent">Percentage (%)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                {z.handling_type === "percent" ? (
+                  <Field label="Handling Percentage (%)">
+                    <Input type="number" value={String(z.handling_percentage ?? "")} onChange={(e) => set("handling_percentage", e.target.value as any)} />
+                  </Field>
+                ) : (
+                  <Field label="Handling Fee (₹)">
+                    <Input type="number" value={String(z.default_handling_fee ?? "")} onChange={(e) => set("default_handling_fee", e.target.value as any)} />
+                  </Field>
+                )}
+                <Field label="Free Handling Above (₹, optional)">
+                  <Input type="number" value={String(z.free_handling_above ?? "")} onChange={(e) => set("free_handling_above", e.target.value as any)} />
+                </Field>
+              </div>
+              <div className="text-xs text-muted-foreground pt-1">Per-tier overrides (leave blank to use default)</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Field label="🚚 Standard (₹)">
+                  <Input type="number" value={String(z.standard_handling_fee ?? "")} onChange={(e) => set("standard_handling_fee", e.target.value as any)} />
+                </Field>
+                <Field label="⚡ Fast (₹)">
+                  <Input type="number" value={String(z.fast_handling_fee ?? "")} onChange={(e) => set("fast_handling_fee", e.target.value as any)} />
+                </Field>
+                <Field label="🚀 Express (₹)">
+                  <Input type="number" value={String(z.express_handling_fee ?? "")} onChange={(e) => set("express_handling_fee", e.target.value as any)} />
+                </Field>
+              </div>
+            </>
+          )}
+        </div>
 
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
