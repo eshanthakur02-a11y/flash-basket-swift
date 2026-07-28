@@ -94,7 +94,21 @@ function CheckoutPage() {
 
   const selectedTier = tiers.find((t) => t.id === deliveryType) ?? tiers[0];
   const deliveryFee = selectedTier?.fee ?? 0;
-  const handling = 5;
+  const handling = (() => {
+    const z: any = zone.data;
+    if (!z || !z.handling_enabled) return 0;
+    if (z.free_handling_above != null && subtotal >= Number(z.free_handling_above)) return 0;
+    const tierOverride =
+      deliveryType === "standard_delivery" ? z.standard_handling_fee
+      : deliveryType === "fast_delivery" ? z.fast_handling_fee
+      : deliveryType === "express_delivery" ? z.express_handling_fee
+      : null;
+    if (tierOverride != null && tierOverride !== "") return Math.max(0, Number(tierOverride));
+    if (z.handling_type === "percent") {
+      return Math.max(0, Math.round((subtotal * (Number(z.handling_percentage) || 0)) / 100 * 100) / 100);
+    }
+    return Math.max(0, Number(z.default_handling_fee) || 0);
+  })();
   const discount = appliedCoupon?.discount ?? 0;
   const total = Math.max(0, subtotal - discount) + deliveryFee + handling;
   const minOrderNotMet = selectedTier?.minOrder != null && subtotal < selectedTier.minOrder;
