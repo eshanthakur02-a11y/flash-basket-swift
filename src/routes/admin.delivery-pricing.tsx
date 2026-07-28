@@ -320,6 +320,55 @@ function ZoneDialog({ zone, onClose, onSave }: { zone: Zone; onClose: () => void
           onMin={(v) => set("minimum_order_express", v)}
         />
 
+        <div className="rounded-xl border border-border p-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="font-semibold">📦 Handling Charges</div>
+            <div className="flex items-center gap-2">
+              <Switch checked={!!z.handling_enabled} onCheckedChange={(v) => set("handling_enabled", v)} />
+              <Label>{z.handling_enabled ? "Enabled" : "Disabled"}</Label>
+            </div>
+          </div>
+          {z.handling_enabled && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Field label="Fee Type">
+                  <Select value={z.handling_type ?? "fixed"} onValueChange={(v) => set("handling_type", v as any)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixed">Fixed Amount (₹)</SelectItem>
+                      <SelectItem value="percent">Percentage (%)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                {z.handling_type === "percent" ? (
+                  <Field label="Handling Percentage (%)">
+                    <Input type="number" value={String(z.handling_percentage ?? "")} onChange={(e) => set("handling_percentage", e.target.value as any)} />
+                  </Field>
+                ) : (
+                  <Field label="Handling Fee (₹)">
+                    <Input type="number" value={String(z.default_handling_fee ?? "")} onChange={(e) => set("default_handling_fee", e.target.value as any)} />
+                  </Field>
+                )}
+                <Field label="Free Handling Above (₹, optional)">
+                  <Input type="number" value={String(z.free_handling_above ?? "")} onChange={(e) => set("free_handling_above", e.target.value as any)} />
+                </Field>
+              </div>
+              <div className="text-xs text-muted-foreground pt-1">Per-tier overrides (leave blank to use default)</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Field label="🚚 Standard (₹)">
+                  <Input type="number" value={String(z.standard_handling_fee ?? "")} onChange={(e) => set("standard_handling_fee", e.target.value as any)} />
+                </Field>
+                <Field label="⚡ Fast (₹)">
+                  <Input type="number" value={String(z.fast_handling_fee ?? "")} onChange={(e) => set("fast_handling_fee", e.target.value as any)} />
+                </Field>
+                <Field label="🚀 Express (₹)">
+                  <Input type="number" value={String(z.express_handling_fee ?? "")} onChange={(e) => set("express_handling_fee", e.target.value as any)} />
+                </Field>
+              </div>
+            </>
+          )}
+        </div>
+
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button onClick={() => onSave(z)}>Save</Button>
