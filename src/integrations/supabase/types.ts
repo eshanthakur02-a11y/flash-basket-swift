@@ -373,13 +373,20 @@ export type Database = {
         Row: {
           city: string
           created_at: string
+          default_handling_fee: number
           delivery_radius_km: number
           express_enabled: boolean
           express_eta_minutes: string
           express_fee: number
+          express_handling_fee: number | null
           fast_enabled: boolean
           fast_eta_minutes: string
           fast_fee: number
+          fast_handling_fee: number | null
+          free_handling_above: number | null
+          handling_enabled: boolean
+          handling_percentage: number
+          handling_type: string
           id: string
           is_active: boolean
           minimum_order_express: number | null
@@ -389,19 +396,27 @@ export type Database = {
           standard_enabled: boolean
           standard_eta_minutes: string
           standard_fee: number
+          standard_handling_fee: number | null
           state: string
           updated_at: string
         }
         Insert: {
           city: string
           created_at?: string
+          default_handling_fee?: number
           delivery_radius_km?: number
           express_enabled?: boolean
           express_eta_minutes?: string
           express_fee?: number
+          express_handling_fee?: number | null
           fast_enabled?: boolean
           fast_eta_minutes?: string
           fast_fee?: number
+          fast_handling_fee?: number | null
+          free_handling_above?: number | null
+          handling_enabled?: boolean
+          handling_percentage?: number
+          handling_type?: string
           id?: string
           is_active?: boolean
           minimum_order_express?: number | null
@@ -411,19 +426,27 @@ export type Database = {
           standard_enabled?: boolean
           standard_eta_minutes?: string
           standard_fee?: number
+          standard_handling_fee?: number | null
           state: string
           updated_at?: string
         }
         Update: {
           city?: string
           created_at?: string
+          default_handling_fee?: number
           delivery_radius_km?: number
           express_enabled?: boolean
           express_eta_minutes?: string
           express_fee?: number
+          express_handling_fee?: number | null
           fast_enabled?: boolean
           fast_eta_minutes?: string
           fast_fee?: number
+          fast_handling_fee?: number | null
+          free_handling_above?: number | null
+          handling_enabled?: boolean
+          handling_percentage?: number
+          handling_type?: string
           id?: string
           is_active?: boolean
           minimum_order_express?: number | null
@@ -433,6 +456,7 @@ export type Database = {
           standard_enabled?: boolean
           standard_eta_minutes?: string
           standard_fee?: number
+          standard_handling_fee?: number | null
           state?: string
           updated_at?: string
         }
@@ -2236,13 +2260,20 @@ export type Database = {
         Returns: {
           city: string
           created_at: string
+          default_handling_fee: number
           delivery_radius_km: number
           express_enabled: boolean
           express_eta_minutes: string
           express_fee: number
+          express_handling_fee: number | null
           fast_enabled: boolean
           fast_eta_minutes: string
           fast_fee: number
+          fast_handling_fee: number | null
+          free_handling_above: number | null
+          handling_enabled: boolean
+          handling_percentage: number
+          handling_type: string
           id: string
           is_active: boolean
           minimum_order_express: number | null
@@ -2252,6 +2283,7 @@ export type Database = {
           standard_enabled: boolean
           standard_eta_minutes: string
           standard_fee: number
+          standard_handling_fee: number | null
           state: string
           updated_at: string
         }
@@ -2289,13 +2321,20 @@ export type Database = {
         Returns: {
           city: string
           created_at: string
+          default_handling_fee: number
           delivery_radius_km: number
           express_enabled: boolean
           express_eta_minutes: string
           express_fee: number
+          express_handling_fee: number | null
           fast_enabled: boolean
           fast_eta_minutes: string
           fast_fee: number
+          fast_handling_fee: number | null
+          free_handling_above: number | null
+          handling_enabled: boolean
+          handling_percentage: number
+          handling_type: string
           id: string
           is_active: boolean
           minimum_order_express: number | null
@@ -2305,6 +2344,7 @@ export type Database = {
           standard_enabled: boolean
           standard_eta_minutes: string
           standard_fee: number
+          standard_handling_fee: number | null
           state: string
           updated_at: string
         }[]
@@ -2524,13 +2564,20 @@ export type Database = {
         Returns: {
           city: string
           created_at: string
+          default_handling_fee: number
           delivery_radius_km: number
           express_enabled: boolean
           express_eta_minutes: string
           express_fee: number
+          express_handling_fee: number | null
           fast_enabled: boolean
           fast_eta_minutes: string
           fast_fee: number
+          fast_handling_fee: number | null
+          free_handling_above: number | null
+          handling_enabled: boolean
+          handling_percentage: number
+          handling_type: string
           id: string
           is_active: boolean
           minimum_order_express: number | null
@@ -2540,6 +2587,7 @@ export type Database = {
           standard_enabled: boolean
           standard_eta_minutes: string
           standard_fee: number
+          standard_handling_fee: number | null
           state: string
           updated_at: string
         }
@@ -2557,6 +2605,10 @@ export type Database = {
       cancel_order: {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
+      }
+      compute_handling_fee: {
+        Args: { _delivery_type: string; _pincode: string; _subtotal: number }
+        Returns: number
       }
       create_delivery_partner: {
         Args: {
@@ -2642,12 +2694,19 @@ export type Database = {
         Args: { _pincode: string }
         Returns: {
           city: string
+          default_handling_fee: number
           express_enabled: boolean
           express_eta_minutes: string
           express_fee: number
+          express_handling_fee: number
           fast_enabled: boolean
           fast_eta_minutes: string
           fast_fee: number
+          fast_handling_fee: number
+          free_handling_above: number
+          handling_enabled: boolean
+          handling_percentage: number
+          handling_type: string
           is_active: boolean
           minimum_order_express: number
           minimum_order_fast: number
@@ -2656,6 +2715,7 @@ export type Database = {
           standard_enabled: boolean
           standard_eta_minutes: string
           standard_fee: number
+          standard_handling_fee: number
           state: string
         }[]
       }
