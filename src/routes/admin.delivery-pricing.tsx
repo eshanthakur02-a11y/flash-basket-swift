@@ -29,6 +29,14 @@ type Zone = {
   standard_enabled: boolean; standard_fee: number | string; standard_eta_minutes: string; minimum_order_standard: number | string | null;
   fast_enabled: boolean; fast_fee: number | string; fast_eta_minutes: string; minimum_order_fast: number | string | null;
   express_enabled: boolean; express_fee: number | string; express_eta_minutes: string; minimum_order_express: number | string | null;
+  handling_enabled?: boolean;
+  handling_type?: "fixed" | "percent";
+  default_handling_fee?: number | string;
+  handling_percentage?: number | string;
+  free_handling_above?: number | string | null;
+  standard_handling_fee?: number | string | null;
+  fast_handling_fee?: number | string | null;
+  express_handling_fee?: number | string | null;
 };
 
 const empty: Zone = {
@@ -37,6 +45,8 @@ const empty: Zone = {
   standard_enabled: true, standard_fee: 20, standard_eta_minutes: "45-60", minimum_order_standard: null,
   fast_enabled: true, fast_fee: 49, fast_eta_minutes: "20-30", minimum_order_fast: null,
   express_enabled: false, express_fee: 99, express_eta_minutes: "10-15", minimum_order_express: null,
+  handling_enabled: false, handling_type: "fixed", default_handling_fee: 5, handling_percentage: 0,
+  free_handling_above: null, standard_handling_fee: null, fast_handling_fee: null, express_handling_fee: null,
 };
 
 function Page() {
