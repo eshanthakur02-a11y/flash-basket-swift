@@ -88,7 +88,7 @@ function AppCart() {
         <Row label="Item total" value={rupees(subtotal)} />
         {savings > 0 && <Row label="You save" value={`- ${rupees(savings)}`} className="text-success" />}
         <Row label="Delivery fee" value={deliveryFee === 0 ? "FREE" : rupees(deliveryFee)} />
-        <Row label="Handling" value={rupees(handling)} />
+        <Row label="Handling" value="At checkout" />
         <div className="my-2 h-px bg-border" />
         <Row label="To pay" value={rupees(total)} bold />
       </div>
