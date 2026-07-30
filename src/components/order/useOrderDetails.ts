@@ -41,9 +41,9 @@ const pickImage = (item: any, product: any, variant: any): string | null =>
   product?.image_url ||
   null;
 
-export function useOrderDetails(orderId: string, opts?: { shopId?: string | null; refetchInterval?: number }) {
+export function useOrderDetails(orderId: string, opts?: { shopId?: string | null; scopeToShop?: boolean; refetchInterval?: number }) {
   return useQuery<OrderDetails | null>({
-    queryKey: ["order-details", orderId, opts?.shopId ?? null],
+    queryKey: ["order-details", orderId, opts?.shopId ?? null, opts?.scopeToShop ?? false],
     refetchInterval: opts?.refetchInterval,
     queryFn: async () => {
       const { data: order } = await supabase.from("orders").select("*").eq("id", orderId).maybeSingle();
@@ -57,7 +57,8 @@ export function useOrderDetails(orderId: string, opts?: { shopId?: string | null
       ]);
 
       let items = (rawItems ?? []) as any[];
-      if (opts?.shopId) items = items.filter((i) => !i.shop_id || i.shop_id === opts.shopId);
+      const scopeShop = opts?.shopId ?? (opts?.scopeToShop ? ((order as any).shop_id as string | null) : null);
+      if (scopeShop) items = items.filter((i) => !i.shop_id || i.shop_id === scopeShop);
 
       const productIds = [...new Set(items.map((i) => i.product_id).filter(Boolean))];
       const variantIds = [...new Set(items.map((i) => i.variant_id).filter(Boolean))];
