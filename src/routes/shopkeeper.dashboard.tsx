@@ -9,6 +9,7 @@ import { rupees } from "@/lib/format";
 import { toast } from "sonner";
 import { LayoutDashboard, ListOrdered, Package, Wallet, Bell, Star, Settings, Check, X, PackageCheck, Truck, Tag, AlertTriangle } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { DeliveryTypeBadge } from "@/components/FastDeliveryBadge";
 
 
 
@@ -73,7 +74,7 @@ function Page() {
       if (!shopId) return [];
       const { data } = await supabase
         .from("orders")
-        .select("id, order_number, status, total, placed_at, assignment_expires_at, address")
+        .select("id, order_number, status, total, placed_at, assignment_expires_at, address, payment_method, delivery_type, delivery_pincode, assignment_distance_km, parent_order_id")
         .eq("shop_id", shopId)
         .order("placed_at", { ascending: false })
         .limit(30);
@@ -82,6 +83,23 @@ function Page() {
     enabled: !!shopId,
   });
 
+
+  const itemStats = useQuery({
+    queryKey: ["shop-order-item-stats", (orders.data ?? []).map(o => o.id).join(",")],
+    enabled: (orders.data?.length ?? 0) > 0,
+    queryFn: async () => {
+      const ids = (orders.data ?? []).map(o => o.id);
+      const { data } = await supabase.from("order_items").select("order_id, child_order_id, quantity").or(`order_id.in.(${ids.join(",")}),child_order_id.in.(${ids.join(",")})`);
+      const map: Record<string, { products: number; qty: number }> = {};
+      for (const r of (data ?? []) as any[]) {
+        const key = ids.includes(r.child_order_id) ? r.child_order_id : r.order_id;
+        if (!map[key]) map[key] = { products: 0, qty: 0 };
+        map[key].products += 1;
+        map[key].qty += Number(r.quantity) || 0;
+      }
+      return map;
+    },
+  });
 
   const expiry = useQuery({
     queryKey: ["shop-expiry-summary", shopId],
@@ -168,11 +186,25 @@ function Page() {
                 {(orders.data ?? []).map(o => (
                   <div key={o.id} className="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-3 flex-wrap">
                     <div className="min-w-0">
-                      <div className="font-bold">{o.order_number}</div>
-                      <div className="text-xs text-muted-foreground">{rupees(o.total)} • {o.status.replace(/_/g, " ")}</div>
-                      <div className="text-xs text-muted-foreground">{(o.address as any)?.name} — {(o.address as any)?.line1}</div>
+                      <div className="font-bold flex items-center gap-2 flex-wrap">
+                        {o.order_number}
+                        <DeliveryTypeBadge type={(o as any).delivery_type} size="xs" />
+                        <span className="text-[10px] uppercase font-bold rounded-full bg-secondary px-2 py-0.5">{String((o as any).payment_method ?? "").toUpperCase()}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {rupees(o.total)} • {o.status.replace(/_/g, " ")} • {itemStats.data?.[o.id]?.products ?? 0} products / {itemStats.data?.[o.id]?.qty ?? 0} items
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {(o.address as any)?.name} {(o.address as any)?.phone ? `· ${(o.address as any).phone}` : ""} — {(o.address as any)?.line1}
+                        {(o as any).delivery_pincode ? ` · ${(o as any).delivery_pincode}` : ""}
+                        {(o as any).assignment_distance_km != null ? ` · ${Number((o as any).assignment_distance_km).toFixed(1)} km` : ""}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">{o.placed_at ? new Date(o.placed_at).toLocaleString() : ""}</div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <Button asChild size="sm" variant="secondary" className="rounded-xl">
+                        <Link to="/shopkeeper/orders/$id" params={{ id: o.id }}>View details</Link>
+                      </Button>
                       {o.status === "awaiting_shop" && (
                         <>
                           <Button size="sm" onClick={() => accept(o.id)} className="rounded-xl"><Check className="h-3 w-3 mr-1" />Accept</Button>
