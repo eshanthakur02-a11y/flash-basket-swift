@@ -33,7 +33,6 @@ import { Route as SupportDashboardRouteImport } from './routes/support.dashboard
 import { Route as ShopkeeperSettingsRouteImport } from './routes/shopkeeper.settings'
 import { Route as ShopkeeperReviewsRouteImport } from './routes/shopkeeper.reviews'
 import { Route as ShopkeeperProductsRouteImport } from './routes/shopkeeper.products'
-import { Route as ShopkeeperOrdersRouteImport } from './routes/shopkeeper.orders'
 import { Route as ShopkeeperOffersRouteImport } from './routes/shopkeeper.offers'
 import { Route as ShopkeeperNotificationsRouteImport } from './routes/shopkeeper.notifications'
 import { Route as ShopkeeperInventoryInsightsRouteImport } from './routes/shopkeeper.inventory-insights'
@@ -81,6 +80,7 @@ import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminComplaintsRouteImport } from './routes/admin.complaints'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as ShopkeeperOrdersIndexRouteImport } from './routes/shopkeeper.orders.index'
 import { Route as CustomerOrdersIndexRouteImport } from './routes/customer.orders.index'
 import { Route as SupportTicketsIdRouteImport } from './routes/support.tickets.$id'
 import { Route as SupportTicketIdRouteImport } from './routes/support.ticket.$id'
@@ -210,11 +210,6 @@ const ShopkeeperReviewsRoute = ShopkeeperReviewsRouteImport.update({
 const ShopkeeperProductsRoute = ShopkeeperProductsRouteImport.update({
   id: '/products',
   path: '/products',
-  getParentRoute: () => ShopkeeperRoute,
-} as any)
-const ShopkeeperOrdersRoute = ShopkeeperOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
   getParentRoute: () => ShopkeeperRoute,
 } as any)
 const ShopkeeperOffersRoute = ShopkeeperOffersRouteImport.update({
@@ -453,6 +448,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const ShopkeeperOrdersIndexRoute = ShopkeeperOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => ShopkeeperRoute,
+} as any)
 const CustomerOrdersIndexRoute = CustomerOrdersIndexRouteImport.update({
   id: '/orders/',
   path: '/orders/',
@@ -469,9 +469,9 @@ const SupportTicketIdRoute = SupportTicketIdRouteImport.update({
   getParentRoute: () => SupportRoute,
 } as any)
 const ShopkeeperOrdersIdRoute = ShopkeeperOrdersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ShopkeeperOrdersRoute,
+  id: '/orders/$id',
+  path: '/orders/$id',
+  getParentRoute: () => ShopkeeperRoute,
 } as any)
 const DeliveryTaskIdRoute = DeliveryTaskIdRouteImport.update({
   id: '/task/$id',
@@ -570,7 +570,6 @@ export interface FileRoutesByFullPath {
   '/shopkeeper/inventory-insights': typeof ShopkeeperInventoryInsightsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/offers': typeof ShopkeeperOffersRoute
-  '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
@@ -589,6 +588,7 @@ export interface FileRoutesByFullPath {
   '/support/ticket/$id': typeof SupportTicketIdRoute
   '/support/tickets/$id': typeof SupportTicketsIdRoute
   '/customer/orders/': typeof CustomerOrdersIndexRoute
+  '/shopkeeper/orders/': typeof ShopkeeperOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -654,7 +654,6 @@ export interface FileRoutesByTo {
   '/shopkeeper/inventory-insights': typeof ShopkeeperInventoryInsightsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/offers': typeof ShopkeeperOffersRoute
-  '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
@@ -673,6 +672,7 @@ export interface FileRoutesByTo {
   '/support/ticket/$id': typeof SupportTicketIdRoute
   '/support/tickets/$id': typeof SupportTicketsIdRoute
   '/customer/orders': typeof CustomerOrdersIndexRoute
+  '/shopkeeper/orders': typeof ShopkeeperOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -739,7 +739,6 @@ export interface FileRoutesById {
   '/shopkeeper/inventory-insights': typeof ShopkeeperInventoryInsightsRoute
   '/shopkeeper/notifications': typeof ShopkeeperNotificationsRoute
   '/shopkeeper/offers': typeof ShopkeeperOffersRoute
-  '/shopkeeper/orders': typeof ShopkeeperOrdersRouteWithChildren
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
@@ -758,6 +757,7 @@ export interface FileRoutesById {
   '/support/ticket/$id': typeof SupportTicketIdRoute
   '/support/tickets/$id': typeof SupportTicketsIdRoute
   '/customer/orders/': typeof CustomerOrdersIndexRoute
+  '/shopkeeper/orders/': typeof ShopkeeperOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -825,7 +825,6 @@ export interface FileRouteTypes {
     | '/shopkeeper/inventory-insights'
     | '/shopkeeper/notifications'
     | '/shopkeeper/offers'
-    | '/shopkeeper/orders'
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
@@ -844,6 +843,7 @@ export interface FileRouteTypes {
     | '/support/ticket/$id'
     | '/support/tickets/$id'
     | '/customer/orders/'
+    | '/shopkeeper/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -909,7 +909,6 @@ export interface FileRouteTypes {
     | '/shopkeeper/inventory-insights'
     | '/shopkeeper/notifications'
     | '/shopkeeper/offers'
-    | '/shopkeeper/orders'
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
@@ -928,6 +927,7 @@ export interface FileRouteTypes {
     | '/support/ticket/$id'
     | '/support/tickets/$id'
     | '/customer/orders'
+    | '/shopkeeper/orders'
   id:
     | '__root__'
     | '/'
@@ -993,7 +993,6 @@ export interface FileRouteTypes {
     | '/shopkeeper/inventory-insights'
     | '/shopkeeper/notifications'
     | '/shopkeeper/offers'
-    | '/shopkeeper/orders'
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
@@ -1012,6 +1011,7 @@ export interface FileRouteTypes {
     | '/support/ticket/$id'
     | '/support/tickets/$id'
     | '/customer/orders/'
+    | '/shopkeeper/orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1207,13 +1207,6 @@ declare module '@tanstack/react-router' {
       path: '/products'
       fullPath: '/shopkeeper/products'
       preLoaderRoute: typeof ShopkeeperProductsRouteImport
-      parentRoute: typeof ShopkeeperRoute
-    }
-    '/shopkeeper/orders': {
-      id: '/shopkeeper/orders'
-      path: '/orders'
-      fullPath: '/shopkeeper/orders'
-      preLoaderRoute: typeof ShopkeeperOrdersRouteImport
       parentRoute: typeof ShopkeeperRoute
     }
     '/shopkeeper/offers': {
@@ -1545,6 +1538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/shopkeeper/orders/': {
+      id: '/shopkeeper/orders/'
+      path: '/orders'
+      fullPath: '/shopkeeper/orders/'
+      preLoaderRoute: typeof ShopkeeperOrdersIndexRouteImport
+      parentRoute: typeof ShopkeeperRoute
+    }
     '/customer/orders/': {
       id: '/customer/orders/'
       path: '/orders'
@@ -1568,10 +1568,10 @@ declare module '@tanstack/react-router' {
     }
     '/shopkeeper/orders/$id': {
       id: '/shopkeeper/orders/$id'
-      path: '/$id'
+      path: '/orders/$id'
       fullPath: '/shopkeeper/orders/$id'
       preLoaderRoute: typeof ShopkeeperOrdersIdRouteImport
-      parentRoute: typeof ShopkeeperOrdersRoute
+      parentRoute: typeof ShopkeeperRoute
     }
     '/delivery/task/$id': {
       id: '/delivery/task/$id'
@@ -1738,17 +1738,6 @@ const DeliveryRouteWithChildren = DeliveryRoute._addFileChildren(
   DeliveryRouteChildren,
 )
 
-interface ShopkeeperOrdersRouteChildren {
-  ShopkeeperOrdersIdRoute: typeof ShopkeeperOrdersIdRoute
-}
-
-const ShopkeeperOrdersRouteChildren: ShopkeeperOrdersRouteChildren = {
-  ShopkeeperOrdersIdRoute: ShopkeeperOrdersIdRoute,
-}
-
-const ShopkeeperOrdersRouteWithChildren =
-  ShopkeeperOrdersRoute._addFileChildren(ShopkeeperOrdersRouteChildren)
-
 interface ShopkeeperRouteChildren {
   ShopkeeperCategoriesRoute: typeof ShopkeeperCategoriesRoute
   ShopkeeperCouponsRoute: typeof ShopkeeperCouponsRoute
@@ -1758,10 +1747,11 @@ interface ShopkeeperRouteChildren {
   ShopkeeperInventoryInsightsRoute: typeof ShopkeeperInventoryInsightsRoute
   ShopkeeperNotificationsRoute: typeof ShopkeeperNotificationsRoute
   ShopkeeperOffersRoute: typeof ShopkeeperOffersRoute
-  ShopkeeperOrdersRoute: typeof ShopkeeperOrdersRouteWithChildren
   ShopkeeperProductsRoute: typeof ShopkeeperProductsRoute
   ShopkeeperReviewsRoute: typeof ShopkeeperReviewsRoute
   ShopkeeperSettingsRoute: typeof ShopkeeperSettingsRoute
+  ShopkeeperOrdersIdRoute: typeof ShopkeeperOrdersIdRoute
+  ShopkeeperOrdersIndexRoute: typeof ShopkeeperOrdersIndexRoute
 }
 
 const ShopkeeperRouteChildren: ShopkeeperRouteChildren = {
@@ -1773,10 +1763,11 @@ const ShopkeeperRouteChildren: ShopkeeperRouteChildren = {
   ShopkeeperInventoryInsightsRoute: ShopkeeperInventoryInsightsRoute,
   ShopkeeperNotificationsRoute: ShopkeeperNotificationsRoute,
   ShopkeeperOffersRoute: ShopkeeperOffersRoute,
-  ShopkeeperOrdersRoute: ShopkeeperOrdersRouteWithChildren,
   ShopkeeperProductsRoute: ShopkeeperProductsRoute,
   ShopkeeperReviewsRoute: ShopkeeperReviewsRoute,
   ShopkeeperSettingsRoute: ShopkeeperSettingsRoute,
+  ShopkeeperOrdersIdRoute: ShopkeeperOrdersIdRoute,
+  ShopkeeperOrdersIndexRoute: ShopkeeperOrdersIndexRoute,
 }
 
 const ShopkeeperRouteWithChildren = ShopkeeperRoute._addFileChildren(
