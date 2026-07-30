@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, PackageCheck, X } from "lucide-react";
+import { Check, MessageCircle, PackageCheck, Phone, Printer, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleShell } from "@/components/RoleShell";
 import { rupees } from "@/lib/format";
@@ -29,6 +29,7 @@ function Page() {
 
   const { order: o, items, totalQuantity, productCount } = q.data as any;
   const isChild = !!o.parent_order_id;
+  const phone = (o.address as any)?.phone as string | undefined;
 
   const accept = async () => {
     const { error } = await (supabase.rpc as any)(isChild ? "shop_accept_child" : "shop_accept_order",
@@ -72,6 +73,19 @@ function Page() {
             {o.status === "accepted_by_shop" && (
               <Button size="sm" onClick={pack} className="rounded-xl"><PackageCheck className="h-3 w-3 mr-1" />Mark ready</Button>
             )}
+            {phone && (
+              <>
+                <Button asChild size="sm" variant="outline" className="rounded-xl">
+                  <a href={`tel:${phone}`}><Phone className="h-3 w-3 mr-1" />Call</a>
+                </Button>
+                <Button asChild size="sm" variant="outline" className="rounded-xl">
+                  <a href={`sms:${phone}`}><MessageCircle className="h-3 w-3 mr-1" />Chat</a>
+                </Button>
+              </>
+            )}
+            <Button size="sm" variant="outline" className="rounded-xl" onClick={() => window.print()}>
+              <Printer className="h-3 w-3 mr-1" />Print
+            </Button>
           </div>
         </div>
 
