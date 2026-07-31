@@ -123,9 +123,11 @@ function Page() {
           </div>
 
           <div className="space-y-4">
+            <AdminOrderActions order={o} />
             <OrderSummaryCard order={o} productCount={productCount} totalQuantity={totalQuantity} />
             <CustomerInfoCard order={o} />
             <OrderTimeline status={o.status} />
+
           </div>
         </div>
       </div>
