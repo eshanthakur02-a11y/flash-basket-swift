@@ -71,14 +71,22 @@ function Page() {
 
             {children.length > 0 && (
               <div className="rounded-2xl border border-border bg-card p-4 space-y-2">
-                <div className="font-bold text-sm">Child orders ({children.length})</div>
-                {children.map((c: any) => (
-                  <Link key={c.id} to="/admin/orders/$id" params={{ id: c.id }} className="flex justify-between text-sm py-1.5 border-t border-border hover:text-primary">
-                    <span className="font-semibold">{c.order_number}</span>
-                    <span className="text-xs uppercase">{String(c.status).replace(/_/g, " ")}</span>
-                    <span className="font-bold">{rupees(c.total)}</span>
-                  </Link>
-                ))}
+                <div className="font-bold text-sm">Shops on this order ({children.length})</div>
+                {children.map((c: any) => {
+                  const s: any = c.shop_id ? meta.data?.shopMap?.get(c.shop_id) : null;
+                  return (
+                    <Link key={c.id} to="/admin/orders/$id" params={{ id: c.id }} className="block py-2 border-t border-border hover:text-primary">
+                      <div className="flex justify-between text-sm gap-2">
+                        <span className="font-semibold">{s?.name ?? c.order_number}</span>
+                        <span className="text-xs uppercase rounded-full bg-secondary px-2 py-0.5 font-bold">{String(c.status).replace(/_/g, " ")}</span>
+                        <span className="font-bold">{rupees(c.total)}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {c.order_number} · Owner: {s?.owner_name ?? "—"} · PIN {s?.pincode ?? "—"}
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
 
@@ -86,6 +94,9 @@ function Page() {
               <div className="font-bold">Assignment & routing</div>
               <div className="grid grid-cols-2 gap-y-1 text-muted-foreground">
                 <span>Shop</span><span className="text-foreground">{meta.data?.shop?.name ?? o.shop_id ?? "—"}</span>
+                <span>Shop owner</span><span className="text-foreground">{meta.data?.shop?.owner_name ?? "—"}{meta.data?.shop?.owner_phone ? ` · ${meta.data.shop.owner_phone}` : ""}</span>
+                <span>Shop PIN code</span><span className="text-foreground">{meta.data?.shop?.pincode ?? "—"}</span>
+                <span>Shop ID</span><span className="text-foreground font-mono text-xs">{o.shop_id ?? "—"}</span>
                 <span>Delivery partner</span><span className="text-foreground">{meta.data?.partner ? `${meta.data.partner.name} (${meta.data.partner.phone ?? "—"})` : "—"}</span>
                 <span>Parent order</span><span className="text-foreground font-mono text-xs">{o.parent_order_id ?? (o.is_parent ? "this order" : "—")}</span>
                 <span>Distance</span><span className="text-foreground">{o.assignment_distance_km != null ? `${Number(o.assignment_distance_km).toFixed(2)} km` : "—"}</span>
@@ -94,6 +105,7 @@ function Page() {
                 <span>Attempts</span><span className="text-foreground">{o.assignment_attempts ?? 0}</span>
               </div>
             </div>
+
 
             <div className="rounded-2xl border border-border bg-card p-4 space-y-1 text-sm">
               <div className="font-bold mb-1">Financials</div>
