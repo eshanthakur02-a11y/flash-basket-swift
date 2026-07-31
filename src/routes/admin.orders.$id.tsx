@@ -9,7 +9,16 @@ import { useOrderDetails } from "@/components/order/useOrderDetails";
 import { CustomerInfoCard, OrderItemsPanel, OrderMetaStrip, OrderSummaryCard, OrderTimeline } from "@/components/order/OrderPanels";
 
 export const Route = createFileRoute("/admin/orders/$id")({
-  head: () => ({ meta: [{ title: "Order details — Admin" }] }),
+  head: () => ({
+    meta: [
+      { title: "Order details — FlashBasket Admin" },
+      { name: "description", content: "Full order breakdown: products, shops, rider, inventory impact, payments and timeline." },
+      { property: "og:title", content: "Order details — FlashBasket Admin" },
+      { property: "og:description", content: "Full order breakdown for FlashBasket admins." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Page,
 });
 
@@ -22,13 +31,15 @@ function Page() {
     enabled: !!q.data,
     queryFn: async () => {
       const o: any = q.data!.order;
-      const [shop, partner] = await Promise.all([
-        o.shop_id ? supabase.from("shops").select("name, city, pincode").eq("id", o.shop_id).maybeSingle().then((r) => r.data) : null,
+      const [shops, partner] = await Promise.all([
+        supabase.rpc("admin_list_shops").then((r) => (r.data as any[]) ?? []),
         o.partner_id ? supabase.from("delivery_partners").select("name, phone, vehicle").eq("id", o.partner_id).maybeSingle().then((r) => r.data) : null,
       ]);
-      return { shop, partner };
+      const shopMap = new Map(shops.map((s: any) => [s.id, s]));
+      return { shop: o.shop_id ? shopMap.get(o.shop_id) ?? null : null, shopMap, partner };
     },
   });
+
 
   if (!q.data)
     return (
