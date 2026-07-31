@@ -7,6 +7,7 @@ import { ADMIN_NAV } from "./admin.dashboard";
 import { OrderAuditLog } from "@/components/OrderAuditLog";
 import { useOrderDetails } from "@/components/order/useOrderDetails";
 import { CustomerInfoCard, OrderItemsPanel, OrderMetaStrip, OrderSummaryCard, OrderTimeline } from "@/components/order/OrderPanels";
+import { AdminOrderActions } from "@/components/order/AdminOrderActions";
 
 export const Route = createFileRoute("/admin/orders/$id")({
   head: () => ({
