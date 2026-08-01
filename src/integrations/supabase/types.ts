@@ -2964,6 +2964,7 @@ export type Database = {
         Args: { _body: string; _is_internal?: boolean; _ticket_id: string }
         Returns: string
       }
+      purge_old_notifications: { Args: never; Returns: undefined }
       rank_riders_for_parent: {
         Args: { _limit?: number; _parent_id: string }
         Returns: {
