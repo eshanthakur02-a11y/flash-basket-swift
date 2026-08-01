@@ -140,7 +140,7 @@ export function MultiImageInput({
               <Star className="h-3 w-3 fill-current text-yellow-500" /> Cover image
             </div>
             <div className="relative rounded-lg overflow-hidden w-full max-w-[220px] aspect-square bg-card">
-              <img src={value[0]} alt="" className="w-full h-full object-cover" />
+              <img loading="lazy" decoding="async" src={value[0]} alt="" className="w-full h-full object-cover" />
               <button
                 type="button"
                 onClick={() => remove(0)}
@@ -171,7 +171,7 @@ export function MultiImageInput({
                         dragIdx === idx && "opacity-50",
                       )}
                     >
-                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      <img loading="lazy" decoding="async" src={url} alt="" className="w-full h-full object-cover" />
                       <div className="absolute inset-x-0 top-0 flex justify-between p-1">
                         <span className="h-5 w-5 rounded bg-background/80 grid place-items-center cursor-grab">
                           <GripVertical className="h-3 w-3" />

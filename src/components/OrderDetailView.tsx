@@ -264,7 +264,7 @@ export function OrderDetailView({ id }: { id: string }) {
           {o.items.map((it: any) => (
             <div key={it.id} className="flex items-center gap-3">
               {it.image_url ? (
-                <img src={it.image_url} className="h-14 w-14 rounded-xl object-cover" alt={it.name} />
+                <img loading="lazy" decoding="async" src={it.image_url} className="h-14 w-14 rounded-xl object-cover" alt={it.name} />
               ) : (
                 <div className="h-14 w-14 rounded-xl bg-secondary grid place-items-center">🛒</div>
               )}

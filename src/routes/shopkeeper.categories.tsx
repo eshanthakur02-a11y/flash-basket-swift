@@ -116,7 +116,7 @@ function Page() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {list.data?.map((c) => (
               <div key={c.id} className="rounded-2xl border border-border bg-card overflow-hidden">
-                <img src={c.image_url} alt={c.name} className="h-28 w-full object-cover" />
+                <img loading="lazy" decoding="async" src={c.image_url} alt={c.name} className="h-28 w-full object-cover" />
                 <div className="p-3 flex items-center gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="font-bold truncate">{c.name}</div>
@@ -222,7 +222,7 @@ function ItemPicker({ shopId, category, onClose }: { shopId: string; category: C
             const on = selected.data?.has(p.id);
             return (
               <button key={p.id} onClick={() => toggle(p.id)} className={`w-full flex items-center gap-3 rounded-xl border p-2 text-left ${on ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
-                {p.image_url ? <img src={p.image_url} className="h-10 w-10 rounded-lg object-cover" alt="" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
+                {p.image_url ? <img loading="lazy" decoding="async" src={p.image_url} className="h-10 w-10 rounded-lg object-cover" alt="" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
                 <span className="flex-1 text-sm font-semibold truncate">{p.name}</span>
                 {on && <Check className="h-4 w-4 text-primary" />}
               </button>

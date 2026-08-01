@@ -81,7 +81,7 @@ function AppOrders() {
                   ) : (
                     preview.map((it) =>
                       it.image_url ? (
-                        <img key={it.id} src={it.image_url} alt={it.name} className="h-14 w-14 rounded-xl object-cover ring-2 ring-card bg-secondary" />
+                        <img loading="lazy" decoding="async" key={it.id} src={it.image_url} alt={it.name} className="h-14 w-14 rounded-xl object-cover ring-2 ring-card bg-secondary" />
                       ) : (
                         <div key={it.id} className="h-14 w-14 rounded-xl bg-secondary grid place-items-center ring-2 ring-card text-lg">🛒</div>
                       )
