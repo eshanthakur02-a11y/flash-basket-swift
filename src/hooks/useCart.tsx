@@ -92,6 +92,10 @@ export function useCart() {
   const currentShop = items.find((l) => l.shop)?.shop ?? null;
   const currentShopId = items.find((l) => l.shop_id)?.shop_id ?? null;
 
+  const cartKey = ["cart", user?.id] as const;
+  const snapshot = () => qc.getQueryData<CartLine[]>(cartKey) ?? [];
+  const setLines = (lines: CartLine[]) => qc.setQueryData<CartLine[]>(cartKey, lines);
+
   const addMutation = useMutation({
     mutationFn: async ({
       productId,
@@ -151,10 +155,31 @@ export function useCart() {
         if (error) throw error;
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["cart", user?.id] }),
-    onError: (e: Error) => {
+    // Optimistic: bump the quantity of an existing line right away so the
+    // quantity stepper / cart badge react instantly.
+    onMutate: async (vars) => {
+      const previous = snapshot();
+      const effectiveShopId = vars.shopId ?? currentShopId;
+      const existing = previous.find(
+        (l) =>
+          l.product_id === vars.productId &&
+          (l.variant_id ?? null) === (vars.variantId ?? null) &&
+          (l.shop_id ?? null) === (effectiveShopId ?? null),
+      );
+      if (existing && !vars.force) {
+        setLines(
+          previous.map((l) =>
+            l.id === existing.id ? { ...l, quantity: l.quantity + (vars.qty ?? 1) } : l,
+          ),
+        );
+      }
+      return { previous };
+    },
+    onError: (e: Error, _vars, ctx) => {
+      if (ctx?.previous) setLines(ctx.previous);
       if (e.name !== "CartShopConflictError") toast.error(e.message);
     },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["cart", user?.id] }),
   });
 
   const updateMutation = useMutation({
@@ -167,24 +192,46 @@ export function useCart() {
         if (error) throw error;
       }
     },
+    onMutate: async ({ lineId, qty }) => {
+      const previous = snapshot();
+      setLines(
+        qty <= 0
+          ? previous.filter((l) => l.id !== lineId)
+          : previous.map((l) => (l.id === lineId ? { ...l, quantity: qty } : l)),
+      );
+      return { previous };
+    },
+    onError: (e: Error, _vars, ctx) => {
+      if (ctx?.previous) setLines(ctx.previous);
+      toast.error(e.message);
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart", user?.id] }),
   });
 
   const changeShop = async (newShopId: string) => {
     if (!user) return;
+    const previous = snapshot();
+    // Instant UI: repoint every line at the new shop (single batched update below).
+    setLines(previous.map((l) => ({ ...l, shop_id: newShopId, shop: l.shop ? { ...l.shop, id: newShopId } : l.shop })));
     const { error } = await supabase
       .from("cart_items")
       .update({ shop_id: newShopId })
       .eq("user_id", user.id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      setLines(previous);
+      return toast.error(error.message);
+    }
     toast.success("Shop updated");
     qc.invalidateQueries({ queryKey: ["cart", user.id] });
   };
 
   const clear = async () => {
     if (!user) return;
+    const previous = snapshot();
+    setLines([]);
     const { error } = await supabase.from("cart_items").delete().eq("user_id", user.id);
     if (error) {
+      setLines(previous);
       toast.error("Could not clear cart: " + error.message);
       return;
     }
@@ -209,3 +256,4 @@ export function useCart() {
     clear,
   };
 }
+

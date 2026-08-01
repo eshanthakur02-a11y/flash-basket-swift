@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Truck, Store, Package } from "lucide-react";
 import { DELIVERY_NAV } from "./delivery.dashboard";
 import { FastDeliveryBadge } from "@/components/FastDeliveryBadge";
+import { runOptimistic, removeRow } from "@/lib/optimistic";
+
 
 export const Route = createFileRoute("/delivery/available-orders")({
   head: () => ({ meta: [{ title: "Available Orders — Delivery" }] }),
@@ -61,16 +63,26 @@ function Page() {
   });
 
   const acceptParent = async (parent_id: string) => {
-    const { error } = await supabase.rpc("partner_accept_parent", { _parent_id: parent_id });
-    if (error) return toast.error(error.message);
-    toast.success("Accepted multi-shop order");
-    navigate({ to: "/delivery/task/$id", params: { id: parent_id } });
+    await runOptimistic({
+      qc,
+      keys: [["available-parent-orders"]],
+      updater: removeRow(parent_id, ["parent_id", "id"]),
+      request: () => supabase.rpc("partner_accept_parent", { _parent_id: parent_id }),
+      success: "Accepted multi-shop order",
+      onSuccess: () => navigate({ to: "/delivery/task/$id", params: { id: parent_id } }),
+    });
   };
 
   const accept = async (id: string) => {
-    const { error } = await supabase.rpc("partner_accept_order", { _order_id: id });
-    if (error) toast.error(error.message); else toast.success("Accepted! Start delivery.");
+    await runOptimistic({
+      qc,
+      keys: [["available-orders"]],
+      updater: removeRow(id),
+      request: () => supabase.rpc("partner_accept_order", { _order_id: id }),
+      success: "Accepted! Start delivery.",
+    });
   };
+
 
   return (
     <RoleShell role="delivery" nav={DELIVERY_NAV} requireRoles={["delivery", "admin"]}>

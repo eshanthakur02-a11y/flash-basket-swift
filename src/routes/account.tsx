@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { runOptimistic, patchObject, removeRow } from "@/lib/optimistic";
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +18,8 @@ export const Route = createFileRoute("/account")({
 
 function AccountPage() {
   const { user } = useAuth();
+  const qc = useQueryClient();
+
 
   const profile = useQuery({
     queryKey: ["profile", user?.id],
@@ -44,20 +48,26 @@ function AccountPage() {
   }
 
   const saveProfile = async () => {
-    const { error } = await supabase.from("profiles").update({ full_name: name, phone }).eq("id", user.id);
-    if (error) toast.error(error.message);
-    else toast.success("Profile updated");
+    await runOptimistic({
+      qc,
+      keys: [["profile", user.id]],
+      updater: patchObject({ full_name: name, phone }),
+      request: () => supabase.from("profiles").update({ full_name: name, phone }).eq("id", user.id),
+      success: "Profile updated",
+    });
   };
 
   const deleteAddress = async (id: string) => {
     if (!confirm("Delete this address?")) return;
-    const { error } = await supabase.from("addresses").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Deleted");
-      addresses.refetch();
-    }
+    await runOptimistic({
+      qc,
+      keys: [["addresses", user.id]],
+      updater: removeRow(id),
+      request: () => supabase.from("addresses").delete().eq("id", id),
+      success: "Deleted",
+    });
   };
+
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 space-y-6">

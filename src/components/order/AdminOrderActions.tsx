@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Ban, Printer, RefreshCcw, Store, Truck, User, Undo2 } from "lucide-react";
 import { rupees } from "@/lib/format";
+import { optimisticPatch, patchOrderDetail } from "@/lib/optimistic";
+
 
 type Props = { order: any };
 
@@ -44,14 +46,27 @@ export function AdminOrderActions({ order }: Props) {
     qc.invalidateQueries({ queryKey: ["admin-order-payment", order.id] });
   };
 
-  const run = async (fn: () => Promise<{ error: any }>, msg: string, after?: () => void) => {
+  const run = async (
+    fn: () => Promise<{ error: any }>,
+    msg: string,
+    after?: () => void,
+    patch?: Record<string, unknown>,
+  ) => {
     setBusy(true);
+    // Optimistic: patch the order detail cache right away, roll back on error.
+    const rollback = patch
+      ? optimisticPatch(qc, [["order-details", order.id], ["order-details"]], patchOrderDetail(patch))
+      : () => {};
     const { error } = await fn();
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      rollback();
+      return toast.error(error.message);
+    }
     done(msg);
     after?.();
   };
+
 
   const selectCls = "h-10 w-full rounded-xl border border-border bg-background px-2 text-sm";
 
@@ -91,7 +106,7 @@ export function AdminOrderActions({ order }: Props) {
             <DialogFooter>
               <Button
                 disabled={!shopId || busy}
-                onClick={() => run(() => supabase.rpc("admin_reassign_shop", { _order_id: order.id, _shop_id: shopId }) as any, "Shop reassigned", () => setOpenShop(false))}
+                onClick={() => run(() => supabase.rpc("admin_reassign_shop", { _order_id: order.id, _shop_id: shopId }) as any, "Shop reassigned", () => setOpenShop(false), { shop_id: shopId, status: "awaiting_shop" })}
               >
                 Reassign
               </Button>
@@ -115,7 +130,7 @@ export function AdminOrderActions({ order }: Props) {
             <DialogFooter>
               <Button
                 disabled={!partnerId || busy}
-                onClick={() => run(() => supabase.rpc("admin_reassign_partner", { _order_id: order.id, _partner_id: partnerId }) as any, "Rider reassigned", () => setOpenRider(false))}
+                onClick={() => run(() => supabase.rpc("admin_reassign_partner", { _order_id: order.id, _partner_id: partnerId }) as any, "Rider reassigned", () => setOpenRider(false), { partner_id: partnerId })}
               >
                 Reassign
               </Button>
@@ -131,7 +146,7 @@ export function AdminOrderActions({ order }: Props) {
           disabled={busy || order.status === "cancelled" || order.status === "delivered"}
           onClick={() => {
             if (!confirm("Cancel this order? Stock will be restored where applicable.")) return;
-            run(() => supabase.rpc("admin_update_order_status", { _order_id: order.id, _status: "cancelled" }) as any, "Order cancelled");
+            run(() => supabase.rpc("admin_update_order_status", { _order_id: order.id, _status: "cancelled" }) as any, "Order cancelled", undefined, { status: "cancelled" });
           }}
         >
           <Ban className="h-3.5 w-3.5 mr-1" />Cancel order

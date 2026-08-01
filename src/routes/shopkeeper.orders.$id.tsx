@@ -10,6 +10,9 @@ import { toast } from "sonner";
 import { DeliveryTypeBadge } from "@/components/FastDeliveryBadge";
 import { useOrderDetails } from "@/components/order/useOrderDetails";
 import { CustomerInfoCard, OrderItemsPanel, OrderMetaStrip, OrderSummaryCard, OrderTimeline } from "@/components/order/OrderPanels";
+import { useQueryClient } from "@tanstack/react-query";
+import { runOptimistic, patchOrderDetail } from "@/lib/optimistic";
+
 
 export const Route = createFileRoute("/shopkeeper/orders/$id")({
   head: () => ({ meta: [{ title: "Order — Shopkeeper" }] }),
@@ -18,7 +21,9 @@ export const Route = createFileRoute("/shopkeeper/orders/$id")({
 
 function Page() {
   const { id } = Route.useParams();
+  const qc = useQueryClient();
   const q = useOrderDetails(id, { scopeToShop: true, refetchInterval: 15000 });
+
 
   if (!q.data)
     return (
@@ -32,24 +37,40 @@ function Page() {
   const phone = (o.address as any)?.phone as string | undefined;
 
   const accept = async () => {
-    const { error } = await (supabase.rpc as any)(isChild ? "shop_accept_child" : "shop_accept_order",
-      isChild ? { _child_id: o.id, _prep_minutes: 15 } : { _order_id: o.id });
-    if (error) toast.error(error.message);
-    else { toast.success("Order accepted"); q.refetch(); }
+    await runOptimistic({
+      qc,
+      keys: [["order-details", id], ["shop-orders"]],
+      updater: patchOrderDetail({ status: "accepted_by_shop" }),
+      request: () =>
+        (supabase.rpc as any)(isChild ? "shop_accept_child" : "shop_accept_order",
+          isChild ? { _child_id: o.id, _prep_minutes: 15 } : { _order_id: o.id }),
+      success: "Order accepted",
+    });
   };
   const reject = async () => {
     const reason = window.prompt("Reason for rejecting this order? (optional)") ?? null;
-    const { error } = await (supabase.rpc as any)(isChild ? "shop_reject_child" : "shop_reject_order",
-      isChild ? { _child_id: o.id, _reason: reason } : { _order_id: o.id, _reason: reason });
-    if (error) toast.error(error.message);
-    else { toast.success("Order rejected — searching replacement shop"); q.refetch(); }
+    await runOptimistic({
+      qc,
+      keys: [["order-details", id], ["shop-orders"]],
+      updater: patchOrderDetail({ status: "awaiting_shop" }),
+      request: () =>
+        (supabase.rpc as any)(isChild ? "shop_reject_child" : "shop_reject_order",
+          isChild ? { _child_id: o.id, _reason: reason } : { _order_id: o.id, _reason: reason }),
+      success: "Order rejected — searching replacement shop",
+    });
   };
   const pack = async () => {
-    const { error } = await (supabase.rpc as any)(isChild ? "shop_mark_child_ready" : "shop_mark_packed",
-      isChild ? { _child_id: o.id } : { _order_id: o.id });
-    if (error) toast.error(error.message);
-    else { toast.success("Marked ready"); q.refetch(); }
+    await runOptimistic({
+      qc,
+      keys: [["order-details", id], ["shop-orders"]],
+      updater: patchOrderDetail({ status: isChild ? "packed" : "packed" }),
+      request: () =>
+        (supabase.rpc as any)(isChild ? "shop_mark_child_ready" : "shop_mark_packed",
+          isChild ? { _child_id: o.id } : { _order_id: o.id }),
+      success: "Marked ready",
+    });
   };
+
 
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
