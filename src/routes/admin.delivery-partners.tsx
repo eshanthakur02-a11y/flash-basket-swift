@@ -36,7 +36,7 @@ function Page() {
         .limit(100);
       return data ?? [];
     },
-    refetchInterval: 8000,
+    refetchInterval: 30000,
   });
 
   const partners = useQuery({
@@ -48,7 +48,7 @@ function Page() {
         .order("is_online", { ascending: false });
       return data ?? [];
     },
-    refetchInterval: 10000,
+    refetchInterval: 30000,
   });
 
   const shops = useQuery({
@@ -76,7 +76,7 @@ function Page() {
       if (error) throw error;
       return data ?? [];
     },
-    refetchInterval: 15000,
+    refetchInterval: 30000,
   });
 
   const reassign = async (orderId: string, partnerId: string) => {
@@ -109,7 +109,7 @@ function Page() {
         shop_id: string | null; shop_name: string | null;
       }>;
     },
-    refetchInterval: 8000,
+    refetchInterval: 30000,
   });
 
   useEffect(() => {
