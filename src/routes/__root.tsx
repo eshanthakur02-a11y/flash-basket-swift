@@ -77,6 +77,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+      // Warm the DNS + TLS handshake for the backend before the first query runs.
+      { rel: "preconnect", href: import.meta.env.VITE_SUPABASE_URL as string, crossOrigin: "" },
+      { rel: "dns-prefetch", href: import.meta.env.VITE_SUPABASE_URL as string },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
