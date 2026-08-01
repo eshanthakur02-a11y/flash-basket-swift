@@ -120,7 +120,7 @@ function Page() {
             <div key={p.id} className="rounded-2xl border border-border bg-card overflow-hidden">
               <div className="flex gap-3 p-3">
                 <div className="h-20 w-20 shrink-0 rounded-xl bg-secondary overflow-hidden grid place-items-center">
-                  {p.image_url ? <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" /> : <Package className="h-6 w-6 text-muted-foreground" />}
+                  {p.image_url ? <img loading="lazy" decoding="async" src={p.image_url} alt={p.name} className="h-full w-full object-cover" /> : <Package className="h-6 w-6 text-muted-foreground" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold truncate">{p.name}</div>

@@ -384,7 +384,7 @@ function ShopCard({
     <div className="rounded-2xl border border-border bg-card p-4 space-y-2">
       <div className="flex items-start gap-3">
         {shop.logo_url ? (
-          <img src={shop.logo_url} alt="" className="h-12 w-12 rounded-xl object-cover border border-border shrink-0" />
+          <img loading="lazy" decoding="async" src={shop.logo_url} alt="" className="h-12 w-12 rounded-xl object-cover border border-border shrink-0" />
         ) : (
           <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Store className="h-5 w-5" />

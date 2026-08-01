@@ -188,7 +188,7 @@ function Page() {
                   <div key={sp.id} className="rounded-2xl border border-border bg-card overflow-hidden">
                     <div className="flex gap-3 p-3">
                       {sp.products?.image_url ? (
-                        <img src={sp.products.image_url} alt={sp.products.name} className="h-16 w-16 rounded-xl object-cover" />
+                        <img loading="lazy" decoding="async" src={sp.products.image_url} alt={sp.products.name} className="h-16 w-16 rounded-xl object-cover" />
                       ) : (
                         <div className="h-16 w-16 rounded-xl bg-secondary grid place-items-center"><Package className="h-5 w-5 text-muted-foreground" /></div>
                       )}
@@ -696,7 +696,7 @@ function FromCatalog({
                 onClick={() => pick(p)}
                 className="w-full flex items-center gap-3 p-2 text-left hover:bg-secondary disabled:opacity-50"
               >
-                {p.image_url ? <img src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
+                {p.image_url ? <img loading="lazy" decoding="async" src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold truncate">{p.name}</div>
                   <div className="text-xs text-muted-foreground">{p.unit} · MRP {rupees(p.mrp)}</div>
@@ -714,7 +714,7 @@ function FromCatalog({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3 p-2 rounded-xl bg-secondary">
-        {selected.image_url ? <img src={selected.image_url} alt="" className="h-12 w-12 rounded-lg object-cover" /> : <div className="h-12 w-12 rounded-lg bg-card" />}
+        {selected.image_url ? <img loading="lazy" decoding="async" src={selected.image_url} alt="" className="h-12 w-12 rounded-lg object-cover" /> : <div className="h-12 w-12 rounded-lg bg-card" />}
         <div className="flex-1">
           <div className="font-bold text-sm">{selected.name}</div>
           <div className="text-xs text-muted-foreground">{selected.unit}</div>

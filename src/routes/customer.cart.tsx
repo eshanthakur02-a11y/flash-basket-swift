@@ -53,7 +53,7 @@ function AppCart() {
               className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-card"
             >
               {(l.variant?.images?.[0] ?? l.product.image_url) ? (
-                <img src={l.variant?.images?.[0] ?? l.product.image_url!} alt={l.product.name} className="h-16 w-16 rounded-xl object-cover" />
+                <img loading="lazy" decoding="async" src={l.variant?.images?.[0] ?? l.product.image_url!} alt={l.product.name} className="h-16 w-16 rounded-xl object-cover" />
               ) : (
                 <div className="h-16 w-16 rounded-xl bg-secondary grid place-items-center text-2xl">🛒</div>
               )}

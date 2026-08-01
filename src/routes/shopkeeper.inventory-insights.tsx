@@ -453,7 +453,7 @@ function Page() {
                             <td className="p-3">
                               <div className="flex items-center gap-2">
                                 {i.products?.image_url ? (
-                                  <img src={i.products.image_url} className="h-9 w-9 rounded-lg object-cover" alt="" />
+                                  <img loading="lazy" decoding="async" src={i.products.image_url} className="h-9 w-9 rounded-lg object-cover" alt="" />
                                 ) : (
                                   <div className="h-9 w-9 rounded-lg bg-secondary grid place-items-center"><Package className="h-4 w-4 text-muted-foreground" /></div>
                                 )}
@@ -496,7 +496,7 @@ function Page() {
                       {bestSelling.map((b, idx) => (
                         <li key={b.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/50">
                           <span className="text-lg w-6 text-center">{idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : idx + 1}</span>
-                          {b.image ? <img src={b.image} className="h-10 w-10 rounded-lg object-cover" alt="" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
+                          {b.image ? <img loading="lazy" decoding="async" src={b.image} className="h-10 w-10 rounded-lg object-cover" alt="" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
                           <div className="flex-1 min-w-0">
                             <div className="font-semibold truncate">{b.name}</div>
                             <div className="text-xs text-muted-foreground">{b.orders} orders</div>
@@ -525,7 +525,7 @@ function Page() {
                     <ul className="space-y-2">
                       {lowestSelling.map((l) => (
                         <li key={l.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary/50">
-                          {l.image ? <img src={l.image} className="h-10 w-10 rounded-lg object-cover" alt="" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
+                          {l.image ? <img loading="lazy" decoding="async" src={l.image} className="h-10 w-10 rounded-lg object-cover" alt="" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
                           <div className="flex-1 min-w-0">
                             <div className="font-semibold truncate">{l.name}</div>
                             <div className="text-xs text-muted-foreground">
@@ -651,7 +651,7 @@ function TimelineDialog({ row, sales }: { row: InvRow; sales: SaleRow[] }) {
     <DialogContent className="max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
-          {row.products?.image_url && <img src={row.products.image_url} className="h-10 w-10 rounded-lg object-cover" alt="" />}
+          {row.products?.image_url && <img loading="lazy" decoding="async" src={row.products.image_url} className="h-10 w-10 rounded-lg object-cover" alt="" />}
           {row.products?.name}
         </DialogTitle>
       </DialogHeader>

@@ -103,7 +103,7 @@ export function ImageInput({
       </div>
       {value && (
         <div className="rounded-xl overflow-hidden border border-border w-full max-w-xs">
-          <img src={value} alt="" className="w-full h-32 object-cover" />
+          <img loading="lazy" decoding="async" src={value} alt="" className="w-full h-32 object-cover" />
         </div>
       )}
       {required && !value && (

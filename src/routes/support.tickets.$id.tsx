@@ -120,7 +120,7 @@ function Page() {
             <div className="mt-3 flex flex-wrap gap-2">
               {ctx.data!.attachments.map((a: any) => (
                 <a key={a.id} href={a.file_url} target="_blank" rel="noreferrer" className="block">
-                  <img src={a.file_url} alt={a.file_name ?? "attachment"} className="h-24 w-24 object-cover rounded-lg border border-border" />
+                  <img loading="lazy" decoding="async" src={a.file_url} alt={a.file_name ?? "attachment"} className="h-24 w-24 object-cover rounded-lg border border-border" />
                 </a>
               ))}
             </div>

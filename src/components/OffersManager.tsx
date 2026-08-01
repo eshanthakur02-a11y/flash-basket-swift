@@ -303,7 +303,7 @@ export function OffersManager({
 
               {editing.image_url && (
                 <div className="rounded-xl overflow-hidden border border-border">
-                  <img src={editing.image_url} alt="" className="w-full h-32 object-cover" />
+                  <img loading="lazy" decoding="async" src={editing.image_url} alt="" className="w-full h-32 object-cover" />
                 </div>
               )}
 

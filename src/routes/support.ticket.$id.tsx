@@ -93,7 +93,7 @@ function Page() {
           <div className="mt-3 flex flex-wrap gap-2">
             {attachments.data!.map(a => (
               <a key={a.id} href={a.file_url} target="_blank" rel="noreferrer">
-                <img src={a.file_url} alt={a.file_name ?? ""} className="h-20 w-20 object-cover rounded-lg border border-border" />
+                <img loading="lazy" decoding="async" src={a.file_url} alt={a.file_name ?? ""} className="h-20 w-20 object-cover rounded-lg border border-border" />
               </a>
             ))}
           </div>
