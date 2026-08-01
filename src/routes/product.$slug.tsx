@@ -158,10 +158,15 @@ function ProductPage() {
   const discount = pct(effPrice, effMrp);
 
   async function handleAdd() {
+    if (allShopsClosed) {
+      toast.error("Sorry, all shops selling this product are currently closed.");
+      return;
+    }
     if (!selectedShop && eligibleShops.length === 0 && delivery.pincode) {
       toast.error("No shop currently delivers this item to your address.");
       return;
     }
+
     try {
       await add(p.id, 1, selected?.id ?? null, selectedShop?.shop_id ?? null);
     } catch (e) {
