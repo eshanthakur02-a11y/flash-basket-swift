@@ -91,6 +91,29 @@ function ProductPage() {
     enabled: !!product.data?.id,
   });
   const eligibleShops = eligibleQ.data ?? [];
+
+  // Open vs closed shops carrying this item — drives the "Currently Unavailable" state
+  const availabilityQ = useQuery({
+    queryKey: ["product-availability", product.data?.id, selected?.id ?? null, delivery.pincode, delivery.lat, delivery.lng],
+    enabled: !!product.data?.id,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc("product_shop_availability", {
+        _product_id: product.data!.id,
+        _variant_id: selected?.id ?? null,
+        _pincode: delivery.pincode ?? null,
+        _lat: delivery.lat,
+        _lng: delivery.lng,
+      });
+      if (error) throw error;
+      const row = (Array.isArray(data) ? data[0] : data) ?? null;
+      return { open: Number(row?.open_shops ?? 0), closed: Number(row?.closed_shops ?? 0) };
+    },
+  });
+  const allShopsClosed =
+    !availabilityQ.isLoading &&
+    (availabilityQ.data?.open ?? 0) === 0 &&
+    (availabilityQ.data?.closed ?? 0) > 0;
+
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const selectedShop: EligibleShop | null = useMemo(() => {
     if (eligibleShops.length === 0) return null;
