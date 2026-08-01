@@ -91,6 +91,29 @@ function ProductPage() {
     enabled: !!product.data?.id,
   });
   const eligibleShops = eligibleQ.data ?? [];
+
+  // Open vs closed shops carrying this item — drives the "Currently Unavailable" state
+  const availabilityQ = useQuery({
+    queryKey: ["product-availability", product.data?.id, selected?.id ?? null, delivery.pincode, delivery.lat, delivery.lng],
+    enabled: !!product.data?.id,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc("product_shop_availability", {
+        _product_id: product.data!.id,
+        _variant_id: selected?.id ?? null,
+        _pincode: delivery.pincode ?? null,
+        _lat: delivery.lat,
+        _lng: delivery.lng,
+      });
+      if (error) throw error;
+      const row = (Array.isArray(data) ? data[0] : data) ?? null;
+      return { open: Number(row?.open_shops ?? 0), closed: Number(row?.closed_shops ?? 0) };
+    },
+  });
+  const allShopsClosed =
+    !availabilityQ.isLoading &&
+    (availabilityQ.data?.open ?? 0) === 0 &&
+    (availabilityQ.data?.closed ?? 0) > 0;
+
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const selectedShop: EligibleShop | null = useMemo(() => {
     if (eligibleShops.length === 0) return null;
@@ -135,10 +158,15 @@ function ProductPage() {
   const discount = pct(effPrice, effMrp);
 
   async function handleAdd() {
+    if (allShopsClosed) {
+      toast.error("Sorry, all shops selling this product are currently closed.");
+      return;
+    }
     if (!selectedShop && eligibleShops.length === 0 && delivery.pincode) {
       toast.error("No shop currently delivers this item to your address.");
       return;
     }
+
     try {
       await add(p.id, 1, selected?.id ?? null, selectedShop?.shop_id ?? null);
     } catch (e) {
@@ -243,7 +271,9 @@ function ProductPage() {
           <div className="text-xs text-muted-foreground">(Inclusive of all taxes)</div>
 
           <div className="mt-6 flex gap-3">
-            {effStock <= 0 ? (
+            {allShopsClosed ? (
+              <Button disabled size="lg" className="rounded-xl h-12">Currently Unavailable</Button>
+            ) : effStock <= 0 ? (
               <Button disabled size="lg" className="rounded-xl">Out of stock</Button>
             ) : line ? (
               <div className="flex items-center gap-1 rounded-xl gradient-primary text-primary-foreground">
@@ -260,6 +290,12 @@ function ProductPage() {
               Go to cart
             </Link>
           </div>
+
+          {allShopsClosed && (
+            <div className="mt-4 rounded-2xl border-2 border-destructive/30 bg-destructive/5 p-4 text-sm font-semibold text-destructive">
+              Sorry, all shops selling this product are currently closed.
+            </div>
+          )}
 
           {/* Available shops picker */}
           {shopSelectionEnabled && eligibleShops.length > 1 && (
@@ -279,11 +315,12 @@ function ProductPage() {
             </div>
           )}
 
-          {shopSelectionEnabled && eligibleShops.length === 0 && delivery.pincode && !eligibleQ.isLoading && (
+          {shopSelectionEnabled && !allShopsClosed && eligibleShops.length === 0 && delivery.pincode && !eligibleQ.isLoading && (
             <div className="mt-6 rounded-2xl border border-dashed border-border p-4 text-sm text-muted-foreground">
               No shop in your area ({delivery.pincode}) currently has this item in stock.
             </div>
           )}
+
 
           <div className="mt-8 grid grid-cols-3 gap-2">
             <Perk icon={<Clock className="h-4 w-4" />} title="Super fast" sub={`${effDeliveryMinutes} min delivery`} />

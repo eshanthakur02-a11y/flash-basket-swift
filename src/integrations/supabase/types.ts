@@ -2964,6 +2964,19 @@ export type Database = {
         Args: { _body: string; _is_internal?: boolean; _ticket_id: string }
         Returns: string
       }
+      product_shop_availability: {
+        Args: {
+          _lat?: number
+          _lng?: number
+          _pincode?: string
+          _product_id: string
+          _variant_id?: string
+        }
+        Returns: {
+          closed_shops: number
+          open_shops: number
+        }[]
+      }
       purge_old_notifications: { Args: never; Returns: undefined }
       rank_riders_for_parent: {
         Args: { _limit?: number; _parent_id: string }
@@ -2975,6 +2988,10 @@ export type Database = {
           score: number
           user_id: string
         }[]
+      }
+      reassign_orders_from_closed_shop: {
+        Args: { _shop_id: string }
+        Returns: number
       }
       reassign_stale_orders: { Args: never; Returns: number }
       release_expired_reservations: { Args: never; Returns: number }

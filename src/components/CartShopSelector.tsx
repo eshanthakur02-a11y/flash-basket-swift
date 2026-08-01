@@ -117,7 +117,10 @@ export function CartShopSelector({
               )}
             </div>
             {noShops ? (
-              <div className="font-bold text-sm text-destructive">No shop in your PIN code has all cart items</div>
+              <div className="font-bold text-sm text-destructive">
+                Sorry, all shops selling these products are currently closed or out of stock.
+              </div>
+
             ) : (
               <>
                 <div className="font-bold text-sm truncate">{displayName}</div>
