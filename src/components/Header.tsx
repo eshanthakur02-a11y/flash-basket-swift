@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { MapPin, User, LogOut, Shield, Clock, Search } from "lucide-react";
+import { User, LogOut, Shield, Search } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "./Logo";
