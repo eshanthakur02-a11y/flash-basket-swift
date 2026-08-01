@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { MapPin, User, LogOut, Shield, Clock, Search } from "lucide-react";
+import { User, LogOut, Shield, Search } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "./Logo";
@@ -29,15 +29,8 @@ export function Header() {
             <Logo />
           </Link>
 
-          <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/60 border border-border">
-            <Clock className="h-4 w-4 text-primary" />
-            <div className="text-xs leading-tight">
-              <div className="font-bold">Delivery in 10 min</div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <MapPin className="h-3 w-3" /> Your location
-              </div>
-            </div>
-          </div>
+
+
 
           <div className="flex-1" />
 
