@@ -26,7 +26,13 @@ function OrdersPage() {
     queryKey: ["orders", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data } = await supabase.from("orders").select("*").order("placed_at", { ascending: false });
+      // Only the columns this list renders, newest 50 (payload trim).
+      const { data } = await supabase
+        .from("orders")
+        .select("id, order_number, status, total, payment_method, placed_at")
+        .order("placed_at", { ascending: false })
+        .limit(50);
+
       return data ?? [];
     },
     enabled: !!user,

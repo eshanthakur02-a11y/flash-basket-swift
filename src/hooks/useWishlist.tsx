@@ -70,20 +70,26 @@ export function useWishlist() {
       return;
     }
     const has = ids.includes(productId);
+    const previous = qc.getQueryData<string[]>(["wishlist", user.id]);
     // Optimistic update
     qc.setQueryData<string[]>(["wishlist", user.id], (prev) => {
       const cur = prev ?? [];
       return has ? cur.filter((i) => i !== productId) : [...cur, productId];
     });
-    if (has) {
-      await supabase.from("wishlist_items").delete()
-        .eq("user_id", user.id).eq("product_id", productId);
-    } else {
-      await supabase.from("wishlist_items")
-        .upsert({ user_id: user.id, product_id: productId }, { onConflict: "user_id,product_id" });
+    const { error } = has
+      ? await supabase.from("wishlist_items").delete().eq("user_id", user.id).eq("product_id", productId)
+      : await supabase
+          .from("wishlist_items")
+          .upsert({ user_id: user.id, product_id: productId }, { onConflict: "user_id,product_id" });
+    if (error) {
+      qc.setQueryData<string[]>(["wishlist", user.id], previous);
+      const { toast } = await import("sonner");
+      toast.error(error.message);
+      return;
     }
     qc.invalidateQueries({ queryKey: ["wishlist", user.id] });
   }, [user, ids, qc]);
+
 
   return { ids, isFav, toggle, loading: !!user && remoteQuery.isLoading };
 }

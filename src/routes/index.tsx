@@ -40,10 +40,17 @@ function HomePage() {
   const categories = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data } = await supabase.from("categories").select("*").order("display_order");
+      const { data } = await supabase
+        .from("categories")
+        .select("id, slug, name, icon, color, display_order")
+        .order("display_order");
       return data ?? [];
     },
+    // Static catalog data — cache aggressively to avoid refetch chatter.
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
+
 
   const featured = useQuery({
     queryKey: ["products", "featured"],

@@ -15,8 +15,12 @@ function CategoryPage() {
 
   const category = useQuery({
     queryKey: ["category", slug],
-    queryFn: async () => (await supabase.from("categories").select("*").eq("slug", slug).maybeSingle()).data,
+    queryFn: async () =>
+      (await supabase.from("categories").select("id, slug, name, icon, color").eq("slug", slug).maybeSingle()).data,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
+
 
   const products = useCustomerProducts({
     categoryId: category.data?.id ?? null,

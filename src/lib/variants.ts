@@ -99,27 +99,31 @@ export async function saveVariants(productId: string, drafts: VariantDraft[]) {
     if (error) throw error;
   }
 
-  const updates = visible.filter((d) => d.id);
-  for (const d of updates) {
-    const { error } = await client
-      .from("product_variants")
-      .update({
-        name: d.name || null,
-        size: d.size,
-        unit: d.unit || null,
-        sku: d.sku || null,
-        barcode: d.barcode || null,
-        weight: d.weight || null,
-        mrp: d.mrp || 0,
-        selling_price: d.selling_price,
-        retail_price: d.retail_price || 0,
-        stock: d.stock,
-        images: d.images,
-        is_available: d.is_available,
-        is_default: d.is_default,
-        display_order: d.display_order ?? 0,
-      })
-      .eq("id", d.id);
+  // Batched bulk update: one upsert instead of one request per variant.
+  const updates = visible
+    .filter((d) => d.id)
+    .map((d, i) => ({
+      id: d.id!,
+      product_id: productId,
+      name: d.name || null,
+      size: d.size,
+      unit: d.unit || null,
+      sku: d.sku || null,
+      barcode: d.barcode || null,
+      weight: d.weight || null,
+      mrp: d.mrp || 0,
+      selling_price: d.selling_price,
+      retail_price: d.retail_price || 0,
+      stock: d.stock,
+      images: d.images,
+      is_available: d.is_available,
+      is_default: d.is_default,
+      display_order: d.display_order ?? i,
+    }));
+
+  if (updates.length) {
+    const { error } = await client.from("product_variants").upsert(updates, { onConflict: "id" });
     if (error) throw error;
   }
 }
+

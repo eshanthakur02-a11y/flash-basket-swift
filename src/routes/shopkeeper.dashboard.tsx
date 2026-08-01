@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { LayoutDashboard, ListOrdered, Package, Wallet, Bell, Star, Settings, Check, X, PackageCheck, Truck, Tag, AlertTriangle } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { DeliveryTypeBadge } from "@/components/FastDeliveryBadge";
+import { runOptimistic, patchRow, removeRow } from "@/lib/optimistic";
+
 
 
 
@@ -127,18 +129,35 @@ function Page() {
 
 
   const accept = async (id: string) => {
-    const { error } = await supabase.rpc("shop_accept_order", { _order_id: id });
-    if (error) toast.error(error.message); else toast.success("Order accepted");
+    await runOptimistic({
+      qc,
+      keys: [["shop-orders", shopId]],
+      updater: patchRow(id, { status: "accepted_by_shop" }),
+      request: () => supabase.rpc("shop_accept_order", { _order_id: id }),
+      success: "Order accepted",
+    });
   };
   const reject = async (id: string) => {
     const reason = window.prompt("Reason for rejecting this order? (optional)") ?? null;
-    const { error } = await (supabase.rpc as any)("shop_reject_order", { _order_id: id, _reason: reason });
-    if (error) toast.error(error.message); else toast.success("Order rejected — re-routing to next shop");
+    await runOptimistic({
+      qc,
+      keys: [["shop-orders", shopId]],
+      // rejected orders leave this shop's queue immediately
+      updater: removeRow(id),
+      request: () => (supabase.rpc as any)("shop_reject_order", { _order_id: id, _reason: reason }),
+      success: "Order rejected — re-routing to next shop",
+    });
   };
   const pack = async (id: string) => {
-    const { error } = await supabase.rpc("shop_mark_packed", { _order_id: id });
-    if (error) toast.error(error.message); else toast.success("Marked packed");
+    await runOptimistic({
+      qc,
+      keys: [["shop-orders", shopId]],
+      updater: patchRow(id, { status: "packed" }),
+      request: () => supabase.rpc("shop_mark_packed", { _order_id: id }),
+      success: "Marked packed",
+    });
   };
+
 
   return (
     <RoleShell role="shopkeeper" nav={NAV} requireRoles={["shopkeeper", "admin"]}>

@@ -13,6 +13,8 @@ import { RouteMap } from "@/components/maps/RouteMap";
 import { MessageCustomerDialog } from "@/components/MessageCustomerDialog";
 import { FastDeliveryBadge, PriorityDot, useCountdown } from "@/components/FastDeliveryBadge";
 import { cn } from "@/lib/utils";
+import { runOptimistic, removeRow } from "@/lib/optimistic";
+
 
 
 
@@ -218,24 +220,26 @@ function Page() {
   });
 
   const acceptAvailable = async (id: string) => {
-    const { error } = await supabase.rpc("partner_accept_order", { _order_id: id });
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Accepted! Start delivery.");
-      qc.invalidateQueries({ queryKey: ["dashboard-available-orders"] });
-      qc.invalidateQueries({ queryKey: ["assigned-to-me", partner?.id] });
-      qc.invalidateQueries({ queryKey: ["my-deliveries"] });
-    }
+    await runOptimistic({
+      qc,
+      keys: [["dashboard-available-orders"], ["assigned-to-me", partner?.id], ["my-deliveries"]],
+      // the order leaves the "available" pool instantly
+      updater: removeRow(id),
+      request: () => supabase.rpc("partner_accept_order", { _order_id: id }),
+      success: "Accepted! Start delivery.",
+    });
   };
 
   const declineAssignment = async (id: string) => {
-    const { error } = await supabase.rpc("partner_decline_assignment", { _order_id: id });
-    if (error) toast.error(error.message);
-    else {
-      toast.message("Declined. Reassigning…");
-      qc.invalidateQueries({ queryKey: ["assigned-to-me", partner?.id] });
-    }
+    const ok = await runOptimistic({
+      qc,
+      keys: [["assigned-to-me", partner?.id]],
+      updater: removeRow(id),
+      request: () => supabase.rpc("partner_decline_assignment", { _order_id: id }),
+    });
+    if (ok) toast.message("Declined. Reassigning…");
   };
+
 
   // Attendance
   const attendance = useQuery({
