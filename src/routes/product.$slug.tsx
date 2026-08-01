@@ -266,7 +266,9 @@ function ProductPage() {
           <div className="text-xs text-muted-foreground">(Inclusive of all taxes)</div>
 
           <div className="mt-6 flex gap-3">
-            {effStock <= 0 ? (
+            {allShopsClosed ? (
+              <Button disabled size="lg" className="rounded-xl h-12">Currently Unavailable</Button>
+            ) : effStock <= 0 ? (
               <Button disabled size="lg" className="rounded-xl">Out of stock</Button>
             ) : line ? (
               <div className="flex items-center gap-1 rounded-xl gradient-primary text-primary-foreground">
@@ -283,6 +285,12 @@ function ProductPage() {
               Go to cart
             </Link>
           </div>
+
+          {allShopsClosed && (
+            <div className="mt-4 rounded-2xl border-2 border-destructive/30 bg-destructive/5 p-4 text-sm font-semibold text-destructive">
+              Sorry, all shops selling this product are currently closed.
+            </div>
+          )}
 
           {/* Available shops picker */}
           {shopSelectionEnabled && eligibleShops.length > 1 && (
@@ -302,11 +310,12 @@ function ProductPage() {
             </div>
           )}
 
-          {shopSelectionEnabled && eligibleShops.length === 0 && delivery.pincode && !eligibleQ.isLoading && (
+          {shopSelectionEnabled && !allShopsClosed && eligibleShops.length === 0 && delivery.pincode && !eligibleQ.isLoading && (
             <div className="mt-6 rounded-2xl border border-dashed border-border p-4 text-sm text-muted-foreground">
               No shop in your area ({delivery.pincode}) currently has this item in stock.
             </div>
           )}
+
 
           <div className="mt-8 grid grid-cols-3 gap-2">
             <Perk icon={<Clock className="h-4 w-4" />} title="Super fast" sub={`${effDeliveryMinutes} min delivery`} />
