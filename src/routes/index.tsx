@@ -167,7 +167,7 @@ function HomePage() {
             </div>
 
             <div className="mt-8 grid grid-cols-3 gap-3 max-w-md">
-              <Feature icon={<Clock className="h-5 w-5" />} label="10-min delivery" />
+              <Feature icon={<Clock className="h-5 w-5" />} label="Lightning fast" />
               <Feature icon={<Truck className="h-5 w-5" />} label="Free above ₹199" />
               <Feature icon={<ShieldCheck className="h-5 w-5" />} label="100% authentic" />
             </div>
