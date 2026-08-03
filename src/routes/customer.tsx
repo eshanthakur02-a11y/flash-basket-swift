@@ -32,7 +32,7 @@ function CustomerShell() {
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      navigate({ to: "/login", replace: true });
+      navigate({ to: "/login", search: { next: pathname } as never, replace: true });
       return;
     }
     const r: string[] = roles ?? [];
