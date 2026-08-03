@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Package, Search, BarChart3 } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Search, BarChart3, Library, AlertCircle } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -43,7 +42,11 @@ import { MAX_PRODUCT_CATEGORIES, loadProductCategories, saveProductCategories } 
 import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
 import { loadVariants, rowToDraft, saveVariants } from "@/lib/variants";
 import { rupees } from "@/lib/format";
-import { expiryStatus, shelfLifeDays, daysUntil } from "@/lib/expiry";
+import { expiryStatus } from "@/lib/expiry";
+import { DateRangeFields, dateRangeError } from "@/components/DateRangeFields";
+import { CatalogDialogContent } from "@/components/CatalogBrowser";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
 
@@ -99,6 +102,7 @@ function Page() {
   const [editing, setEditing] = useState<ShopProduct | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState<ShopProduct | null>(null);
 
   useEffect(() => {
@@ -149,24 +153,49 @@ function Page() {
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
       <div className="p-4 md:p-6 max-w-6xl mx-auto">
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <h1 className="font-display text-3xl font-extrabold flex-1">Inventory</h1>
-          <Button asChild variant="outline" size="sm" className="gap-1">
-            <Link to="/shopkeeper/inventory-insights"><BarChart3 className="h-4 w-4" />Insights</Link>
-          </Button>
-          {shopId && (
-            <Dialog open={addOpen} onOpenChange={setAddOpen}>
-              <DialogTrigger asChild>
-                <Button><Plus className="h-4 w-4 mr-1" />Add product</Button>
-              </DialogTrigger>
-              <AddProductDialog
-                shopId={shopId}
-                categories={cats.data ?? []}
-                existingProductIds={new Set((items.data ?? []).map((s) => s.product_id))}
-                onDone={() => { setAddOpen(false); refresh(); }}
-              />
-            </Dialog>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {shopId && (
+              <>
+                <Dialog open={catalogOpen} onOpenChange={setCatalogOpen}>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="gap-1 bg-card">
+                            <Library className="h-4 w-4" />
+                            <span className="hidden xs:inline">Add from Catalog</span>
+                            <span className="xs:hidden">Catalog</span>
+                          </Button>
+                        </DialogTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Add an existing FlashBasket product to your shop.</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <CatalogDialogContent
+                    shopId={shopId}
+                    categories={cats.data ?? []}
+                    onDone={() => { setCatalogOpen(false); refresh(); }}
+                  />
+                </Dialog>
+                <Dialog open={addOpen} onOpenChange={setAddOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-1"><Plus className="h-4 w-4" />Add Product</Button>
+                  </DialogTrigger>
+                  <AddProductDialog
+                    shopId={shopId}
+                    categories={cats.data ?? []}
+                    onOpenCatalog={() => { setAddOpen(false); setCatalogOpen(true); }}
+                    onDone={() => { setAddOpen(false); refresh(); }}
+                  />
+                </Dialog>
+              </>
+            )}
+            <Button asChild variant="outline" size="sm" className="gap-1 sm:ml-2">
+              <Link to="/shopkeeper/inventory-insights"><BarChart3 className="h-4 w-4" />Insights</Link>
+            </Button>
+          </div>
         </div>
 
         {!shopId ? (
@@ -405,30 +434,24 @@ function EditDialog({
 }
 
 function AddProductDialog({
-  shopId, categories, existingProductIds, onDone,
-}: { shopId: string; categories: Category[]; existingProductIds: Set<string>; onDone: () => void }) {
+  shopId, categories, onOpenCatalog, onDone,
+}: { shopId: string; categories: Category[]; onOpenCatalog: () => void; onDone: () => void }) {
   return (
     <DialogContent className="max-h-[90vh] overflow-y-auto">
-      <DialogHeader><DialogTitle>Add product</DialogTitle></DialogHeader>
-      <Tabs defaultValue="new">
-        <TabsList className="grid grid-cols-2 w-full">
-          <TabsTrigger value="new">Create new</TabsTrigger>
-          <TabsTrigger value="catalog">From catalog</TabsTrigger>
-        </TabsList>
-        <TabsContent value="new" className="mt-3">
-          <CreateNewProduct shopId={shopId} categories={categories} onDone={onDone} />
-        </TabsContent>
-        <TabsContent value="catalog" className="mt-3">
-          <FromCatalog shopId={shopId} existingProductIds={existingProductIds} onDone={onDone} />
-        </TabsContent>
-      </Tabs>
+      <DialogHeader><DialogTitle>Add a new product</DialogTitle></DialogHeader>
+      <CreateNewProduct
+        shopId={shopId}
+        categories={categories}
+        onOpenCatalog={onOpenCatalog}
+        onDone={onDone}
+      />
     </DialogContent>
   );
 }
 
 function CreateNewProduct({
-  shopId, categories, onDone,
-}: { shopId: string; categories: Category[]; onDone: () => void }) {
+  shopId, categories, onOpenCatalog, onDone,
+}: { shopId: string; categories: Category[]; onOpenCatalog: () => void; onDone: () => void }) {
   const [productType, setProductType] = useState<"simple" | "variants">("simple");
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
@@ -444,7 +467,26 @@ function CreateNewProduct({
   const [expDate, setExpDate] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
+  // ---- Smart duplicate detection against the FlashBasket master catalog ----
+  const debouncedName = useDebouncedValue(name.trim(), 300);
+  const dup = useQuery({
+    queryKey: ["catalog-duplicate", debouncedName, shopId],
+    enabled: debouncedName.length >= 2,
+    staleTime: 30_000,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc("find_catalog_duplicate", {
+        _name: debouncedName,
+        _shop_id: shopId,
+      });
+      if (error) throw error;
+      const row = ((data ?? []) as any[])[0];
+      return (row ?? null) as { id: string; name: string; brand: string | null; unit: string | null; already_added: boolean } | null;
+    },
+  });
+  const duplicate = debouncedName.length >= 2 ? (dup.data ?? null) : null;
+
   async function save() {
+    if (duplicate) return toast.error("This product already exists in FlashBasket. Use \"Add from Catalog\" instead.");
     if (!name.trim()) return toast.error("Product name is required");
     if (categoryIds.length === 0) return toast.error("Select at least one category");
 
@@ -579,6 +621,26 @@ function CreateNewProduct({
           <div>
             <label className="text-xs font-bold">Name <span className="text-destructive">*</span></label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Amul Gold Milk" />
+            {duplicate && (
+              <div className="mt-2 rounded-xl border border-primary/40 bg-primary/10 p-3">
+                <p className="text-sm font-semibold flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                  {duplicate.already_added
+                    ? `${duplicate.name} has already been added to your shop.`
+                    : `This product already exists in FlashBasket. Please use "Add from Catalog" instead.`}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 ml-6">
+                  Match: {duplicate.name}{duplicate.unit ? ` · ${duplicate.unit}` : ""}{duplicate.brand ? ` · ${duplicate.brand}` : ""}
+                </p>
+                {!duplicate.already_added && (
+                  <div className="mt-2 flex gap-2 ml-6">
+                    <Button size="sm" onClick={onOpenCatalog} className="gap-1">
+                      <Library className="h-4 w-4" />Open Catalog
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -634,8 +696,8 @@ function CreateNewProduct({
       </div>
 
       <div className="sticky bottom-0 left-0 right-0 -mx-6 px-6 py-3 bg-background/95 backdrop-blur border-t border-border">
-        <Button className="w-full" disabled={saving} onClick={save}>
-          {saving ? "Creating..." : "Create Product"}
+        <Button className="w-full" disabled={saving || !!duplicate} onClick={save}>
+          {duplicate ? "Product already exists" : saving ? "Creating..." : "Create Product"}
         </Button>
       </div>
     </div>
@@ -643,119 +705,6 @@ function CreateNewProduct({
 }
 
 
-
-function FromCatalog({
-  shopId, existingProductIds, onDone,
-}: { shopId: string; existingProductIds: Set<string>; onDone: () => void }) {
-  const [q, setQ] = useState("");
-  const [selected, setSelected] = useState<CatalogProduct | null>(null);
-  const [price, setPrice] = useState<number>(0);
-  const [stock, setStock] = useState<number>(0);
-  const [mfgDate, setMfgDate] = useState<string>("");
-  const [expDate, setExpDate] = useState<string>("");
-  const [saving, setSaving] = useState(false);
-
-
-  const catalog = useQuery({
-    queryKey: ["catalog-add", q],
-    queryFn: async () => {
-      let qb = supabase.from("products").select("id, name, unit, image_url, price, mrp").order("name").limit(50);
-      if (q.trim()) qb = qb.ilike("name", `%${q}%`);
-      const { data, error } = await qb;
-      if (error) throw error;
-      return (data ?? []) as CatalogProduct[];
-    },
-  });
-
-  function pick(p: CatalogProduct) {
-    setSelected(p);
-    setPrice(p.price);
-    setStock(0);
-  }
-
-  async function save() {
-    if (!selected) return;
-    const dErr = dateRangeError(mfgDate, expDate);
-    if (dErr) { toast.error(dErr); return; }
-    setSaving(true);
-    const { error } = await supabase.from("shop_products").insert({
-      shop_id: shopId,
-      product_id: selected.id,
-      price,
-      stock,
-      is_available: true,
-      manufacturing_date: mfgDate || null,
-      expiry_date: expDate || null,
-    } as any);
-
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Added to inventory");
-    onDone();
-  }
-
-  if (!selected) {
-    return (
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search catalog..." className="pl-9" />
-        </div>
-        <div className="max-h-80 overflow-y-auto divide-y divide-border rounded-xl border border-border">
-          {(catalog.data ?? []).map((p) => {
-            const exists = existingProductIds.has(p.id);
-            return (
-              <button
-                key={p.id}
-                disabled={exists}
-                onClick={() => pick(p)}
-                className="w-full flex items-center gap-3 p-2 text-left hover:bg-secondary disabled:opacity-50"
-              >
-                {p.image_url ? <img loading="lazy" decoding="async" src={p.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" /> : <div className="h-10 w-10 rounded-lg bg-secondary" />}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">{p.unit} · MRP {rupees(p.mrp)}</div>
-                </div>
-                {exists && <span className="text-xs text-muted-foreground">Added</span>}
-              </button>
-            );
-          })}
-          {catalog.data && catalog.data.length === 0 && <p className="p-4 text-sm text-muted-foreground text-center">No products found.</p>}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3 p-2 rounded-xl bg-secondary">
-        {selected.image_url ? <img loading="lazy" decoding="async" src={selected.image_url} alt="" className="h-12 w-12 rounded-lg object-cover" /> : <div className="h-12 w-12 rounded-lg bg-card" />}
-        <div className="flex-1">
-          <div className="font-bold text-sm">{selected.name}</div>
-          <div className="text-xs text-muted-foreground">{selected.unit}</div>
-        </div>
-        <Button variant="ghost" size="sm" onClick={() => setSelected(null)}>Change</Button>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs font-bold">Your price ₹</label>
-          <Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
-        </div>
-        <div>
-          <label className="text-xs font-bold">Stock</label>
-          <Input type="number" value={stock} onChange={(e) => setStock(Number(e.target.value))} />
-        </div>
-      </div>
-      <DateRangeFields
-        mfg={mfgDate} exp={expDate}
-        onMfg={setMfgDate} onExp={setExpDate}
-      />
-      <DialogFooter>
-        <Button disabled={saving} onClick={save}>{saving ? "Adding..." : "Add to inventory"}</Button>
-      </DialogFooter>
-    </div>
-  );
-}
 
 export { dateRangeError } from "@/components/DateRangeFields";
 
