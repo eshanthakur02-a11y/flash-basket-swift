@@ -1409,6 +1409,7 @@ export type Database = {
           is_featured: boolean
           mrp: number
           name: string
+          name_normalized: string | null
           price: number
           rating: number
           slug: string
@@ -1431,6 +1432,7 @@ export type Database = {
           is_featured?: boolean
           mrp: number
           name: string
+          name_normalized?: string | null
           price: number
           rating?: number
           slug: string
@@ -1453,6 +1455,7 @@ export type Database = {
           is_featured?: boolean
           mrp?: number
           name?: string
+          name_normalized?: string | null
           price?: number
           rating?: number
           slug?: string
@@ -1823,41 +1826,56 @@ export type Database = {
       }
       shop_products: {
         Row: {
+          barcode: string | null
           created_at: string
           expiry_date: string | null
           id: string
+          images: string[]
           initial_stock: number | null
           is_available: boolean
           manufacturing_date: string | null
+          mrp: number | null
           price: number
           product_id: string
+          retail_price: number | null
           shop_id: string
+          sku: string | null
           stock: number
           updated_at: string
         }
         Insert: {
+          barcode?: string | null
           created_at?: string
           expiry_date?: string | null
           id?: string
+          images?: string[]
           initial_stock?: number | null
           is_available?: boolean
           manufacturing_date?: string | null
+          mrp?: number | null
           price: number
           product_id: string
+          retail_price?: number | null
           shop_id: string
+          sku?: string | null
           stock?: number
           updated_at?: string
         }
         Update: {
+          barcode?: string | null
           created_at?: string
           expiry_date?: string | null
           id?: string
+          images?: string[]
           initial_stock?: number | null
           is_available?: boolean
           manufacturing_date?: string | null
+          mrp?: number | null
           price?: number
           product_id?: string
+          retail_price?: number | null
           shop_id?: string
+          sku?: string | null
           stock?: number
           updated_at?: string
         }
@@ -2709,6 +2727,17 @@ export type Database = {
         }
         Returns: string
       }
+      find_catalog_duplicate: {
+        Args: { _name: string; _shop_id?: string }
+        Returns: {
+          already_added: boolean
+          brand: string
+          id: string
+          image: string
+          name: string
+          unit: string
+        }[]
+      }
       find_nearest_partner_for_order: {
         Args: { _exclude?: string[]; _order_id: string }
         Returns: string
@@ -2845,6 +2874,13 @@ export type Database = {
           stock: number
         }[]
       }
+      master_catalog_brands: {
+        Args: never
+        Returns: {
+          brand: string
+        }[]
+      }
+      normalize_product_name: { Args: { _name: string }; Returns: string }
       notify_expiring_products: { Args: never; Returns: undefined }
       notify_role: {
         Args: {
@@ -3035,6 +3071,28 @@ export type Database = {
       rider_verify_pickup: {
         Args: { _child_id: string; _otp: string }
         Returns: undefined
+      }
+      search_master_catalog: {
+        Args: {
+          _brand?: string
+          _category_id?: string
+          _limit?: number
+          _offset?: number
+          _q?: string
+          _shop_id?: string
+        }
+        Returns: {
+          already_added: boolean
+          brand: string
+          category_names: string[]
+          id: string
+          image: string
+          mrp: number
+          name: string
+          price: number
+          total_count: number
+          unit: string
+        }[]
       }
       send_onesignal_push: {
         Args: { _notification_id: string }
