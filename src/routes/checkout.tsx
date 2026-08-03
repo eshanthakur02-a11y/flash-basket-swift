@@ -18,6 +18,7 @@ import { openRazorpayCheckout } from "@/integrations/razorpay/checkout";
 import { createRazorpayOrder, verifyRazorpayPayment, recordPaymentFailure } from "@/lib/razorpay.functions";
 import { LocationPicker } from "@/components/maps/LocationPicker";
 import { CartShopSelector } from "@/components/CartShopSelector";
+import { AuthRequired } from "@/components/AuthRequired";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — FlashBasket" }] }),
@@ -147,7 +148,15 @@ function CheckoutPage() {
     }
   }, [addresses.data, selectedAddr]);
 
-  if (!user) return <Navigate to="/auth" />;
+  if (!user) {
+    return (
+      <AuthRequired
+        next="/checkout"
+        title="Almost There"
+        description="Sign in to confirm your delivery address and place this order."
+      />
+    );
+  }
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { MapPin, Trash2 } from "lucide-react";
+import { AuthRequired } from "@/components/AuthRequired";
 
 export const Route = createFileRoute("/account")({
   head: () => ({ meta: [{ title: "My account — FlashBasket" }] }),
@@ -39,7 +40,14 @@ function AccountPage() {
   const [phone, setPhone] = useState("");
 
   if (!user) {
-    return <div className="mx-auto max-w-md px-4 py-20 text-center"><Link to="/auth" className="text-primary font-bold">Sign in →</Link></div>;
+    return (
+      <AuthRequired
+        next="/account"
+        title="Your Account"
+        description="Sign in to manage your profile, saved addresses and preferences."
+        icon={<MapPin className="h-12 w-12 text-primary" strokeWidth={1.75} />}
+      />
+    );
   }
 
   if (profile.data && !name) {

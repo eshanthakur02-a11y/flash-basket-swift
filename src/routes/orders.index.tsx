@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { rupees } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuthRequired } from "@/components/AuthRequired";
 
 export const Route = createFileRoute("/orders/")({
   head: () => ({ meta: [{ title: "My orders — FlashBasket" }] }),
