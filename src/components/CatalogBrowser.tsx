@@ -333,7 +333,7 @@ function AddToShopForm({
         <DateRangeFields mfg={mfgDate} exp={expDate} onMfg={setMfgDate} onExp={setExpDate} />
 
         <div className="pt-2 border-t border-border">
-          <MultiImageInput value={images} onChange={setImages} label="Your product images (optional)" />
+          <MultiImageInput value={images} onChange={setImages} label="Your product images (optional)" required={false} />
         </div>
 
         <div className="pt-2 border-t border-border">
