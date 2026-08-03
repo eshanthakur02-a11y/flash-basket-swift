@@ -282,10 +282,18 @@ function CatalogFilters({ categories }: { categories: Array<{ id: string; slug: 
         ids = (pc ?? []).map((r) => r.product_id);
         if (ids.length === 0) return [];
       }
+      if (activeCat) {
+        const { data: catLinks } = await (supabase as any)
+          .from("product_categories")
+          .select("product_id")
+          .eq("category_id", activeCat);
+        const catIds = ((catLinks ?? []) as { product_id: string }[]).map((r) => r.product_id);
+        ids = ids ? ids.filter((id) => catIds.includes(id)) : catIds;
+        if (ids.length === 0) return [];
+      }
       let qb = supabase
         .from("products")
         .select("id, slug, name, unit, price, mrp, image_url, delivery_minutes, stock, rating, category_id");
-      if (activeCat) qb = qb.eq("category_id", activeCat);
       if (ids) qb = qb.in("id", ids);
       if (maxPrice < 1000) qb = qb.lte("price", maxPrice);
       if (inStock) qb = qb.gt("stock", 0);

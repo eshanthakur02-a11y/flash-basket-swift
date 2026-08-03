@@ -38,6 +38,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MultiImageInput } from "@/components/MultiImageInput";
+import { MultiCategorySelect } from "@/components/MultiCategorySelect";
+import { MAX_PRODUCT_CATEGORIES, loadProductCategories, saveProductCategories } from "@/lib/productCategories";
 import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
 import { loadVariants, rowToDraft, saveVariants } from "@/lib/variants";
 import { rupees } from "@/lib/format";
@@ -271,7 +273,9 @@ function EditDialog({
   const [brand, setBrand] = useState(item.products?.brand ?? "");
   const [description, setDescription] = useState(item.products?.description ?? "");
   const [mrp, setMrp] = useState(item.products?.mrp ?? 0);
-  const [categoryId, setCategoryId] = useState(item.products?.category_id ?? "");
+  const [categoryIds, setCategoryIds] = useState<string[]>(
+    item.products?.category_id ? [item.products.category_id] : [],
+  );
   const initialGallery = (item.products?.image_gallery && item.products.image_gallery.length > 0)
     ? item.products.image_gallery
     : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
@@ -285,9 +289,13 @@ function EditDialog({
   useEffect(() => {
     if (!item.product_id) return;
     loadVariants(item.product_id).then((rows) => setVariants(rows.map(rowToDraft))).catch(() => {});
-  }, [item.product_id]);
+    loadProductCategories(item.product_id, item.products?.category_id ?? null)
+      .then((ids) => { if (ids.length > 0) setCategoryIds(ids); })
+      .catch(() => {});
+  }, [item.product_id, item.products?.category_id]);
 
   async function save() {
+    if (categoryIds.length === 0) { toast.error("Select at least one category"); return; }
     const dErr = dateRangeError(mfgDate, expDate);
     if (dErr) { toast.error(dErr); return; }
     setSaving(true);
@@ -300,10 +308,11 @@ function EditDialog({
             image_url: gallery[0] ?? null,
             cover_image: gallery[0] ?? null,
             image_gallery: gallery,
-            category_id: categoryId || null,
+            category_id: categoryIds[0] ?? null,
           })
           .eq("id", item.product_id);
         if (pErr) throw pErr;
+        await saveProductCategories(item.product_id, categoryIds);
         await saveVariants(item.product_id, variants);
       }
       // Update shop_products
@@ -348,11 +357,13 @@ function EditDialog({
           </div>
         </div>
         <div>
-          <label className="text-xs font-bold">Category</label>
-          <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-            <SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-          </Select>
+          <label className="text-xs font-bold">Categories <span className="text-destructive">*</span></label>
+          <MultiCategorySelect
+            options={categories}
+            value={categoryIds}
+            onChange={setCategoryIds}
+            max={MAX_PRODUCT_CATEGORIES}
+          />
         </div>
         <div>
           <label className="text-xs font-bold">Description</label>
@@ -423,7 +434,7 @@ function CreateNewProduct({
   const [brand, setBrand] = useState("");
   const [unit, setUnit] = useState("1 pc");
   const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [gallery, setGallery] = useState<string[]>([]);
   const [price, setPrice] = useState<number>(0);
   const [mrp, setMrp] = useState<number>(0);
@@ -435,7 +446,7 @@ function CreateNewProduct({
 
   async function save() {
     if (!name.trim()) return toast.error("Product name is required");
-    if (!categoryId) return toast.error("Please select a category");
+    if (categoryIds.length === 0) return toast.error("Select at least one category");
 
     const activeVariants = variants.filter((v) => !v._deleted);
 
@@ -478,13 +489,15 @@ function CreateNewProduct({
           image_url: gallery[0] ?? null,
           cover_image: gallery[0] ?? null,
           image_gallery: gallery,
-          category_id: categoryId, brand, unit: baseUnit,
+          category_id: categoryIds[0], brand, unit: baseUnit,
           price: basePrice, mrp: baseMrp, stock: 0,
           is_available: true,
         })
         .select("id")
         .single();
       if (pErr) throw pErr;
+
+      await saveProductCategories(prod.id, categoryIds);
 
       const shopStock = isVariantMode
         ? activeVariants.reduce((s, v) => s + (Number(v.stock) || 0), 0)
@@ -572,13 +585,15 @@ function CreateNewProduct({
               <label className="text-xs font-bold">Brand</label>
               <Input value={brand} onChange={(e) => setBrand(e.target.value)} />
             </div>
-            <div>
-              <label className="text-xs font-bold">Category <span className="text-destructive">*</span></label>
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                <SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+          </div>
+          <div>
+            <label className="text-xs font-bold">Categories <span className="text-destructive">*</span></label>
+            <MultiCategorySelect
+              options={categories}
+              value={categoryIds}
+              onChange={setCategoryIds}
+              max={MAX_PRODUCT_CATEGORIES}
+            />
           </div>
           <div>
             <label className="text-xs font-bold">Description</label>
