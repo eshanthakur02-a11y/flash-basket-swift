@@ -22,7 +22,7 @@ import {
   saveProductCategories,
 } from "@/lib/productCategories";
 
-const searchSchema = z.object({ filter: z.string().optional() });
+const searchSchema = z.object({ filter: z.string().optional(), cat: z.string().optional() });
 
 export const Route = createFileRoute("/admin/products")({
   head: () => ({ meta: [{ title: "Products — Admin" }] }),
@@ -41,13 +41,13 @@ function slugify(s: string) { return s.toLowerCase().trim().replace(/[^a-z0-9]+/
 const LOW_STOCK = 5;
 
 function Page() {
-  const { filter } = useSearch({ from: "/admin/products" });
+  const { filter, cat } = useSearch({ from: "/admin/products" });
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState<Product | null>(null);
   const [q, setQ] = useState("");
-  const [catFilter, setCatFilter] = useState<string>("all");
+  const [catFilter, setCatFilter] = useState<string>(cat ?? "all");
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["admin-products"],

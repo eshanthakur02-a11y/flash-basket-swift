@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, Tag } from "lucide-react";
@@ -91,6 +91,9 @@ function Page() {
                 <div className="font-bold truncate">{c.name}</div>
                 <div className="text-xs text-muted-foreground truncate">/{c.slug} · order {c.display_order}</div>
               </div>
+              <Link to="/admin/products" search={{ cat: c.id }} className="text-xs font-semibold text-primary underline-offset-2 hover:underline">
+                View products
+              </Link>
               <Button size="icon" variant="ghost" onClick={() => { setEditing(c); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
               <Button size="icon" variant="ghost" onClick={() => setConfirmDel(c)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
             </div>

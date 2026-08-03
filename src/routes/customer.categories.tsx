@@ -5,6 +5,7 @@ import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Search, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { loadProductCategoriesMap } from "@/lib/productCategories";
 import { useDeliveryContext } from "@/hooks/useDeliveryContext";
 
 
@@ -93,9 +94,13 @@ function CategoriesBrowse() {
         _limit: 1000,
         _ids: null,
       });
+      const rows = (data ?? []) as any[];
+      const ids = rows.map((r) => r.id);
+      const linkMap = await loadProductCategoriesMap(ids);
       const map: Record<string, number> = {};
-      (data ?? []).forEach((r: any) => {
-        if (r.category_id) map[r.category_id] = (map[r.category_id] ?? 0) + 1;
+      rows.forEach((r: any) => {
+        const cats = linkMap[r.id]?.length ? linkMap[r.id] : (r.category_id ? [r.category_id] : []);
+        new Set(cats).forEach((cid) => { map[cid] = (map[cid] ?? 0) + 1; });
       });
       return map;
     },
