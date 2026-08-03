@@ -79,15 +79,6 @@ type ShopProduct = {
   } | null;
 };
 
-type CatalogProduct = {
-  id: string;
-  name: string;
-  unit: string;
-  image_url: string | null;
-  price: number;
-  mrp: number;
-};
-
 type Category = { id: string; name: string };
 
 function slugify(s: string) {
