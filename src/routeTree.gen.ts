@@ -20,6 +20,7 @@ import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomerRouteImport } from './routes/customer'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -145,6 +146,11 @@ const CustomerRoute = CustomerRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -512,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -596,6 +603,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -681,6 +689,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -767,6 +776,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/cart'
     | '/checkout'
     | '/customer'
     | '/dashboard'
@@ -851,6 +861,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/cart'
     | '/checkout'
     | '/customer'
     | '/dashboard'
@@ -935,6 +946,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/cart'
     | '/checkout'
     | '/customer'
     | '/dashboard'
@@ -1020,6 +1032,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
+  CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   CustomerRoute: typeof CustomerRouteWithChildren
   DashboardRoute: typeof DashboardRoute
@@ -1116,6 +1129,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -1811,6 +1831,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
+  CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   CustomerRoute: CustomerRouteWithChildren,
   DashboardRoute: DashboardRoute,
@@ -1833,13 +1854,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
