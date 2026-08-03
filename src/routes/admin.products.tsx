@@ -1,5 +1,5 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, Package, AlertTriangle } from "lucide-react";
@@ -14,6 +14,13 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { rupees } from "@/lib/format";
 import { ImageInput } from "@/components/ImageInput";
+import { MultiCategorySelect } from "@/components/MultiCategorySelect";
+import {
+  MAX_PRODUCT_CATEGORIES,
+  loadProductCategories,
+  loadProductCategoriesMap,
+  saveProductCategories,
+} from "@/lib/productCategories";
 
 const searchSchema = z.object({ filter: z.string().optional() });
 
@@ -60,18 +67,26 @@ function Page() {
     },
   });
 
+  const { data: catMap = {} } = useQuery({
+    queryKey: ["admin-product-categories"],
+    enabled: data.length > 0,
+    queryFn: () => loadProductCategoriesMap(data.map((p) => p.id)),
+  });
+
   const save = useMutation({
-    mutationFn: async (p: Partial<Product>) => {
+    mutationFn: async ({ categoryIds, ...p }: Partial<Product> & { categoryIds: string[] }) => {
       const payload = { ...p, slug: p.slug || slugify(p.name || "") };
       if (editing?.id) {
         const { error } = await supabase.from("products").update(payload).eq("id", editing.id);
         if (error) throw error;
+        await saveProductCategories(editing.id, categoryIds);
       } else {
-        const { error } = await supabase.from("products").insert(payload as any);
+        const { data: row, error } = await supabase.from("products").insert(payload as any).select("id").single();
         if (error) throw error;
+        await saveProductCategories(row.id, categoryIds);
       }
     },
-    onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["admin-products"] }); setOpen(false); setEditing(null); },
+    onSuccess: () => { toast.success("Saved"); qc.invalidateQueries({ queryKey: ["admin-products"] }); qc.invalidateQueries({ queryKey: ["admin-product-categories"] }); setOpen(false); setEditing(null); },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -85,7 +100,7 @@ function Page() {
   });
 
   let filtered = data.filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
-  if (catFilter !== "all") filtered = filtered.filter(p => p.category_id === catFilter);
+  if (catFilter !== "all") filtered = filtered.filter(p => p.category_id === catFilter || (catMap[p.id] ?? []).includes(catFilter));
   if (filter === "low-stock") filtered = filtered.filter(p => p.stock <= LOW_STOCK);
 
   return (
@@ -160,12 +175,19 @@ function Page() {
   );
 }
 
-function ProductDialog({ initial, categories, onSave, saving }: { initial: Product | null; categories: Category[]; onSave: (p: Partial<Product>) => void; saving: boolean }) {
+function ProductDialog({ initial, categories, onSave, saving }: { initial: Product | null; categories: Category[]; onSave: (p: Partial<Product> & { categoryIds: string[] }) => void; saving: boolean }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
-  const [categoryId, setCategoryId] = useState(initial?.category_id ?? "");
+  const [categoryIds, setCategoryIds] = useState<string[]>(initial?.category_id ? [initial.category_id] : []);
+
+  useEffect(() => {
+    if (!initial?.id) return;
+    loadProductCategories(initial.id, initial.category_id)
+      .then((ids) => { if (ids.length > 0) setCategoryIds(ids); })
+      .catch(() => {});
+  }, [initial?.id, initial?.category_id]);
   const [price, setPrice] = useState(initial?.price ?? 0);
   const [mrp, setMrp] = useState(initial?.mrp ?? 0);
   const [unit, setUnit] = useState(initial?.unit ?? "1 pc");
@@ -185,11 +207,13 @@ function ProductDialog({ initial, categories, onSave, saving }: { initial: Produ
           <div><label className="text-xs font-bold">Brand</label><Input value={brand} onChange={(e) => setBrand(e.target.value)} /></div>
         </div>
         <div>
-          <label className="text-xs font-bold">Category</label>
-          <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-            <SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-          </Select>
+          <label className="text-xs font-bold">Categories</label>
+          <MultiCategorySelect
+            options={categories}
+            value={categoryIds}
+            onChange={setCategoryIds}
+            max={MAX_PRODUCT_CATEGORIES}
+          />
         </div>
         <div><label className="text-xs font-bold">Description</label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} /></div>
         <ImageInput value={imageUrl} onChange={setImageUrl} bucket="products" label="Product image" required />
@@ -206,8 +230,8 @@ function ProductDialog({ initial, categories, onSave, saving }: { initial: Produ
         </div>
       </div>
       <DialogFooter>
-        <Button disabled={!name || !categoryId || !imageUrl || saving} onClick={() => onSave({
-          name, slug: slug || slugify(name), description, image_url: imageUrl, category_id: categoryId,
+        <Button disabled={!name || categoryIds.length === 0 || !imageUrl || saving} onClick={() => onSave({
+          name, slug: slug || slugify(name), description, image_url: imageUrl, category_id: categoryIds[0] ?? null, categoryIds,
           price, mrp: mrp || price, unit, stock, brand,
           is_available: available, is_featured: featured, is_bestseller: bestseller,
         })}>{saving ? "Saving..." : "Save"}</Button>
