@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as StaffLoginRouteImport } from './routes/staff-login'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -20,6 +21,7 @@ import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CustomerRouteImport } from './routes/customer'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -92,6 +94,11 @@ import { Route as ApiPublicOneSignalSDKWorkerDotjsRouteImport } from './routes/a
 import { Route as ApiPublicOneSignalSDKUpdaterWorkerDotjsRouteImport } from './routes/api/public/OneSignalSDKUpdaterWorker[.]js'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
 
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -145,6 +152,11 @@ const CustomerRoute = CustomerRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -512,6 +524,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -523,6 +536,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
+  '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -596,6 +610,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -607,6 +622,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
+  '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -681,6 +697,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
+  '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/customer': typeof CustomerRouteWithChildren
   '/dashboard': typeof DashboardRoute
@@ -692,6 +709,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
+  '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -767,6 +785,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/cart'
     | '/checkout'
     | '/customer'
     | '/dashboard'
@@ -778,6 +797,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/staff-login'
     | '/support'
+    | '/wishlist'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -851,6 +871,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/cart'
     | '/checkout'
     | '/customer'
     | '/dashboard'
@@ -862,6 +883,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/staff-login'
     | '/support'
+    | '/wishlist'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -935,6 +957,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/auth'
+    | '/cart'
     | '/checkout'
     | '/customer'
     | '/dashboard'
@@ -946,6 +969,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/staff-login'
     | '/support'
+    | '/wishlist'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -1020,6 +1044,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
+  CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   CustomerRoute: typeof CustomerRouteWithChildren
   DashboardRoute: typeof DashboardRoute
@@ -1031,6 +1056,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   StaffLoginRoute: typeof StaffLoginRoute
   SupportRoute: typeof SupportRouteWithChildren
+  WishlistRoute: typeof WishlistRoute
   CategorySlugRoute: typeof CategorySlugRoute
   OrdersIdRoute: typeof OrdersIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -1041,6 +1067,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/support': {
       id: '/support'
       path: '/support'
@@ -1116,6 +1149,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -1811,6 +1851,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
+  CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   CustomerRoute: CustomerRouteWithChildren,
   DashboardRoute: DashboardRoute,
@@ -1822,6 +1863,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   StaffLoginRoute: StaffLoginRoute,
   SupportRoute: SupportRouteWithChildren,
+  WishlistRoute: WishlistRoute,
   CategorySlugRoute: CategorySlugRoute,
   OrdersIdRoute: OrdersIdRoute,
   ProductSlugRoute: ProductSlugRoute,

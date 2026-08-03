@@ -21,12 +21,12 @@ function AppCart() {
       <div className="px-4 py-20 text-center">
         <div className="text-7xl">🛒</div>
         <h2 className="font-display text-2xl font-bold mt-4">Your cart is empty</h2>
-        <p className="text-muted-foreground mt-2 text-sm">Add some fresh groceries to get started.</p>
+        <p className="text-muted-foreground mt-2 text-sm">Looks like you haven't added anything yet.</p>
         <Link
           to="/customer/categories"
           className="mt-6 inline-block rounded-2xl gradient-primary px-6 py-3 font-bold text-primary-foreground shadow-glow"
         >
-          Shop now
+          Continue Shopping
         </Link>
       </div>
     );
