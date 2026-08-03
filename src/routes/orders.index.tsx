@@ -39,8 +39,16 @@ function OrdersPage() {
   });
 
   if (!user) {
-    return <div className="mx-auto max-w-md px-4 py-20 text-center"><Link to="/auth" className="text-primary font-bold">Sign in to view orders →</Link></div>;
+    return (
+      <AuthRequired
+        next="/orders"
+        title="Track Your Orders"
+        description="Sign in to see your order history, live tracking and past invoices."
+        icon={<Package className="h-12 w-12 text-primary" strokeWidth={1.75} />}
+      />
+    );
   }
+
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
