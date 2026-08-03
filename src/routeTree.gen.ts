@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as StaffLoginRouteImport } from './routes/staff-login'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -93,6 +94,11 @@ import { Route as ApiPublicOneSignalSDKWorkerDotjsRouteImport } from './routes/a
 import { Route as ApiPublicOneSignalSDKUpdaterWorkerDotjsRouteImport } from './routes/api/public/OneSignalSDKUpdaterWorker[.]js'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
 
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -530,6 +536,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
+  '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -615,6 +622,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
+  '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -701,6 +709,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
   '/support': typeof SupportRouteWithChildren
+  '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/complaints': typeof AdminComplaintsRoute
   '/admin/coupons': typeof AdminCouponsRoute
@@ -788,6 +797,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/staff-login'
     | '/support'
+    | '/wishlist'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -873,6 +883,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/staff-login'
     | '/support'
+    | '/wishlist'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -958,6 +969,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/staff-login'
     | '/support'
+    | '/wishlist'
     | '/admin/categories'
     | '/admin/complaints'
     | '/admin/coupons'
@@ -1044,6 +1056,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   StaffLoginRoute: typeof StaffLoginRoute
   SupportRoute: typeof SupportRouteWithChildren
+  WishlistRoute: typeof WishlistRoute
   CategorySlugRoute: typeof CategorySlugRoute
   OrdersIdRoute: typeof OrdersIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -1054,6 +1067,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/support': {
       id: '/support'
       path: '/support'
@@ -1843,6 +1863,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   StaffLoginRoute: StaffLoginRoute,
   SupportRoute: SupportRouteWithChildren,
+  WishlistRoute: WishlistRoute,
   CategorySlugRoute: CategorySlugRoute,
   OrdersIdRoute: OrdersIdRoute,
   ProductSlugRoute: ProductSlugRoute,
