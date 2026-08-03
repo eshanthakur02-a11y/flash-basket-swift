@@ -149,8 +149,7 @@ function Page() {
                         <DialogTrigger asChild>
                           <Button variant="outline" className="gap-1 bg-card">
                             <Library className="h-4 w-4" />
-                            <span className="hidden xs:inline">Add from Catalog</span>
-                            <span className="xs:hidden">Catalog</span>
+                            Add from Catalog
                           </Button>
                         </DialogTrigger>
                       </TooltipTrigger>
