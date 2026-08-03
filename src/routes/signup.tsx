@@ -22,6 +22,8 @@ export const Route = createFileRoute("/signup")({
 function SignupPage() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
