@@ -29,13 +29,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { MultiImageInput } from "@/components/MultiImageInput";
 import { MultiCategorySelect } from "@/components/MultiCategorySelect";
 import { MAX_PRODUCT_CATEGORIES, loadProductCategories, saveProductCategories } from "@/lib/productCategories";
