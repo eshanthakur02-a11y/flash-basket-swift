@@ -12,6 +12,9 @@ import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    next: typeof search.next === "string" && search.next.startsWith("/") ? search.next : undefined,
+  }),
   head: () => ({ meta: [{ title: "Create account — FlashBasket" }] }),
   component: SignupPage,
 });
@@ -60,7 +63,7 @@ function SignupPage() {
       return;
     }
     toast.success("Account created. Check your email to verify, then sign in.");
-    navigate({ to: "/login" });
+    navigate({ to: "/login", search: { next } as never });
   }
 
   async function handleGoogle() {

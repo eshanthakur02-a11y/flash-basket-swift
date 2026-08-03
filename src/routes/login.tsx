@@ -11,6 +11,9 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    next: typeof search.next === "string" && search.next.startsWith("/") ? search.next : undefined,
+  }),
   head: () => ({ meta: [{ title: "Sign in — FlashBasket" }] }),
   component: LoginPage,
 });
@@ -33,6 +36,7 @@ function LoginPage() {
 
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
 
   useEffect(() => {
     try {
@@ -56,7 +60,7 @@ function LoginPage() {
       navigate({ to: "/staff-login" as any });
       return false;
     }
-    navigate({ to: "/customer/dashboard" as any });
+    navigate({ to: (next ?? "/customer/dashboard") as any, replace: true });
     return true;
   }
 
