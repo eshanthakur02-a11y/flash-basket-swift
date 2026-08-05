@@ -43,9 +43,13 @@ function Page() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("shops").select("id").eq("owner_id", user.id).maybeSingle()
-      .then(({ data }) => setShopId(data?.id ?? null));
+    supabase.from("shops").select("id").eq("owner_id", user.id).order("created_at").limit(1)
+      .then(({ data, error }) => {
+        if (error) toast.error(`Could not load your shop: ${error.message}`);
+        setShopId(data?.[0]?.id ?? null);
+      });
   }, [user]);
+
 
   const list = useQuery({
     queryKey: ["shop-categories", shopId],
