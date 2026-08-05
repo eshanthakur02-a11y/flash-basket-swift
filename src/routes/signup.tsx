@@ -12,9 +12,11 @@ import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    next: typeof search.next === "string" && search.next.startsWith("/") ? search.next : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { next?: string } =>
+    typeof search.next === "string" && search.next.startsWith("/")
+      ? { next: search.next }
+      : {},
+
   head: () => ({ meta: [{ title: "Create account — FlashBasket" }] }),
   component: SignupPage,
 });
