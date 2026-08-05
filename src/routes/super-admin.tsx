@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Loader2, ShieldCheck, Users, ScrollText, Crown } from "lucide-react";
+import { Loader2, ShieldCheck, Users, ScrollText, Crown, BarChart3, Sliders, KeyRound, Database } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,10 @@ export const Route = createFileRoute("/super-admin")({
 const NAV = [
   { to: "/super-admin/dashboard", label: "Overview", icon: Crown },
   { to: "/super-admin/access", label: "Roles & Access", icon: Users },
+  { to: "/super-admin/analytics", label: "Revenue", icon: BarChart3 },
+  { to: "/super-admin/settings", label: "Platform Settings", icon: Sliders },
+  { to: "/super-admin/integrations", label: "API Keys", icon: KeyRound },
+  { to: "/super-admin/health", label: "Database", icon: Database },
   { to: "/super-admin/audit", label: "Security Log", icon: ScrollText },
 ] as const;
 
