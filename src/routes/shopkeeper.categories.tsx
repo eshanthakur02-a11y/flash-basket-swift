@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ImageInput } from "@/components/ImageInput";
+import { describeError } from "@/lib/dbError";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
 export const Route = createFileRoute("/shopkeeper/categories")({
