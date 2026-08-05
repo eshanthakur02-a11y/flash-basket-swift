@@ -34,8 +34,12 @@ import { Route as SupportTicketsRouteImport } from './routes/support.tickets'
 import { Route as SupportProfileRouteImport } from './routes/support.profile'
 import { Route as SupportMyTicketsRouteImport } from './routes/support.my-tickets'
 import { Route as SupportDashboardRouteImport } from './routes/support.dashboard'
+import { Route as SuperAdminSettingsRouteImport } from './routes/super-admin.settings'
+import { Route as SuperAdminIntegrationsRouteImport } from './routes/super-admin.integrations'
+import { Route as SuperAdminHealthRouteImport } from './routes/super-admin.health'
 import { Route as SuperAdminDashboardRouteImport } from './routes/super-admin.dashboard'
 import { Route as SuperAdminAuditRouteImport } from './routes/super-admin.audit'
+import { Route as SuperAdminAnalyticsRouteImport } from './routes/super-admin.analytics'
 import { Route as SuperAdminAccessRouteImport } from './routes/super-admin.access'
 import { Route as ShopkeeperSettingsRouteImport } from './routes/shopkeeper.settings'
 import { Route as ShopkeeperReviewsRouteImport } from './routes/shopkeeper.reviews'
@@ -226,6 +230,21 @@ const SupportDashboardRoute = SupportDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => SupportRoute,
 } as any)
+const SuperAdminSettingsRoute = SuperAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => SuperAdminRoute,
+} as any)
+const SuperAdminIntegrationsRoute = SuperAdminIntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => SuperAdminRoute,
+} as any)
+const SuperAdminHealthRoute = SuperAdminHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => SuperAdminRoute,
+} as any)
 const SuperAdminDashboardRoute = SuperAdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -234,6 +253,11 @@ const SuperAdminDashboardRoute = SuperAdminDashboardRouteImport.update({
 const SuperAdminAuditRoute = SuperAdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
+  getParentRoute: () => SuperAdminRoute,
+} as any)
+const SuperAdminAnalyticsRoute = SuperAdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => SuperAdminRoute,
 } as any)
 const SuperAdminAccessRoute = SuperAdminAccessRouteImport.update({
@@ -634,8 +658,12 @@ export interface FileRoutesByFullPath {
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/super-admin/access': typeof SuperAdminAccessRoute
+  '/super-admin/analytics': typeof SuperAdminAnalyticsRoute
   '/super-admin/audit': typeof SuperAdminAuditRoute
   '/super-admin/dashboard': typeof SuperAdminDashboardRoute
+  '/super-admin/health': typeof SuperAdminHealthRoute
+  '/super-admin/integrations': typeof SuperAdminIntegrationsRoute
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
   '/support/dashboard': typeof SupportDashboardRoute
   '/support/my-tickets': typeof SupportMyTicketsRoute
   '/support/profile': typeof SupportProfileRoute
@@ -727,8 +755,12 @@ export interface FileRoutesByTo {
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/super-admin/access': typeof SuperAdminAccessRoute
+  '/super-admin/analytics': typeof SuperAdminAnalyticsRoute
   '/super-admin/audit': typeof SuperAdminAuditRoute
   '/super-admin/dashboard': typeof SuperAdminDashboardRoute
+  '/super-admin/health': typeof SuperAdminHealthRoute
+  '/super-admin/integrations': typeof SuperAdminIntegrationsRoute
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
   '/support/dashboard': typeof SupportDashboardRoute
   '/support/my-tickets': typeof SupportMyTicketsRoute
   '/support/profile': typeof SupportProfileRoute
@@ -821,8 +853,12 @@ export interface FileRoutesById {
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
   '/super-admin/access': typeof SuperAdminAccessRoute
+  '/super-admin/analytics': typeof SuperAdminAnalyticsRoute
   '/super-admin/audit': typeof SuperAdminAuditRoute
   '/super-admin/dashboard': typeof SuperAdminDashboardRoute
+  '/super-admin/health': typeof SuperAdminHealthRoute
+  '/super-admin/integrations': typeof SuperAdminIntegrationsRoute
+  '/super-admin/settings': typeof SuperAdminSettingsRoute
   '/support/dashboard': typeof SupportDashboardRoute
   '/support/my-tickets': typeof SupportMyTicketsRoute
   '/support/profile': typeof SupportProfileRoute
@@ -916,8 +952,12 @@ export interface FileRouteTypes {
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
     | '/super-admin/access'
+    | '/super-admin/analytics'
     | '/super-admin/audit'
     | '/super-admin/dashboard'
+    | '/super-admin/health'
+    | '/super-admin/integrations'
+    | '/super-admin/settings'
     | '/support/dashboard'
     | '/support/my-tickets'
     | '/support/profile'
@@ -1009,8 +1049,12 @@ export interface FileRouteTypes {
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
     | '/super-admin/access'
+    | '/super-admin/analytics'
     | '/super-admin/audit'
     | '/super-admin/dashboard'
+    | '/super-admin/health'
+    | '/super-admin/integrations'
+    | '/super-admin/settings'
     | '/support/dashboard'
     | '/support/my-tickets'
     | '/support/profile'
@@ -1102,8 +1146,12 @@ export interface FileRouteTypes {
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
     | '/super-admin/access'
+    | '/super-admin/analytics'
     | '/super-admin/audit'
     | '/super-admin/dashboard'
+    | '/super-admin/health'
+    | '/super-admin/integrations'
+    | '/super-admin/settings'
     | '/support/dashboard'
     | '/support/my-tickets'
     | '/support/profile'
@@ -1332,6 +1380,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportDashboardRouteImport
       parentRoute: typeof SupportRoute
     }
+    '/super-admin/settings': {
+      id: '/super-admin/settings'
+      path: '/settings'
+      fullPath: '/super-admin/settings'
+      preLoaderRoute: typeof SuperAdminSettingsRouteImport
+      parentRoute: typeof SuperAdminRoute
+    }
+    '/super-admin/integrations': {
+      id: '/super-admin/integrations'
+      path: '/integrations'
+      fullPath: '/super-admin/integrations'
+      preLoaderRoute: typeof SuperAdminIntegrationsRouteImport
+      parentRoute: typeof SuperAdminRoute
+    }
+    '/super-admin/health': {
+      id: '/super-admin/health'
+      path: '/health'
+      fullPath: '/super-admin/health'
+      preLoaderRoute: typeof SuperAdminHealthRouteImport
+      parentRoute: typeof SuperAdminRoute
+    }
     '/super-admin/dashboard': {
       id: '/super-admin/dashboard'
       path: '/dashboard'
@@ -1344,6 +1413,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/super-admin/audit'
       preLoaderRoute: typeof SuperAdminAuditRouteImport
+      parentRoute: typeof SuperAdminRoute
+    }
+    '/super-admin/analytics': {
+      id: '/super-admin/analytics'
+      path: '/analytics'
+      fullPath: '/super-admin/analytics'
+      preLoaderRoute: typeof SuperAdminAnalyticsRouteImport
       parentRoute: typeof SuperAdminRoute
     }
     '/super-admin/access': {
@@ -1955,14 +2031,22 @@ const ShopkeeperRouteWithChildren = ShopkeeperRoute._addFileChildren(
 
 interface SuperAdminRouteChildren {
   SuperAdminAccessRoute: typeof SuperAdminAccessRoute
+  SuperAdminAnalyticsRoute: typeof SuperAdminAnalyticsRoute
   SuperAdminAuditRoute: typeof SuperAdminAuditRoute
   SuperAdminDashboardRoute: typeof SuperAdminDashboardRoute
+  SuperAdminHealthRoute: typeof SuperAdminHealthRoute
+  SuperAdminIntegrationsRoute: typeof SuperAdminIntegrationsRoute
+  SuperAdminSettingsRoute: typeof SuperAdminSettingsRoute
 }
 
 const SuperAdminRouteChildren: SuperAdminRouteChildren = {
   SuperAdminAccessRoute: SuperAdminAccessRoute,
+  SuperAdminAnalyticsRoute: SuperAdminAnalyticsRoute,
   SuperAdminAuditRoute: SuperAdminAuditRoute,
   SuperAdminDashboardRoute: SuperAdminDashboardRoute,
+  SuperAdminHealthRoute: SuperAdminHealthRoute,
+  SuperAdminIntegrationsRoute: SuperAdminIntegrationsRoute,
+  SuperAdminSettingsRoute: SuperAdminSettingsRoute,
 }
 
 const SuperAdminRouteWithChildren = SuperAdminRoute._addFileChildren(

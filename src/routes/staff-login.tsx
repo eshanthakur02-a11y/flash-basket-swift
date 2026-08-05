@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Lock, Mail, Shield, Store, Bike, Headphones, Loader2, ArrowLeft, Crown } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Shield, Store, Bike, Headphones, Loader2, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/staff-login")({
   component: StaffLoginPage,
 });
 
-type RoleKey = "super_admin" | "admin" | "shopkeeper" | "delivery" | "support";
+type RoleKey = "admin" | "shopkeeper" | "delivery" | "support";
 
 const ROLES: Array<{
   key: RoleKey;
@@ -26,7 +26,6 @@ const ROLES: Array<{
   iconColor: string;
   dashboard: string;
 }> = [
-  { key: "super_admin", title: "Super Admin", subtitle: "System Owner", icon: Crown, iconBg: "bg-amber-100", iconColor: "text-amber-600", dashboard: "/super-admin/dashboard" },
   { key: "admin", title: "Admin", subtitle: "Platform Administrator", icon: Shield, iconBg: "bg-emerald-100", iconColor: "text-emerald-600", dashboard: "/admin/dashboard" },
   { key: "shopkeeper", title: "Shopkeeper", subtitle: "Manage your Shop", icon: Store, iconBg: "bg-blue-100", iconColor: "text-blue-600", dashboard: "/shopkeeper/dashboard" },
   { key: "delivery", title: "Delivery", subtitle: "Deliver Orders", icon: Bike, iconBg: "bg-orange-100", iconColor: "text-orange-600", dashboard: "/delivery/dashboard" },
@@ -56,10 +55,6 @@ function StaffLoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!role) {
-      toast.error("Please select a role to continue");
-      return;
-    }
     setSubmitting(true);
     const { error } = await signIn(email, password, remember);
     if (error) {
@@ -73,6 +68,25 @@ function StaffLoginPage() {
     if (user) {
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       actualRoles = (data ?? []).map((r: any) => r.role);
+    }
+
+    // Hidden platform-owner path: the tier is never advertised in the UI, it is
+    // only resolved server-side from the authenticated account's roles.
+    if (actualRoles.includes("super_admin")) {
+      try {
+        if (remember) localStorage.setItem("flashbasket.staff", JSON.stringify({ email }));
+        else localStorage.removeItem("flashbasket.staff");
+      } catch {}
+      toast.success("Welcome back");
+      navigate({ to: "/super-admin/dashboard" as any, replace: true });
+      return;
+    }
+
+    if (!role) {
+      setSubmitting(false);
+      await supabase.auth.signOut();
+      toast.error("Please select a role to continue");
+      return;
     }
 
     if (!actualRoles.includes(role)) {
