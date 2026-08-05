@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ImageInput } from "@/components/ImageInput";
+import { describeError } from "@/lib/dbError";
 import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 
 export const Route = createFileRoute("/shopkeeper/categories")({
@@ -43,9 +44,13 @@ function Page() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("shops").select("id").eq("owner_id", user.id).maybeSingle()
-      .then(({ data }) => setShopId(data?.id ?? null));
+    supabase.from("shops").select("id").eq("owner_id", user.id).order("created_at").limit(1)
+      .then(({ data, error }) => {
+        if (error) toast.error(`Could not load your shop: ${error.message}`);
+        setShopId(data?.[0]?.id ?? null);
+      });
   }, [user]);
+
 
   const list = useQuery({
     queryKey: ["shop-categories", shopId],
@@ -66,10 +71,14 @@ function Page() {
       const payload = { ...c, slug: c.slug || slugify(c.name || "") };
       if (editing?.id) {
         const { error } = await (supabase as any).from("shop_categories").update(payload).eq("id", editing.id);
-        if (error) throw error;
+        if (error) throw describeError(error, "shop_categories.update", { id: editing.id, ...payload });
       } else {
-        const { error } = await (supabase as any).from("shop_categories").insert({ ...payload, shop_id: shopId });
-        if (error) throw error;
+        if (!shopId) {
+          throw new Error("No shop is linked to your account yet — ask an admin to assign your shop before adding categories.");
+        }
+        const row = { ...payload, shop_id: shopId };
+        const { error } = await (supabase as any).from("shop_categories").insert(row);
+        if (error) throw describeError(error, "shop_categories.insert", row);
       }
     },
     onSuccess: () => {
@@ -77,21 +86,22 @@ function Page() {
       qc.invalidateQueries({ queryKey: ["shop-categories", shopId] });
       setOpen(false); setEditing(null);
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => toast.error(e.message, { duration: 8000 }),
   });
 
   const del = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await (supabase as any).from("shop_categories").delete().eq("id", id);
-      if (error) throw error;
+      if (error) throw describeError(error, "shop_categories.delete", { id });
     },
     onSuccess: () => {
       toast.success("Deleted");
       qc.invalidateQueries({ queryKey: ["shop-categories", shopId] });
       setConfirmDel(null);
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => toast.error(e.message, { duration: 8000 }),
   });
+
 
   return (
     <RoleShell role="shopkeeper" nav={SHOPKEEPER_NAV} requireRoles={["shopkeeper", "admin"]}>
