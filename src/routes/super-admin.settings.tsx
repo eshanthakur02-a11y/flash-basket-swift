@@ -19,7 +19,7 @@ export const Route = createFileRoute("/super-admin/settings")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: PlatformSettings;
+  component: PlatformSettings,
 });
 
 /** Only non-sensitive config keys are ever surfaced here. Credential-bearing
