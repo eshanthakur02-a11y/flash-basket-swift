@@ -2,7 +2,50 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type Role = "admin" | "customer" | "shopkeeper" | "delivery" | "support";
+export type Role = "super_admin" | "admin" | "customer" | "shopkeeper" | "delivery" | "support";
+
+const REMEMBER_KEY = "flashbasket.remember";
+const SESSION_MARKER = "flashbasket.session-alive";
+
+/** Remember Me: when disabled the session is dropped once the browser/app is fully restarted. */
+export function setRememberMe(remember: boolean) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(REMEMBER_KEY, remember ? "1" : "0");
+    sessionStorage.setItem(SESSION_MARKER, "1");
+  } catch {}
+}
+
+function shouldDropSessionOnRestart() {
+  if (typeof window === "undefined") return false;
+  try {
+    const remember = localStorage.getItem(REMEMBER_KEY);
+    if (remember !== "0") return false;
+    // No marker => this is a brand-new browser session, so the old one must not persist.
+    const alive = sessionStorage.getItem(SESSION_MARKER);
+    if (!alive) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+export const ROLE_HOME: Record<Role, string> = {
+  super_admin: "/super-admin/dashboard",
+  admin: "/admin/dashboard",
+  support: "/support/dashboard",
+  shopkeeper: "/shopkeeper/dashboard",
+  delivery: "/delivery/dashboard",
+  customer: "/customer/dashboard",
+};
+
+/** Highest-privilege role first — drives role-based redirects. */
+export const ROLE_PRIORITY: Role[] = ["super_admin", "admin", "support", "shopkeeper", "delivery", "customer"];
+
+export function homeForRoles(roles: string[] | undefined | null): string {
+  const found = ROLE_PRIORITY.find((r) => (roles ?? []).includes(r));
+  return ROLE_HOME[found ?? "customer"];
+}
 
 interface AuthContextValue {
   user: User | null;
@@ -11,8 +54,17 @@ interface AuthContextValue {
   rolesLoading: boolean;
   roles: Role[];
   isAdmin: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string, phone?: string, extra?: { state?: string; city?: string; pincode?: string }) => Promise<{ error: Error | null }>;
+  isSuperAdmin: boolean;
+  signIn: (email: string, password: string, remember?: boolean) => Promise<{ error: Error | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    fullName: string,
+    phone?: string,
+    extra?: { state?: string; city?: string; pincode?: string },
+  ) => Promise<{ error: Error | null }>;
+  sendPhoneOtp: (phone: string) => Promise<{ error: Error | null }>;
+  verifyPhoneOtp: (phone: string, code: string, remember?: boolean) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -38,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
+        try { sessionStorage.setItem(SESSION_MARKER, "1"); } catch {}
         setRolesLoading(true);
         // Defer DB call so we don't block the auth callback.
         setTimeout(() => loadRoles(s.user.id), 0);
@@ -47,10 +100,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
+      // Remember Me disabled + fresh browser session => discard the persisted session.
+      if (s && shouldDropSessionOnRestart()) {
+        await supabase.auth.signOut();
+        setRolesLoading(false);
+        setLoading(false);
+        return;
+      }
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
+        try { sessionStorage.setItem(SESSION_MARKER, "1"); } catch {}
         setRolesLoading(true);
         loadRoles(s.user.id);
       } else {
@@ -62,19 +123,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-
   async function loadRoles(userId: string) {
     try {
       const [rolesRes, profileRes] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", userId),
-        supabase.from("profiles").select("status").eq("id", userId).maybeSingle(),
+        supabase.from("profiles").select("status, is_active").eq("id", userId).maybeSingle(),
       ]);
-      if (profileRes.data?.status === "disabled") {
+      const p = profileRes.data as { status?: string | null; is_active?: boolean | null } | null;
+      const blocked = p?.is_active === false || p?.status === "disabled" || p?.status === "suspended";
+      if (blocked) {
         await supabase.auth.signOut();
         setRoles([]);
         if (typeof window !== "undefined") {
           const { toast } = await import("sonner");
-          toast.error("Your account has been disabled. Contact support.");
+          toast.error("Your account has been deactivated. Please contact support.");
         }
         return;
       }
@@ -84,7 +146,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, remember = true) => {
+    setRememberMe(remember);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };
@@ -113,8 +176,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
+  const sendPhoneOtp = async (phone: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      phone,
+      options: { shouldCreateUser: true },
+    });
+    return { error };
+  };
+
+  const verifyPhoneOtp = async (phone: string, code: string, remember = true) => {
+    setRememberMe(remember);
+    const { error } = await supabase.auth.verifyOtp({ phone, token: code, type: "sms" });
+    return { error };
+  };
 
   const signOut = async () => {
+    try {
+      sessionStorage.removeItem(SESSION_MARKER);
+    } catch {}
     await supabase.auth.signOut();
     setRoles([]);
   };
@@ -127,9 +206,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         rolesLoading,
         roles,
-        isAdmin: roles.includes("admin"),
+        isAdmin: roles.includes("admin") || roles.includes("super_admin"),
+        isSuperAdmin: roles.includes("super_admin"),
         signIn,
         signUp,
+        sendPhoneOtp,
+        verifyPhoneOtp,
         signOut,
       }}
     >

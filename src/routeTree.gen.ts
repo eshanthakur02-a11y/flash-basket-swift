@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SupportRouteImport } from './routes/support'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as StaffLoginRouteImport } from './routes/staff-login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ShopkeeperRouteImport } from './routes/shopkeeper'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FavouritesRouteImport } from './routes/favourites'
@@ -32,6 +34,9 @@ import { Route as SupportTicketsRouteImport } from './routes/support.tickets'
 import { Route as SupportProfileRouteImport } from './routes/support.profile'
 import { Route as SupportMyTicketsRouteImport } from './routes/support.my-tickets'
 import { Route as SupportDashboardRouteImport } from './routes/support.dashboard'
+import { Route as SuperAdminDashboardRouteImport } from './routes/super-admin.dashboard'
+import { Route as SuperAdminAuditRouteImport } from './routes/super-admin.audit'
+import { Route as SuperAdminAccessRouteImport } from './routes/super-admin.access'
 import { Route as ShopkeeperSettingsRouteImport } from './routes/shopkeeper.settings'
 import { Route as ShopkeeperReviewsRouteImport } from './routes/shopkeeper.reviews'
 import { Route as ShopkeeperProductsRouteImport } from './routes/shopkeeper.products'
@@ -105,6 +110,11 @@ const SupportRoute = SupportRouteImport.update({
   path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StaffLoginRoute = StaffLoginRouteImport.update({
   id: '/staff-login',
   path: '/staff-login',
@@ -118,6 +128,11 @@ const SignupRoute = SignupRouteImport.update({
 const ShopkeeperRoute = ShopkeeperRouteImport.update({
   id: '/shopkeeper',
   path: '/shopkeeper',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsRoute = ProductsRouteImport.update({
@@ -209,6 +224,21 @@ const SupportDashboardRoute = SupportDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => SupportRoute,
+} as any)
+const SuperAdminDashboardRoute = SuperAdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => SuperAdminRoute,
+} as any)
+const SuperAdminAuditRoute = SuperAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => SuperAdminRoute,
+} as any)
+const SuperAdminAccessRoute = SuperAdminAccessRouteImport.update({
+  id: '/access',
+  path: '/access',
+  getParentRoute: () => SuperAdminRoute,
 } as any)
 const ShopkeeperSettingsRoute = ShopkeeperSettingsRouteImport.update({
   id: '/settings',
@@ -539,9 +569,11 @@ export interface FileRoutesByFullPath {
   '/favourites': typeof FavouritesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
+  '/super-admin': typeof SuperAdminRouteWithChildren
   '/support': typeof SupportRouteWithChildren
   '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -594,6 +626,9 @@ export interface FileRoutesByFullPath {
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
+  '/super-admin/access': typeof SuperAdminAccessRoute
+  '/super-admin/audit': typeof SuperAdminAuditRoute
+  '/super-admin/dashboard': typeof SuperAdminDashboardRoute
   '/support/dashboard': typeof SupportDashboardRoute
   '/support/my-tickets': typeof SupportMyTicketsRoute
   '/support/profile': typeof SupportProfileRoute
@@ -626,9 +661,11 @@ export interface FileRoutesByTo {
   '/favourites': typeof FavouritesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
+  '/super-admin': typeof SuperAdminRouteWithChildren
   '/support': typeof SupportRouteWithChildren
   '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -681,6 +718,9 @@ export interface FileRoutesByTo {
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
+  '/super-admin/access': typeof SuperAdminAccessRoute
+  '/super-admin/audit': typeof SuperAdminAuditRoute
+  '/super-admin/dashboard': typeof SuperAdminDashboardRoute
   '/support/dashboard': typeof SupportDashboardRoute
   '/support/my-tickets': typeof SupportMyTicketsRoute
   '/support/profile': typeof SupportProfileRoute
@@ -714,9 +754,11 @@ export interface FileRoutesById {
   '/favourites': typeof FavouritesRoute
   '/login': typeof LoginRoute
   '/products': typeof ProductsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/shopkeeper': typeof ShopkeeperRouteWithChildren
   '/signup': typeof SignupRoute
   '/staff-login': typeof StaffLoginRoute
+  '/super-admin': typeof SuperAdminRouteWithChildren
   '/support': typeof SupportRouteWithChildren
   '/wishlist': typeof WishlistRoute
   '/admin/categories': typeof AdminCategoriesRoute
@@ -769,6 +811,9 @@ export interface FileRoutesById {
   '/shopkeeper/products': typeof ShopkeeperProductsRoute
   '/shopkeeper/reviews': typeof ShopkeeperReviewsRoute
   '/shopkeeper/settings': typeof ShopkeeperSettingsRoute
+  '/super-admin/access': typeof SuperAdminAccessRoute
+  '/super-admin/audit': typeof SuperAdminAuditRoute
+  '/super-admin/dashboard': typeof SuperAdminDashboardRoute
   '/support/dashboard': typeof SupportDashboardRoute
   '/support/my-tickets': typeof SupportMyTicketsRoute
   '/support/profile': typeof SupportProfileRoute
@@ -803,9 +848,11 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/login'
     | '/products'
+    | '/reset-password'
     | '/shopkeeper'
     | '/signup'
     | '/staff-login'
+    | '/super-admin'
     | '/support'
     | '/wishlist'
     | '/admin/categories'
@@ -858,6 +905,9 @@ export interface FileRouteTypes {
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
+    | '/super-admin/access'
+    | '/super-admin/audit'
+    | '/super-admin/dashboard'
     | '/support/dashboard'
     | '/support/my-tickets'
     | '/support/profile'
@@ -890,9 +940,11 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/login'
     | '/products'
+    | '/reset-password'
     | '/shopkeeper'
     | '/signup'
     | '/staff-login'
+    | '/super-admin'
     | '/support'
     | '/wishlist'
     | '/admin/categories'
@@ -945,6 +997,9 @@ export interface FileRouteTypes {
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
+    | '/super-admin/access'
+    | '/super-admin/audit'
+    | '/super-admin/dashboard'
     | '/support/dashboard'
     | '/support/my-tickets'
     | '/support/profile'
@@ -977,9 +1032,11 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/login'
     | '/products'
+    | '/reset-password'
     | '/shopkeeper'
     | '/signup'
     | '/staff-login'
+    | '/super-admin'
     | '/support'
     | '/wishlist'
     | '/admin/categories'
@@ -1032,6 +1089,9 @@ export interface FileRouteTypes {
     | '/shopkeeper/products'
     | '/shopkeeper/reviews'
     | '/shopkeeper/settings'
+    | '/super-admin/access'
+    | '/super-admin/audit'
+    | '/super-admin/dashboard'
     | '/support/dashboard'
     | '/support/my-tickets'
     | '/support/profile'
@@ -1065,9 +1125,11 @@ export interface RootRouteChildren {
   FavouritesRoute: typeof FavouritesRoute
   LoginRoute: typeof LoginRoute
   ProductsRoute: typeof ProductsRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ShopkeeperRoute: typeof ShopkeeperRouteWithChildren
   SignupRoute: typeof SignupRoute
   StaffLoginRoute: typeof StaffLoginRoute
+  SuperAdminRoute: typeof SuperAdminRouteWithChildren
   SupportRoute: typeof SupportRouteWithChildren
   WishlistRoute: typeof WishlistRoute
   CategorySlugRoute: typeof CategorySlugRoute
@@ -1095,6 +1157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/super-admin': {
+      id: '/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof SuperAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/staff-login': {
       id: '/staff-login'
       path: '/staff-login'
@@ -1114,6 +1183,13 @@ declare module '@tanstack/react-router' {
       path: '/shopkeeper'
       fullPath: '/shopkeeper'
       preLoaderRoute: typeof ShopkeeperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products': {
@@ -1241,6 +1317,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/support/dashboard'
       preLoaderRoute: typeof SupportDashboardRouteImport
       parentRoute: typeof SupportRoute
+    }
+    '/super-admin/dashboard': {
+      id: '/super-admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/super-admin/dashboard'
+      preLoaderRoute: typeof SuperAdminDashboardRouteImport
+      parentRoute: typeof SuperAdminRoute
+    }
+    '/super-admin/audit': {
+      id: '/super-admin/audit'
+      path: '/audit'
+      fullPath: '/super-admin/audit'
+      preLoaderRoute: typeof SuperAdminAuditRouteImport
+      parentRoute: typeof SuperAdminRoute
+    }
+    '/super-admin/access': {
+      id: '/super-admin/access'
+      path: '/access'
+      fullPath: '/super-admin/access'
+      preLoaderRoute: typeof SuperAdminAccessRouteImport
+      parentRoute: typeof SuperAdminRoute
     }
     '/shopkeeper/settings': {
       id: '/shopkeeper/settings'
@@ -1835,6 +1932,22 @@ const ShopkeeperRouteWithChildren = ShopkeeperRoute._addFileChildren(
   ShopkeeperRouteChildren,
 )
 
+interface SuperAdminRouteChildren {
+  SuperAdminAccessRoute: typeof SuperAdminAccessRoute
+  SuperAdminAuditRoute: typeof SuperAdminAuditRoute
+  SuperAdminDashboardRoute: typeof SuperAdminDashboardRoute
+}
+
+const SuperAdminRouteChildren: SuperAdminRouteChildren = {
+  SuperAdminAccessRoute: SuperAdminAccessRoute,
+  SuperAdminAuditRoute: SuperAdminAuditRoute,
+  SuperAdminDashboardRoute: SuperAdminDashboardRoute,
+}
+
+const SuperAdminRouteWithChildren = SuperAdminRoute._addFileChildren(
+  SuperAdminRouteChildren,
+)
+
 interface SupportTicketsRouteChildren {
   SupportTicketsIdRoute: typeof SupportTicketsIdRoute
 }
@@ -1880,9 +1993,11 @@ const rootRouteChildren: RootRouteChildren = {
   FavouritesRoute: FavouritesRoute,
   LoginRoute: LoginRoute,
   ProductsRoute: ProductsRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ShopkeeperRoute: ShopkeeperRouteWithChildren,
   SignupRoute: SignupRoute,
   StaffLoginRoute: StaffLoginRoute,
+  SuperAdminRoute: SuperAdminRouteWithChildren,
   SupportRoute: SupportRouteWithChildren,
   WishlistRoute: WishlistRoute,
   CategorySlugRoute: CategorySlugRoute,

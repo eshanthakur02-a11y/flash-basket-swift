@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Lock, Mail, Shield, Store, Bike, Headphones, Loader2, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Shield, Store, Bike, Headphones, Loader2, ArrowLeft, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/staff-login")({
   component: StaffLoginPage,
 });
 
-type RoleKey = "admin" | "shopkeeper" | "delivery" | "support";
+type RoleKey = "super_admin" | "admin" | "shopkeeper" | "delivery" | "support";
 
 const ROLES: Array<{
   key: RoleKey;
@@ -26,6 +26,7 @@ const ROLES: Array<{
   iconColor: string;
   dashboard: string;
 }> = [
+  { key: "super_admin", title: "Super Admin", subtitle: "System Owner", icon: Crown, iconBg: "bg-amber-100", iconColor: "text-amber-600", dashboard: "/super-admin/dashboard" },
   { key: "admin", title: "Admin", subtitle: "Platform Administrator", icon: Shield, iconBg: "bg-emerald-100", iconColor: "text-emerald-600", dashboard: "/admin/dashboard" },
   { key: "shopkeeper", title: "Shopkeeper", subtitle: "Manage your Shop", icon: Store, iconBg: "bg-blue-100", iconColor: "text-blue-600", dashboard: "/shopkeeper/dashboard" },
   { key: "delivery", title: "Delivery", subtitle: "Deliver Orders", icon: Bike, iconBg: "bg-orange-100", iconColor: "text-orange-600", dashboard: "/delivery/dashboard" },
@@ -60,7 +61,7 @@ function StaffLoginPage() {
       return;
     }
     setSubmitting(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email, password, remember);
     if (error) {
       setSubmitting(false);
       toast.error(error.message || "Sign-in failed");
@@ -95,7 +96,7 @@ function StaffLoginPage() {
     const target = email || window.prompt("Enter your email to receive a reset link") || "";
     if (!target) return;
     const { error } = await supabase.auth.resetPasswordForEmail(target, {
-      redirectTo: window.location.origin + "/staff-login",
+      redirectTo: window.location.origin + "/reset-password",
     });
     if (error) toast.error(error.message);
     else toast.success("Password reset link sent — check your inbox");
