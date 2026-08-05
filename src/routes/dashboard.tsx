@@ -1,6 +1,7 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
+import { useAuth, homeForRoles } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — FlashBasket" }] }),
@@ -8,22 +9,21 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardRedirect() {
-  const { user, loading, rolesLoading, roles } = useAuth() as any;
+  const { user, loading, rolesLoading, roles } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (loading || rolesLoading) return;
     if (!user) { navigate({ to: "/login", replace: true }); return; }
-    const r: string[] = roles ?? [];
-    if (r.includes("admin")) navigate({ to: "/admin/dashboard", replace: true });
-    else if (r.includes("support")) navigate({ to: "/support/dashboard" as any, replace: true });
-    else if (r.includes("shopkeeper")) navigate({ to: "/shopkeeper/dashboard", replace: true });
-    else if (r.includes("delivery")) navigate({ to: "/delivery/dashboard", replace: true });
+    navigate({ to: homeForRoles(roles) as any, replace: true });
   }, [user, loading, rolesLoading, roles, navigate]);
 
-  if (loading || rolesLoading || !user) return null;
-  const r: string[] = roles ?? [];
-  if (r.includes("admin") || r.includes("shopkeeper") || r.includes("delivery") || r.includes("support")) return null;
-  return <Navigate to="/customer/home" replace />;
+  return (
+    <div className="min-h-screen grid place-items-center bg-background">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <p className="text-xs text-muted-foreground">Taking you to your dashboard…</p>
+      </div>
+    </div>
+  );
 }
-

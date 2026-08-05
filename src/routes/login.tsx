@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Lock, Mail, Loader2, Phone, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { PhoneOtpForm } from "@/components/PhoneOtpForm";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
@@ -30,12 +31,6 @@ function LoginPage() {
   const [remember, setRemember] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // OTP state
-  const [otpEmail, setOtpEmail] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
-  const [otpLoading, setOtpLoading] = useState(false);
-
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const { next } = Route.useSearch();
@@ -55,7 +50,7 @@ function LoginPage() {
     if (!user) return false;
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
     const roles = (data ?? []).map((r: any) => r.role);
-    const STAFF = ["admin", "shopkeeper", "delivery", "support"];
+    const STAFF = ["super_admin", "admin", "shopkeeper", "delivery", "support"];
     if (roles.some((r: string) => STAFF.includes(r))) {
       await supabase.auth.signOut();
       toast.error("Staff accounts must use the Management Portal");
@@ -69,7 +64,7 @@ function LoginPage() {
   async function handlePassword(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email, password, remember);
     if (error) {
       setSubmitting(false);
       toast.error(error.message || "Sign-in failed");
@@ -98,38 +93,12 @@ function LoginPage() {
     const target = email || window.prompt("Enter your email to receive a reset link") || "";
     if (!target) return;
     const { error } = await supabase.auth.resetPasswordForEmail(target, {
-      redirectTo: window.location.origin + "/login",
+      redirectTo: window.location.origin + "/reset-password",
     });
     if (error) toast.error(error.message);
     else toast.success("Password reset link sent — check your inbox");
   }
 
-  async function sendOtp() {
-    if (!otpEmail) return toast.error("Enter your email");
-    setOtpLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: otpEmail,
-      options: { shouldCreateUser: true, emailRedirectTo: window.location.origin + "/login" },
-    });
-    setOtpLoading(false);
-    if (error) return toast.error(error.message);
-    setOtpSent(true);
-    toast.success("OTP sent — check your email");
-  }
-
-  async function verifyOtp() {
-    if (otpCode.length < 6) return toast.error("Enter the 6-digit code");
-    setOtpLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
-      email: otpEmail,
-      token: otpCode,
-      type: "email",
-    });
-    setOtpLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Signed in");
-    await routeAfterLogin();
-  }
 
   return (
     <div className="min-h-screen bg-muted/30 flex items-start md:items-center justify-center p-0 md:p-6">
@@ -182,7 +151,7 @@ function LoginPage() {
               onClick={() => setTab("otp")}
               className={cn("h-9 rounded-lg text-xs font-bold transition", tab === "otp" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}
             >
-              OTP Login
+              Phone OTP
             </button>
           </div>
 
@@ -222,33 +191,14 @@ function LoginPage() {
               </Button>
             </form>
           ) : (
-            <div className="mt-5 space-y-3">
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input type="email" placeholder="Enter your email" value={otpEmail} onChange={(e) => setOtpEmail(e.target.value)} disabled={otpSent} className="h-12 rounded-xl pl-10" />
-              </div>
-              {otpSent && (
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input inputMode="numeric" maxLength={6} placeholder="Enter 6-digit OTP" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))} className="h-12 rounded-xl pl-10 tracking-widest" />
-                </div>
-              )}
-              {!otpSent ? (
-                <Button type="button" onClick={sendOtp} disabled={otpLoading} className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-base shadow-md">
-                  {otpLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending…</>) : "Send OTP"}
-                </Button>
-              ) : (
-                <div className="space-y-2">
-                  <Button type="button" onClick={verifyOtp} disabled={otpLoading} className="w-full h-12 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-base shadow-md">
-                    {otpLoading ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying…</>) : "Verify & Login"}
-                  </Button>
-                  <button type="button" onClick={() => { setOtpSent(false); setOtpCode(""); }} className="w-full text-xs text-muted-foreground hover:text-foreground">
-                    Use a different email
-                  </button>
-                </div>
-              )}
+            <div className="mt-5">
+              <PhoneOtpForm remember={remember} onSuccess={async () => { await routeAfterLogin(); }} />
+              <p className="mt-3 text-center text-[11px] text-muted-foreground">
+                We'll text a 6-digit code to your mobile number.
+              </p>
             </div>
           )}
+
 
           <div className="relative my-5">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>

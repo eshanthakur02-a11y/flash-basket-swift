@@ -1482,8 +1482,10 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          is_active: boolean
           phone: string | null
           pincode: string | null
+          shop_id: string | null
           state: string | null
           status: string
           updated_at: string
@@ -1496,8 +1498,10 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          is_active?: boolean
           phone?: string | null
           pincode?: string | null
+          shop_id?: string | null
           state?: string | null
           status?: string
           updated_at?: string
@@ -1510,13 +1514,23 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          is_active?: boolean
           phone?: string | null
           pincode?: string | null
+          shop_id?: string | null
           state?: string | null
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -1592,6 +1606,36 @@ export type Database = {
           submitted_at?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          actor_id: string | null
+          actor_role: string | null
+          created_at: string
+          detail: Json
+          event_type: string
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          detail?: Json
+          event_type: string
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string | null
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          id?: string
+          target_user_id?: string | null
         }
         Relationships: []
       }
@@ -2813,6 +2857,7 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      is_super_admin: { Args: { _user_id?: string }; Returns: boolean }
       list_category_products: {
         Args: {
           _brands?: string[]
@@ -2907,6 +2952,10 @@ export type Database = {
           shop_name: string
           stock: number
         }[]
+      }
+      log_security_event: {
+        Args: { _detail?: Json; _event_type: string; _target_user_id: string }
+        Returns: undefined
       }
       master_catalog_brands: {
         Args: never
@@ -3272,7 +3321,13 @@ export type Database = {
     }
     Enums: {
       address_type: "home" | "work" | "other"
-      app_role: "admin" | "customer" | "shopkeeper" | "delivery" | "support"
+      app_role:
+        | "admin"
+        | "customer"
+        | "shopkeeper"
+        | "delivery"
+        | "support"
+        | "super_admin"
       coupon_type: "percent" | "flat"
       offer_scope: "global" | "shop"
       order_status:
@@ -3433,7 +3488,14 @@ export const Constants = {
   public: {
     Enums: {
       address_type: ["home", "work", "other"],
-      app_role: ["admin", "customer", "shopkeeper", "delivery", "support"],
+      app_role: [
+        "admin",
+        "customer",
+        "shopkeeper",
+        "delivery",
+        "support",
+        "super_admin",
+      ],
       coupon_type: ["percent", "flat"],
       offer_scope: ["global", "shop"],
       order_status: [
