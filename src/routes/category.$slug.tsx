@@ -1,37 +1,86 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCustomerProducts } from "@/hooks/useCustomerProducts";
+import { Button } from "@/components/ui/button";
+import {
+  CategoryFilterBody,
+  CategoryFilterSheet,
+} from "@/components/customer/CategoryFilterPanel";
+import {
+  activeFilterCount,
+  emptyFilters,
+  useCategoryFacets,
+  useFilteredCategoryProducts,
+  type CategoryFilterState,
+} from "@/hooks/useCategoryFilters";
+import { useCustomerCatalogRealtime } from "@/hooks/useCustomerProducts";
 
 export const Route = createFileRoute("/category/$slug")({
-  head: ({ params }) => ({ meta: [{ title: `${params.slug} — FlashBasket` }] }),
+  head: ({ params }) => ({
+    meta: [
+      { title: `${params.slug} — FlashBasket` },
+      {
+        name: "description",
+        content: `Shop ${params.slug} online with lightning-fast delivery. Filter by brand, size, price and rating.`,
+      },
+      { property: "og:title", content: `${params.slug} — FlashBasket` },
+      {
+        property: "og:description",
+        content: `Shop ${params.slug} with lightning-fast delivery from FlashBasket.`,
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: CategoryPage,
 });
 
 function CategoryPage() {
   const { slug } = Route.useParams();
+  useCustomerCatalogRealtime();
 
   const category = useQuery({
     queryKey: ["category", slug],
     queryFn: async () =>
-      (await supabase.from("categories").select("id, slug, name, icon, color").eq("slug", slug).maybeSingle()).data,
+      (
+        await supabase
+          .from("categories")
+          .select("id, slug, name, icon, color")
+          .eq("slug", slug)
+          .maybeSingle()
+      ).data,
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
 
+  const categoryId = category.data?.id ?? null;
+  const [filters, setFilters] = useState<CategoryFilterState>(emptyFilters);
 
-  const products = useCustomerProducts({
-    categoryId: category.data?.id ?? null,
-    limit: 60,
-    enabled: !!category.data,
-    key: `cat:${slug}`,
-  });
+  // Filters are per-category: reset whenever the category changes.
+  useEffect(() => {
+    setFilters(emptyFilters);
+  }, [categoryId]);
+
+  const facets = useCategoryFacets(categoryId);
+  const products = useFilteredCategoryProducts(categoryId, filters, { limit: 60 });
+  const active = activeFilterCount(filters);
+
+  const panelProps = {
+    facets: facets.data,
+    loading: facets.isLoading,
+    filters,
+    onChange: setFilters,
+    resultCount: products.data?.length ?? 0,
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <Link to="/" className="text-sm text-muted-foreground hover:underline">← Home</Link>
+      <Link to="/" className="text-sm text-muted-foreground hover:underline">
+        ← Home
+      </Link>
       {category.data && (
         <div
           className="mt-4 rounded-3xl p-6 md:p-8 flex items-center gap-4 shadow-card"
@@ -39,17 +88,85 @@ function CategoryPage() {
         >
           <div className="text-6xl">{category.data.icon}</div>
           <div>
-            <h1 className="font-display text-3xl md:text-4xl font-extrabold">{category.data.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">Delivery in 10 minutes</p>
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold">
+              {category.data.name}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {facets.data?.total ?? 0} products available near you
+            </p>
           </div>
         </div>
       )}
-      <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {products.isLoading ? (
-          Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />)
-        ) : (
-          products.data?.map((p) => <ProductCard key={p.id} product={p} />)
-        )}
+
+      <div className="mt-6 grid md:grid-cols-[240px_1fr] gap-6">
+        {/* Desktop filter rail */}
+        <aside className="hidden md:block">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display font-bold">Filters</h3>
+            {active > 0 && (
+              <button
+                onClick={() => setFilters({ ...emptyFilters, sort: filters.sort })}
+                className="text-xs font-bold text-primary"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+          <CategoryFilterBody {...panelProps} />
+        </aside>
+
+        <div>
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="md:hidden">
+              <CategoryFilterSheet {...panelProps} />
+            </div>
+            <span className="hidden md:inline text-sm text-muted-foreground">
+              {products.data?.length ?? 0} results
+            </span>
+            <select
+              value={filters.sort}
+              onChange={(e) =>
+                setFilters({ ...filters, sort: e.target.value as CategoryFilterState["sort"] })
+              }
+              className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
+            >
+              <option value="relevance">Sort: Relevance</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="rating">Top rated</option>
+            </select>
+          </div>
+
+          {products.isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+              ))}
+            </div>
+          ) : (products.data?.length ?? 0) === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-6xl">🔍</div>
+              <p className="mt-3 text-muted-foreground">
+                No products match these filters in this category.
+              </p>
+              {active > 0 && (
+                <Button
+                  variant="outline"
+                  className="mt-4 rounded-xl font-bold"
+                  onClick={() => setFilters({ ...emptyFilters, sort: filters.sort })}
+                >
+                  Clear all filters
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {products.data?.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

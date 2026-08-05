@@ -2660,6 +2660,10 @@ export type Database = {
         Args: { _order_id: string; _reason: string }
         Returns: undefined
       }
+      category_filter_facets: {
+        Args: { _category_id?: string; _pincode?: string }
+        Returns: Json
+      }
       compute_handling_fee: {
         Args: { _delivery_type: string; _pincode: string; _subtotal: number }
         Returns: number
@@ -2808,6 +2812,36 @@ export type Database = {
       haversine_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
+      }
+      list_category_products: {
+        Args: {
+          _brands?: string[]
+          _category_id?: string
+          _limit?: number
+          _max_price?: number
+          _min_discount?: number
+          _min_price?: number
+          _min_rating?: number
+          _pincode?: string
+          _search?: string
+          _sizes?: string[]
+          _sort?: string
+          _subcategory_ids?: string[]
+        }
+        Returns: {
+          brand: string
+          category_id: string
+          delivery_minutes: number
+          id: string
+          image_url: string
+          mrp: number
+          name: string
+          price: number
+          rating: number
+          slug: string
+          stock: number
+          unit: string
+        }[]
       }
       list_customer_products: {
         Args: {
