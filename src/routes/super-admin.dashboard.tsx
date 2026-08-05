@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Crown, Users, Store, ShieldAlert, ScrollText, Loader2, Lock } from "lucide-react";
+import { Crown, Users, Store, ShieldAlert, ScrollText, Loader2, Lock, BarChart3, Sliders, KeyRound, Database, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/super-admin/dashboard")({
@@ -85,22 +85,30 @@ function SuperAdminDashboard() {
         </div>
       )}
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <Link to="/super-admin/access" className="rounded-2xl border border-border bg-card p-5 shadow-sm hover:border-primary/40 transition">
-          <Users className="h-5 w-5 text-emerald-600" />
-          <h2 className="mt-2 font-display font-extrabold">Roles &amp; Access</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Promote or demote any account, create and revoke Admin and Super Admin tiers, suspend or restore users.
-          </p>
-        </Link>
-        <Link to="/super-admin/audit" className="rounded-2xl border border-border bg-card p-5 shadow-sm hover:border-primary/40 transition">
-          <ScrollText className="h-5 w-5 text-emerald-600" />
-          <h2 className="mt-2 font-display font-extrabold">Security audit log</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Every role change, activation and suspension — permanently recorded and visible only to Super Admins.
-          </p>
-        </Link>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {[
+          { to: "/super-admin/access", icon: Users, title: "Roles & Access", desc: "Create, promote, demote or suspend any account including Admins." },
+          { to: "/super-admin/analytics", icon: BarChart3, title: "Revenue analytics", desc: "Platform-wide revenue, order volume and growth." },
+          { to: "/super-admin/settings", icon: Sliders, title: "Platform settings", desc: "Feature flags, maintenance mode, payment, delivery, AI and notification switches." },
+          { to: "/super-admin/integrations", icon: KeyRound, title: "API keys & integrations", desc: "Razorpay, Maps, WhatsApp, SMS, email and push configuration status." },
+          { to: "/super-admin/health", icon: Database, title: "Database health", desc: "Table volumes, write activity and backup posture." },
+          { to: "/super-admin/audit", icon: ScrollText, title: "Security audit log", desc: "Every role change, activation and suspension — Super Admin only." },
+          { to: "/admin/shops", icon: Store, title: "Shop approvals", desc: "Approve, enable or disable shops and assign owners." },
+          { to: "/admin/customers", icon: Users, title: "User management", desc: "Full customer and staff directory across the platform." },
+          { to: "/admin/payments", icon: Wallet, title: "Payments & refunds", desc: "Every transaction, refund and reconciliation record." },
+        ].map((t) => (
+          <Link
+            key={t.to}
+            to={t.to as any}
+            className="rounded-2xl border border-border bg-card p-5 shadow-sm hover:border-primary/40 transition"
+          >
+            <t.icon className="h-5 w-5 text-emerald-600" />
+            <h2 className="mt-2 font-display font-extrabold text-sm">{t.title}</h2>
+            <p className="text-xs text-muted-foreground mt-1">{t.desc}</p>
+          </Link>
+        ))}
       </div>
+
 
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <h2 className="font-display font-extrabold text-sm">Latest security events</h2>
