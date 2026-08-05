@@ -63,17 +63,8 @@ export async function bootstrapSuperAdminImpl() {
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const { data: existing, error: existingErr } = await supabaseAdmin
-    .from("user_roles")
-    .select("user_id")
-    .eq("role", "super_admin")
-    .limit(1);
-  if (existingErr) return { ok: false as const, reason: "Role lookup failed" };
-  if ((existing ?? []).length > 0) {
-    return { ok: true as const, created: false, reason: "Super Admin already provisioned" };
-  }
-
-  // Find or create the auth user for the configured address.
+  // Resolve (or create) the auth user for the CONFIGURED address. Scoped to the
+  // configured email so a stale/mistyped owner account never blocks the real one.
   let userId: string | null = null;
   const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
     email,
@@ -81,25 +72,35 @@ export async function bootstrapSuperAdminImpl() {
     email_confirm: true,
     user_metadata: { full_name: "Platform Owner" },
   });
+  let wasCreated = false;
   if (created?.user) {
     userId = created.user.id;
-  } else if (createErr) {
-    // Already registered — look the account up instead of failing.
-    const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
+    wasCreated = true;
+  } else {
+    const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     const found = (list?.users ?? []).find((u) => (u.email ?? "").toLowerCase() === email.toLowerCase());
-    if (!found) return { ok: false as const, reason: createErr.message };
+    if (!found) return { ok: false as const, reason: createErr?.message ?? "Could not resolve account" };
     userId = found.id;
+    // Keep the account in sync with the configured secret (and confirmed).
+    await supabaseAdmin.auth.admin.updateUserById(userId, { password, email_confirm: true });
   }
-  if (!userId) return { ok: false as const, reason: "Could not resolve account" };
 
-  const { error: roleErr } = await supabaseAdmin
+  const { data: existing } = await supabaseAdmin
     .from("user_roles")
-    .insert({ user_id: userId, role: "super_admin" as any });
-  if (roleErr && !roleErr.message.includes("duplicate")) {
-    return { ok: false as const, reason: roleErr.message };
+    .select("user_id")
+    .eq("role", "super_admin")
+    .eq("user_id", userId)
+    .limit(1);
+  if ((existing ?? []).length === 0) {
+    const { error: roleErr } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: userId, role: "super_admin" as any });
+    if (roleErr && !roleErr.message.toLowerCase().includes("duplicate")) {
+      return { ok: false as const, reason: roleErr.message };
+    }
   }
 
   await supabaseAdmin.from("profiles").update({ is_active: true, status: "active" }).eq("id", userId);
 
-  return { ok: true as const, created: true };
+  return { ok: true as const, created: wasCreated };
 }
