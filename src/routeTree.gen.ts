@@ -90,6 +90,7 @@ import { Route as ShopkeeperOrdersIdRouteImport } from './routes/shopkeeper.orde
 import { Route as DeliveryTaskIdRouteImport } from './routes/delivery.task.$id'
 import { Route as CustomerProductIdRouteImport } from './routes/customer.product.$id'
 import { Route as CustomerOrdersIdRouteImport } from './routes/customer.orders.$id'
+import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as ApiPublicOneSignalSDKWorkerDotjsRouteImport } from './routes/api/public/OneSignalSDKWorker[.]js'
 import { Route as ApiPublicOneSignalSDKUpdaterWorkerDotjsRouteImport } from './routes/api/public/OneSignalSDKUpdaterWorker[.]js'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
@@ -500,6 +501,12 @@ const CustomerOrdersIdRoute = CustomerOrdersIdRouteImport.update({
   path: '/orders/$id',
   getParentRoute: () => CustomerRoute,
 } as any)
+const ApiPublicRazorpayWebhookRoute =
+  ApiPublicRazorpayWebhookRouteImport.update({
+    id: '/api/public/razorpay-webhook',
+    path: '/api/public/razorpay-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicOneSignalSDKWorkerDotjsRoute =
   ApiPublicOneSignalSDKWorkerDotjsRouteImport.update({
     id: '/api/public/OneSignalSDKWorker.js',
@@ -595,6 +602,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
   '/api/public/OneSignalSDKWorker.js': typeof ApiPublicOneSignalSDKWorkerDotjsRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
@@ -681,6 +689,7 @@ export interface FileRoutesByTo {
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
   '/api/public/OneSignalSDKWorker.js': typeof ApiPublicOneSignalSDKWorkerDotjsRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
@@ -768,6 +777,7 @@ export interface FileRoutesById {
   '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/OneSignalSDKUpdaterWorker.js': typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
   '/api/public/OneSignalSDKWorker.js': typeof ApiPublicOneSignalSDKWorkerDotjsRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/customer/orders/$id': typeof CustomerOrdersIdRoute
   '/customer/product/$id': typeof CustomerProductIdRoute
   '/delivery/task/$id': typeof DeliveryTaskIdRoute
@@ -856,6 +866,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$id'
     | '/api/public/OneSignalSDKUpdaterWorker.js'
     | '/api/public/OneSignalSDKWorker.js'
+    | '/api/public/razorpay-webhook'
     | '/customer/orders/$id'
     | '/customer/product/$id'
     | '/delivery/task/$id'
@@ -942,6 +953,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$id'
     | '/api/public/OneSignalSDKUpdaterWorker.js'
     | '/api/public/OneSignalSDKWorker.js'
+    | '/api/public/razorpay-webhook'
     | '/customer/orders/$id'
     | '/customer/product/$id'
     | '/delivery/task/$id'
@@ -1028,6 +1040,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$id'
     | '/api/public/OneSignalSDKUpdaterWorker.js'
     | '/api/public/OneSignalSDKWorker.js'
+    | '/api/public/razorpay-webhook'
     | '/customer/orders/$id'
     | '/customer/product/$id'
     | '/delivery/task/$id'
@@ -1063,6 +1076,7 @@ export interface RootRouteChildren {
   OrdersIndexRoute: typeof OrdersIndexRoute
   ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute: typeof ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute
   ApiPublicOneSignalSDKWorkerDotjsRoute: typeof ApiPublicOneSignalSDKWorkerDotjsRoute
+  ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1634,6 +1648,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerOrdersIdRouteImport
       parentRoute: typeof CustomerRoute
     }
+    '/api/public/razorpay-webhook': {
+      id: '/api/public/razorpay-webhook'
+      path: '/api/public/razorpay-webhook'
+      fullPath: '/api/public/razorpay-webhook'
+      preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/OneSignalSDKWorker.js': {
       id: '/api/public/OneSignalSDKWorker.js'
       path: '/api/public/OneSignalSDKWorker.js'
@@ -1871,6 +1892,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute:
     ApiPublicOneSignalSDKUpdaterWorkerDotjsRoute,
   ApiPublicOneSignalSDKWorkerDotjsRoute: ApiPublicOneSignalSDKWorkerDotjsRoute,
+  ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
