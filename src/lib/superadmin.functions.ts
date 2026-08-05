@@ -51,8 +51,9 @@ export const getIntegrationStatus = createServerFn({ method: "POST" })
  * Creates the single platform Super Admin account from server-side
  * environment variables (SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD).
  *
- * Idempotent and self-locking: once ANY super_admin exists it refuses to run,
- * so the endpoint cannot be used to mint extra owners later.
+ * Idempotent and scoped to the configured address: it only ever grants
+ * super_admin to SUPER_ADMIN_EMAIL, so the endpoint cannot be used to mint an
+ * arbitrary owner (the caller cannot influence which account is promoted).
  */
 export async function bootstrapSuperAdminImpl() {
   const email = process.env.SUPER_ADMIN_EMAIL;
