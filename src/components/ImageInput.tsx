@@ -41,21 +41,22 @@ export function ImageInput({
       const { error: upErr } = await supabase.storage
         .from(bucket)
         .upload(path, file, { cacheControl: "31536000", upsert: false, contentType: file.type });
-      if (upErr) throw upErr;
+      if (upErr) throw describeError(upErr, `storage.${bucket}.upload`, { path, type: file.type, size: file.size });
       // Private bucket → use long-lived signed URL (≈50 years)
       const { data: signed, error: sErr } = await supabase.storage
         .from(bucket)
         .createSignedUrl(path, 60 * 60 * 24 * 365 * 50);
-      if (sErr || !signed) throw sErr ?? new Error("Could not sign URL");
+      if (sErr || !signed) throw describeError(sErr ?? new Error("Could not sign URL"), `storage.${bucket}.sign`, { path });
       onChange(signed.signedUrl);
       toast.success("Uploaded");
     } catch (e: any) {
-      toast.error(e.message ?? "Upload failed");
+      toast.error(e.message ?? "Upload failed", { duration: 8000 });
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
     }
   };
+
 
   return (
     <div className="space-y-2">
