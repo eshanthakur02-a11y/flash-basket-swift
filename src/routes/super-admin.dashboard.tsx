@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Crown, Users, Store, ShieldAlert, ScrollText, Loader2, Lock } from "lucide-react";
+import { Crown, Users, Store, ShieldAlert, ScrollText, Loader2, Lock, BarChart3, Sliders, KeyRound, Database, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/super-admin/dashboard")({
