@@ -66,6 +66,7 @@ export interface CategoryFilterState {
   brands: string[];
   sizes: string[];
   subcategories: string[];
+  delivery: string[];
   minPrice: number | null;
   maxPrice: number | null;
   minRating: number | null;
@@ -77,6 +78,7 @@ export const emptyFilters: CategoryFilterState = {
   brands: [],
   sizes: [],
   subcategories: [],
+  delivery: [],
   minPrice: null,
   maxPrice: null,
   minRating: null,
@@ -89,11 +91,13 @@ export function activeFilterCount(f: CategoryFilterState) {
     f.brands.length +
     f.sizes.length +
     f.subcategories.length +
+    f.delivery.length +
     (f.minPrice !== null || f.maxPrice !== null ? 1 : 0) +
     (f.minRating !== null ? 1 : 0) +
     (f.minDiscount !== null ? 1 : 0)
   );
 }
+
 
 export interface FilteredProduct extends ProductCardData {
   brand: string | null;
