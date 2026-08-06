@@ -145,6 +145,9 @@ export type Database = {
           display_order: number
           icon: string | null
           id: string
+          image_url: string | null
+          is_active: boolean
+          is_featured: boolean
           name: string
           slug: string
         }
@@ -154,6 +157,9 @@ export type Database = {
           display_order?: number
           icon?: string | null
           id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_featured?: boolean
           name: string
           slug: string
         }
@@ -163,6 +169,9 @@ export type Database = {
           display_order?: number
           icon?: string | null
           id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_featured?: boolean
           name?: string
           slug?: string
         }
@@ -1414,6 +1423,7 @@ export type Database = {
           rating: number
           slug: string
           stock: number
+          subcategory_id: string | null
           unit: string
           updated_at: string
         }
@@ -1437,6 +1447,7 @@ export type Database = {
           rating?: number
           slug: string
           stock?: number
+          subcategory_id?: string | null
           unit?: string
           updated_at?: string
         }
@@ -1460,6 +1471,7 @@ export type Database = {
           rating?: number
           slug?: string
           stock?: number
+          subcategory_id?: string | null
           unit?: string
           updated_at?: string
         }
@@ -1469,6 +1481,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
             referencedColumns: ["id"]
           },
         ]
@@ -1996,6 +2015,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      subcategories: {
+        Row: {
+          category_id: string
+          created_at: string
+          display_order: number
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_featured: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_agents: {
         Row: {
@@ -2858,34 +2927,79 @@ export type Database = {
         Returns: number
       }
       is_super_admin: { Args: { _user_id?: string }; Returns: boolean }
-      list_category_products: {
-        Args: {
-          _brands?: string[]
-          _category_id?: string
-          _limit?: number
-          _max_price?: number
-          _min_discount?: number
-          _min_price?: number
-          _min_rating?: number
-          _pincode?: string
-          _search?: string
-          _sizes?: string[]
-          _sort?: string
-          _subcategory_ids?: string[]
-        }
+      list_category_products:
+        | {
+            Args: {
+              _brands?: string[]
+              _category_id?: string
+              _limit?: number
+              _max_price?: number
+              _min_discount?: number
+              _min_price?: number
+              _min_rating?: number
+              _pincode?: string
+              _search?: string
+              _sizes?: string[]
+              _sort?: string
+              _subcategory_ids?: string[]
+            }
+            Returns: {
+              brand: string
+              category_id: string
+              delivery_minutes: number
+              id: string
+              image_url: string
+              mrp: number
+              name: string
+              price: number
+              rating: number
+              slug: string
+              stock: number
+              unit: string
+            }[]
+          }
+        | {
+            Args: {
+              _brands?: string[]
+              _category_id?: string
+              _limit?: number
+              _max_price?: number
+              _min_discount?: number
+              _min_price?: number
+              _min_rating?: number
+              _pincode?: string
+              _search?: string
+              _sizes?: string[]
+              _sort?: string
+              _subcategory_id?: string
+              _subcategory_ids?: string[]
+            }
+            Returns: {
+              brand: string
+              category_id: string
+              delivery_minutes: number
+              id: string
+              image_url: string
+              mrp: number
+              name: string
+              price: number
+              rating: number
+              slug: string
+              stock: number
+              subcategory_id: string
+              unit: string
+            }[]
+          }
+      list_category_subcategories: {
+        Args: { _category_id: string; _pincode?: string }
         Returns: {
-          brand: string
-          category_id: string
-          delivery_minutes: number
+          display_order: number
+          icon: string
           id: string
           image_url: string
-          mrp: number
           name: string
-          price: number
-          rating: number
+          product_count: number
           slug: string
-          stock: number
-          unit: string
         }[]
       }
       list_customer_products: {

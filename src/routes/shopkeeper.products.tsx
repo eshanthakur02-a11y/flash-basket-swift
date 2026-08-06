@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MultiImageInput } from "@/components/MultiImageInput";
 import { MultiCategorySelect } from "@/components/MultiCategorySelect";
+import { SubcategorySelect } from "@/components/SubcategorySelect";
 import { MAX_PRODUCT_CATEGORIES, loadProductCategories, saveProductCategories } from "@/lib/productCategories";
 import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
 import { loadVariants, rowToDraft, saveVariants } from "@/lib/variants";
@@ -69,6 +70,7 @@ type ShopProduct = {
     description: string | null;
     brand: string | null;
     category_id: string | null;
+    subcategory_id: string | null;
   } | null;
 };
 
@@ -100,7 +102,7 @@ function Page() {
       if (!shopId) return [] as ShopProduct[];
       const { data, error } = await supabase
         .from("shop_products")
-        .select("id, price, stock, is_available, product_id, manufacturing_date, expiry_date, products(id, name, unit, image_url, cover_image, image_gallery, mrp, price, description, brand, category_id)")
+        .select("id, price, stock, is_available, product_id, manufacturing_date, expiry_date, products(id, name, unit, image_url, cover_image, image_gallery, mrp, price, description, brand, category_id, subcategory_id)")
         .eq("shop_id", shopId)
         .order("created_at", { ascending: false })
         .limit(500);
@@ -288,6 +290,7 @@ function EditDialog({
   const [categoryIds, setCategoryIds] = useState<string[]>(
     item.products?.category_id ? [item.products.category_id] : [],
   );
+  const [subcategoryId, setSubcategoryId] = useState<string | null>(item.products?.subcategory_id ?? null);
   const initialGallery = (item.products?.image_gallery && item.products.image_gallery.length > 0)
     ? item.products.image_gallery
     : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
@@ -321,7 +324,8 @@ function EditDialog({
             cover_image: gallery[0] ?? null,
             image_gallery: gallery,
             category_id: categoryIds[0] ?? null,
-          })
+            subcategory_id: subcategoryId,
+          } as any)
           .eq("id", item.product_id);
         if (pErr) throw pErr;
         await saveProductCategories(item.product_id, categoryIds);
@@ -377,6 +381,11 @@ function EditDialog({
             max={MAX_PRODUCT_CATEGORIES}
           />
         </div>
+        <SubcategorySelect
+          categoryId={categoryIds[0] ?? null}
+          value={subcategoryId}
+          onChange={setSubcategoryId}
+        />
         <div>
           <label className="text-xs font-bold">Description</label>
           <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
@@ -441,6 +450,7 @@ function CreateNewProduct({
   const [unit, setUnit] = useState("1 pc");
   const [description, setDescription] = useState("");
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [subcategoryId, setSubcategoryId] = useState<string | null>(null);
   const [gallery, setGallery] = useState<string[]>([]);
   const [price, setPrice] = useState<number>(0);
   const [mrp, setMrp] = useState<number>(0);
@@ -514,7 +524,7 @@ function CreateNewProduct({
           image_url: gallery[0] ?? null,
           cover_image: gallery[0] ?? null,
           image_gallery: gallery,
-          category_id: categoryIds[0], brand, unit: baseUnit,
+          category_id: categoryIds[0], subcategory_id: subcategoryId, brand, unit: baseUnit,
           price: basePrice, mrp: baseMrp, stock: 0,
           is_available: true,
         })
@@ -640,6 +650,11 @@ function CreateNewProduct({
               max={MAX_PRODUCT_CATEGORIES}
             />
           </div>
+          <SubcategorySelect
+            categoryId={categoryIds[0] ?? null}
+            value={subcategoryId}
+            onChange={setSubcategoryId}
+          />
           <div>
             <label className="text-xs font-bold">Description</label>
             <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />

@@ -1,20 +1,50 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Tag } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, Layers, Star } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { ImageInput } from "@/components/ImageInput";
+import { SubcategoryManager } from "@/components/admin/SubcategoryManager";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/admin/categories")({
-  head: () => ({ meta: [{ title: "Categories — Admin" }] }),
+  head: () => ({
+    meta: [
+      { title: "Categories & Subcategories — FlashBasket Admin" },
+      {
+        name: "description",
+        content:
+          "Admin control for the FlashBasket category hierarchy: categories, subcategories, images, display order and visibility.",
+      },
+      { property: "og:title", content: "Categories & Subcategories — FlashBasket Admin" },
+      {
+        property: "og:description",
+        content: "Manage the FlashBasket category and subcategory hierarchy.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Page,
 });
 
-type Category = { id: string; name: string; slug: string; icon: string | null; color: string | null; display_order: number };
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  color: string | null;
+  display_order: number;
+  image_url: string | null;
+  is_active: boolean;
+  is_featured: boolean;
+};
 
 function slugify(s: string) { return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
 
@@ -23,6 +53,7 @@ function Page() {
   const [editing, setEditing] = useState<Category | null>(null);
   const [open, setOpen] = useState(false);
   const [confirmDel, setConfirmDel] = useState<Category | null>(null);
+  const [subsFor, setSubsFor] = useState<Category | null>(null);
   const [q, setQ] = useState("");
 
   const { data = [], isLoading } = useQuery({
@@ -49,6 +80,15 @@ function Page() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const patch = useMutation({
+    mutationFn: async ({ id, values }: { id: string; values: Partial<Category> }) => {
+      const { error } = await supabase.from("categories").update(values as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-categories"] }),
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const del = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("categories").delete().eq("id", id);
@@ -69,6 +109,7 @@ function Page() {
             <Button onClick={() => setEditing(null)}><Plus className="h-4 w-4 mr-1" />Add</Button>
           </DialogTrigger>
           <CategoryDialog
+            key={editing?.id ?? "new"}
             initial={editing}
             onSave={(c) => save.mutate(c)}
             saving={save.isPending}
@@ -81,16 +122,32 @@ function Page() {
       {isLoading ? (
         <p className="text-muted-foreground">Loading...</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {filtered.map((c) => (
-            <div key={c.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-              <div className="grid h-12 w-12 place-items-center rounded-xl text-xl" style={{ background: c.color ?? "hsl(var(--secondary))" }}>
-                {c.icon ?? <Tag className="h-5 w-5" />}
-              </div>
+            <div key={c.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card p-3">
+              {c.image_url ? (
+                <img src={c.image_url} alt={c.name} className="h-12 w-12 rounded-xl object-cover" loading="lazy" />
+              ) : (
+                <div className="grid h-12 w-12 place-items-center rounded-xl text-xl" style={{ background: c.color ?? "hsl(var(--secondary))" }}>
+                  {c.icon ?? <Tag className="h-5 w-5" />}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
-                <div className="font-bold truncate">{c.name}</div>
+                <div className="font-bold truncate flex items-center gap-1.5">
+                  {c.name}
+                  {c.is_featured && <Star className="h-3.5 w-3.5 fill-primary text-primary" />}
+                  {!c.is_active && <span className="text-[10px] font-bold text-muted-foreground">(hidden)</span>}
+                </div>
                 <div className="text-xs text-muted-foreground truncate">/{c.slug} · order {c.display_order}</div>
               </div>
+              <Switch
+                checked={c.is_active}
+                aria-label={`Toggle ${c.name}`}
+                onCheckedChange={(v) => patch.mutate({ id: c.id, values: { is_active: v } })}
+              />
+              <Button size="sm" variant="outline" className="rounded-xl font-bold" onClick={() => setSubsFor(c)}>
+                <Layers className="h-4 w-4 mr-1" />Subcategories
+              </Button>
               <Link to="/admin/products" search={{ cat: c.id }} className="text-xs font-semibold text-primary underline-offset-2 hover:underline">
                 View products
               </Link>
@@ -102,11 +159,20 @@ function Page() {
         </div>
       )}
 
+      {subsFor && (
+        <SubcategoryManager
+          categoryId={subsFor.id}
+          categoryName={subsFor.name}
+          open={!!subsFor}
+          onOpenChange={(v) => !v && setSubsFor(null)}
+        />
+      )}
+
       <AlertDialog open={!!confirmDel} onOpenChange={(v) => !v && setConfirmDel(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete category?</AlertDialogTitle>
-            <AlertDialogDescription>"{confirmDel?.name}" will be permanently removed.</AlertDialogDescription>
+            <AlertDialogDescription>"{confirmDel?.name}" and its subcategories will be permanently removed.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -124,21 +190,33 @@ function CategoryDialog({ initial, onSave, saving }: { initial: Category | null;
   const [icon, setIcon] = useState(initial?.icon ?? "🛒");
   const [color, setColor] = useState(initial?.color ?? "#dcfce7");
   const [order, setOrder] = useState(initial?.display_order ?? 0);
+  const [image, setImage] = useState(initial?.image_url ?? "");
+  const [active, setActive] = useState(initial?.is_active ?? true);
+  const [featured, setFeatured] = useState(initial?.is_featured ?? false);
 
   return (
-    <DialogContent>
+    <DialogContent className="max-h-[90vh] overflow-y-auto">
       <DialogHeader><DialogTitle>{initial ? "Edit category" : "New category"}</DialogTitle></DialogHeader>
       <div className="space-y-3">
-        <div><label className="text-xs font-bold">Name</label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-        <div><label className="text-xs font-bold">Slug</label><Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugify(name)} /></div>
+        <div><Label className="text-xs font-bold">Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+        <div><Label className="text-xs font-bold">Slug</Label><Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugify(name)} /></div>
+        <ImageInput value={image} onChange={setImage} bucket="categories" label="Category banner / image" required={false} />
         <div className="grid grid-cols-2 gap-3">
-          <div><label className="text-xs font-bold">Icon (emoji)</label><Input value={icon} onChange={(e) => setIcon(e.target.value)} /></div>
-          <div><label className="text-xs font-bold">Color</label><Input type="color" value={color} onChange={(e) => setColor(e.target.value)} /></div>
+          <div><Label className="text-xs font-bold">Icon (emoji)</Label><Input value={icon} onChange={(e) => setIcon(e.target.value)} /></div>
+          <div><Label className="text-xs font-bold">Color</Label><Input type="color" value={color} onChange={(e) => setColor(e.target.value)} /></div>
         </div>
-        <div><label className="text-xs font-bold">Display order</label><Input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value))} /></div>
+        <div><Label className="text-xs font-bold">Display order</Label><Input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value))} /></div>
+        <div className="flex items-center gap-6">
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <Switch checked={active} onCheckedChange={setActive} /> Active
+          </label>
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <Switch checked={featured} onCheckedChange={setFeatured} /> Featured
+          </label>
+        </div>
       </div>
       <DialogFooter>
-        <Button disabled={!name || saving} onClick={() => onSave({ name, slug: slug || slugify(name), icon, color, display_order: order })}>
+        <Button disabled={!name || saving} onClick={() => onSave({ name, slug: slug || slugify(name), icon, color, display_order: order, image_url: image || null, is_active: active, is_featured: featured })}>
           {saving ? "Saving..." : "Save"}
         </Button>
       </DialogFooter>

@@ -17,6 +17,8 @@ import {
   type CategoryFilterState,
 } from "@/hooks/useCategoryFilters";
 import { useCustomerCatalogRealtime } from "@/hooks/useCustomerProducts";
+import { useCategorySubcategories } from "@/hooks/useSubcategories";
+import { SubcategoryBar } from "@/components/customer/SubcategoryBar";
 
 export const Route = createFileRoute("/category/$slug")({
   head: ({ params }) => ({
@@ -48,7 +50,7 @@ function CategoryPage() {
       (
         await supabase
           .from("categories")
-          .select("id, slug, name, icon, color")
+          .select("id, slug, name, icon, color, image_url")
           .eq("slug", slug)
           .maybeSingle()
       ).data,
@@ -58,14 +60,17 @@ function CategoryPage() {
 
   const categoryId = category.data?.id ?? null;
   const [filters, setFilters] = useState<CategoryFilterState>(emptyFilters);
+  const [subcategoryId, setSubcategoryId] = useState<string | null>(null);
 
   // Filters are per-category: reset whenever the category changes.
   useEffect(() => {
     setFilters(emptyFilters);
+    setSubcategoryId(null);
   }, [categoryId]);
 
+  const subcategories = useCategorySubcategories(categoryId);
   const facets = useCategoryFacets(categoryId);
-  const products = useFilteredCategoryProducts(categoryId, filters, { limit: 60 });
+  const products = useFilteredCategoryProducts(categoryId, filters, { limit: 60, subcategoryId });
   const active = activeFilterCount(filters);
 
   const panelProps = {
@@ -86,7 +91,16 @@ function CategoryPage() {
           className="mt-4 rounded-3xl p-6 md:p-8 flex items-center gap-4 shadow-card"
           style={{ backgroundColor: (category.data.color ?? "#A3E635") + "33" }}
         >
-          <div className="text-6xl">{category.data.icon}</div>
+          {category.data.image_url ? (
+            <img
+              src={category.data.image_url}
+              alt={category.data.name}
+              className="h-20 w-20 rounded-2xl object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="text-6xl">{category.data.icon}</div>
+          )}
           <div>
             <h1 className="font-display text-3xl md:text-4xl font-extrabold">
               {category.data.name}
@@ -97,6 +111,17 @@ function CategoryPage() {
           </div>
         </div>
       )}
+
+      <div className="mt-4">
+        <SubcategoryBar
+          subcategories={subcategories.data}
+          loading={subcategories.isLoading}
+          value={subcategoryId}
+          onChange={setSubcategoryId}
+          totalCount={facets.data?.total}
+        />
+      </div>
+
 
       <div className="mt-6 grid md:grid-cols-[240px_1fr] gap-6">
         {/* Desktop filter rail */}

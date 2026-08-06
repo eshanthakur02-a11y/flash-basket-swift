@@ -23,7 +23,7 @@ function CustomerHome() {
   const categories = useQuery({
     queryKey: ["app-categories"],
     queryFn: async () => {
-      const { data } = await supabase.from("categories").select("id, slug, name, icon, color").order("display_order");
+      const { data } = await supabase.from("categories").select("id, slug, name, icon, color, image_url").eq("is_active", true).order("display_order");
       return (data ?? []) as CategoryLite[];
     },
   });
