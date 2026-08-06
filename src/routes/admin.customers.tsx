@@ -15,9 +15,11 @@ export const Route = createFileRoute("/admin/customers")({
   ),
 });
 
-type AppRole = "admin" | "customer" | "shopkeeper" | "delivery" | "support";
+type AppRole = "super_admin" | "admin" | "customer" | "shopkeeper" | "delivery" | "support";
+/** Roles an admin may assign from this screen (super_admin is intentionally excluded). */
 const ROLES: AppRole[] = ["admin", "shopkeeper", "delivery", "support", "customer"];
-const ICONS: Record<AppRole, any> = { admin: Shield, shopkeeper: StoreIcon, delivery: Truck, support: LifeBuoy, customer: UserIcon };
+const ICONS: Partial<Record<AppRole, any>> = { super_admin: ShieldCheck, admin: Shield, shopkeeper: StoreIcon, delivery: Truck, support: LifeBuoy, customer: UserIcon };
+const iconFor = (r: AppRole) => ICONS[r] ?? Tag;
 
 function CustomersPage() {
   const qc = useQueryClient();
