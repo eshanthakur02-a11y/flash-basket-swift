@@ -27,7 +27,10 @@ function CustomerShell() {
   const { user, loading, roles } = useAuth() as any;
   const navigate = useNavigate();
   const { totalQty } = useCart();
+  const { hasAddress, ready: addressReady } = useDeliveryContext();
   useCustomerCatalogRealtime();
+
+  const onSetup = pathname.startsWith("/customer/address-setup");
 
   useEffect(() => {
     if (loading) return;
@@ -40,7 +43,22 @@ function CustomerShell() {
     else if (r.includes("delivery")) navigate({ to: "/delivery/dashboard", replace: true });
   }, [user, loading, roles, navigate]);
 
+  // Every customer must have a default delivery address before browsing —
+  // this also covers accounts created by an admin via role assignment.
+  useEffect(() => {
+    if (loading || !user || onSetup) return;
+    if (addressReady && !hasAddress) {
+      navigate({
+        to: "/customer/address-setup",
+        search: { next: pathname } as never,
+        replace: true,
+      });
+    }
+  }, [loading, user, onSetup, addressReady, hasAddress, navigate, pathname]);
+
   if (pathname === "/customer") return <Navigate to="/customer/home" replace />;
+
+  if (onSetup) return <Outlet />;
 
   const showHeader = pathname === "/customer/home";
 
