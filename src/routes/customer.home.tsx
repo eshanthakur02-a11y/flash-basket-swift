@@ -20,6 +20,9 @@ export const Route = createFileRoute("/customer/home")({
 });
 
 function CustomerHome() {
+  const { refresh } = useDeliveryContext();
+  const eligibleShops = useEligibleShopCount();
+
   const categories = useQuery({
     queryKey: ["app-categories"],
     queryFn: async () => {
@@ -31,6 +34,18 @@ function CustomerHome() {
   const featured = useCustomerProducts({ onlyFeatured: true, limit: 10, key: "featured" });
   const bestsellers = useCustomerProducts({ onlyBestseller: true, limit: 10, key: "best" });
   const deals = useCustomerProducts({ sort: "price_asc", limit: 10, key: "deals" });
+
+  if (eligibleShops.isSuccess && eligibleShops.data === 0) {
+    return (
+      <NoShopsNotice
+        onRefresh={() => {
+          refresh();
+          eligibleShops.refetch();
+        }}
+      />
+    );
+  }
+
 
   return (
     <motion.div
