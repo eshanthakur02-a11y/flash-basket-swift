@@ -175,15 +175,18 @@ function CheckoutPage() {
     }
     const { data, error } = await supabase
       .from("addresses")
-      .insert({ ...newAddr, user_id: user.id })
+      .insert({ ...newAddr, user_id: user.id, lat: coords?.lat ?? null, lng: coords?.lng ?? null } as never)
       .select()
       .single();
     if (error) return toast.error(error.message);
     setSelectedAddr(data.id);
     setShowNew(false);
     addresses.refetch();
+    // Address changed → refresh eligible shops, products and delivery estimates.
+    refreshDelivery();
     toast.success("Address saved");
   };
+
 
   const place = async () => {
     if (!selectedAddr || !addresses.data?.length) {
