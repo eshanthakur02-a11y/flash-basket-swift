@@ -123,6 +123,8 @@ export function useFilteredCategoryProducts(
         _sizes: filters.sizes.length ? filters.sizes : null,
         _subcategory_ids: filters.subcategories.length ? filters.subcategories : null,
         _subcategory_id: subcategoryId,
+        _delivery: filters.delivery.length ? filters.delivery : null,
+
         _min_price: filters.minPrice,
         _max_price: filters.maxPrice,
         _min_rating: filters.minRating,
