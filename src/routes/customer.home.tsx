@@ -8,6 +8,8 @@ import { QuickServices } from "@/components/customer/QuickServices";
 import { CategoryGrid, type CategoryLite } from "@/components/customer/CategoryGrid";
 import { ProductRail } from "@/components/customer/ProductRail";
 import { useCustomerProducts } from "@/hooks/useCustomerProducts";
+import { useDeliveryContext, useEligibleShopCount } from "@/hooks/useDeliveryContext";
+import { NoShopsNotice } from "@/components/customer/NoShopsNotice";
 
 export const Route = createFileRoute("/customer/home")({
   head: () => ({
