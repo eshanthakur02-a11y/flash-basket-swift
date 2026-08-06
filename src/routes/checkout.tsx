@@ -143,6 +143,12 @@ function CheckoutPage() {
     setCoupon("");
   };
 
+  // Switching the delivery address must refresh shops, products and ETAs.
+  useEffect(() => {
+    if (selectedAddr) refreshDelivery();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAddr]);
+
   useEffect(() => {
     if (!selectedAddr && (addresses.data?.length ?? 0) > 0) {
       const def = addresses.data!.find((a) => a.is_default) ?? addresses.data![0];
