@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Shield, Store as StoreIcon, Truck, User as UserIcon, LifeBuoy, X, Ban, Check } from "lucide-react";
+import { Shield, ShieldCheck, Store as StoreIcon, Truck, User as UserIcon, LifeBuoy, X, Ban, Check, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { RoleShell } from "@/components/RoleShell";
 import { ADMIN_NAV } from "./admin.dashboard";
@@ -15,9 +15,11 @@ export const Route = createFileRoute("/admin/customers")({
   ),
 });
 
-type AppRole = "admin" | "customer" | "shopkeeper" | "delivery" | "support";
+type AppRole = "super_admin" | "admin" | "customer" | "shopkeeper" | "delivery" | "support";
+/** Roles an admin may assign from this screen (super_admin is intentionally excluded). */
 const ROLES: AppRole[] = ["admin", "shopkeeper", "delivery", "support", "customer"];
-const ICONS: Record<AppRole, any> = { admin: Shield, shopkeeper: StoreIcon, delivery: Truck, support: LifeBuoy, customer: UserIcon };
+const ICONS: Partial<Record<AppRole, any>> = { super_admin: ShieldCheck, admin: Shield, shopkeeper: StoreIcon, delivery: Truck, support: LifeBuoy, customer: UserIcon };
+const iconFor = (r: AppRole) => ICONS[r] ?? Tag;
 
 function CustomersPage() {
   const qc = useQueryClient();
@@ -99,7 +101,7 @@ function CustomersPage() {
                       <div className="flex flex-wrap gap-1.5">
                         {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
                         {(u.roles ?? []).map((r: AppRole) => {
-                          const Icon = ICONS[r];
+                          const Icon = iconFor(r);
                           return (
                             <span key={r} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-1 text-xs font-semibold">
                               <Icon className="h-3 w-3" />{r}
@@ -154,7 +156,7 @@ function CustomersPage() {
                   <div className="flex flex-wrap gap-1.5">
                     {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
                     {(u.roles ?? []).map((r: AppRole) => {
-                      const Icon = ICONS[r];
+                      const Icon = iconFor(r);
                       return (
                         <span key={r} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-1 text-xs font-semibold">
                           <Icon className="h-3 w-3" />{r}
