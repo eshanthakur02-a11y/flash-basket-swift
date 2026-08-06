@@ -74,7 +74,7 @@ function CategoriesBrowse() {
   const categories = useQuery({
     queryKey: ["cats-browse"],
     queryFn: async () =>
-      (await supabase.from("categories").select("id, slug, name, icon, color, display_order").order("display_order")).data ?? [],
+      (await supabase.from("categories").select("id, slug, name, icon, color, display_order, image_url").eq("is_active", true).order("display_order")).data ?? [],
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
