@@ -101,7 +101,7 @@ function CustomersPage() {
                       <div className="flex flex-wrap gap-1.5">
                         {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
                         {(u.roles ?? []).map((r: AppRole) => {
-                          const Icon = ICONS[r];
+                          const Icon = iconFor(r);
                           return (
                             <span key={r} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-1 text-xs font-semibold">
                               <Icon className="h-3 w-3" />{r}
@@ -156,7 +156,7 @@ function CustomersPage() {
                   <div className="flex flex-wrap gap-1.5">
                     {(u.roles ?? []).length === 0 && <span className="text-xs text-muted-foreground">No roles</span>}
                     {(u.roles ?? []).map((r: AppRole) => {
-                      const Icon = ICONS[r];
+                      const Icon = iconFor(r);
                       return (
                         <span key={r} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-1 text-xs font-semibold">
                           <Icon className="h-3 w-3" />{r}
