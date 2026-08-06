@@ -166,6 +166,20 @@ export function CategoryFilterBody({ facets, loading, filters, onChange }: Props
         </Section>
       )}
 
+      {f.delivery.length > 0 && (
+        <Section title="Delivery speed">
+          {f.delivery.map((d) => (
+            <CheckRow
+              key={d.value}
+              label={d.label}
+              count={d.count}
+              checked={filters.delivery.includes(d.value)}
+              onToggle={() => onChange({ ...filters, delivery: toggle(filters.delivery, d.value) })}
+            />
+          ))}
+        </Section>
+      )}
+
       {f.ratings.length > 0 && (
         <Section title="Rating">
           {f.ratings.map((r) => (
@@ -181,6 +195,7 @@ export function CategoryFilterBody({ facets, loading, filters, onChange }: Props
           ))}
         </Section>
       )}
+
     </div>
   );
 }

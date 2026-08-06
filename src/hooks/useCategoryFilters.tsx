@@ -15,6 +15,10 @@ export interface NumericOption {
   count: number;
 }
 
+export interface DeliveryOption extends FacetOption {
+  value: string;
+}
+
 export interface CategoryFacets {
   total: number;
   min_price: number;
@@ -24,6 +28,7 @@ export interface CategoryFacets {
   subcategories: SubcategoryOption[];
   ratings: NumericOption[];
   discounts: NumericOption[];
+  delivery: DeliveryOption[];
 }
 
 const EMPTY: CategoryFacets = {
@@ -35,7 +40,9 @@ const EMPTY: CategoryFacets = {
   subcategories: [],
   ratings: [],
   discounts: [],
+  delivery: [],
 };
+
 
 /** Live filter options derived from the products available in this category + pincode. */
 export function useCategoryFacets(categoryId?: string | null, enabled = true) {
@@ -59,6 +66,7 @@ export interface CategoryFilterState {
   brands: string[];
   sizes: string[];
   subcategories: string[];
+  delivery: string[];
   minPrice: number | null;
   maxPrice: number | null;
   minRating: number | null;
@@ -70,6 +78,7 @@ export const emptyFilters: CategoryFilterState = {
   brands: [],
   sizes: [],
   subcategories: [],
+  delivery: [],
   minPrice: null,
   maxPrice: null,
   minRating: null,
@@ -82,11 +91,13 @@ export function activeFilterCount(f: CategoryFilterState) {
     f.brands.length +
     f.sizes.length +
     f.subcategories.length +
+    f.delivery.length +
     (f.minPrice !== null || f.maxPrice !== null ? 1 : 0) +
     (f.minRating !== null ? 1 : 0) +
     (f.minDiscount !== null ? 1 : 0)
   );
 }
+
 
 export interface FilteredProduct extends ProductCardData {
   brand: string | null;
@@ -112,6 +123,8 @@ export function useFilteredCategoryProducts(
         _sizes: filters.sizes.length ? filters.sizes : null,
         _subcategory_ids: filters.subcategories.length ? filters.subcategories : null,
         _subcategory_id: subcategoryId,
+        _delivery: filters.delivery.length ? filters.delivery : null,
+
         _min_price: filters.minPrice,
         _max_price: filters.maxPrice,
         _min_rating: filters.minRating,
