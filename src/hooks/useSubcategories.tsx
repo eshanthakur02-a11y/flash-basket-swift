@@ -69,3 +69,25 @@ export function useSubcategories(categoryId?: string | null, activeOnly = false)
 export function slugifySubcategory(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
+
+/** All active subcategories across several categories (multi-category product form). */
+export function useSubcategoriesForCategories(categoryIds: string[], activeOnly = true) {
+  const ids = Array.from(new Set(categoryIds.filter(Boolean))).sort();
+  return useQuery({
+    queryKey: ["subcategories-multi", ids, activeOnly],
+    enabled: ids.length > 0,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<Subcategory[]> => {
+      let q = (supabase as any)
+        .from("subcategories")
+        .select("id, category_id, name, slug, image_url, icon, display_order, is_active, is_featured")
+        .in("category_id", ids)
+        .order("display_order")
+        .order("name");
+      if (activeOnly) q = q.eq("is_active", true);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as Subcategory[];
+    },
+  });
+}

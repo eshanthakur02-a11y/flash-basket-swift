@@ -58,3 +58,15 @@ export async function categoryHasSubcategories(categoryId: string): Promise<bool
     .eq("is_active", true);
   return (count ?? 0) > 0;
 }
+
+/** True when ANY of the given categories has at least one active subcategory. */
+export async function anyCategoryHasSubcategories(categoryIds: string[]): Promise<boolean> {
+  const ids = Array.from(new Set(categoryIds.filter(Boolean)));
+  if (ids.length === 0) return false;
+  const { count } = await (supabase as any)
+    .from("subcategories")
+    .select("id", { count: "exact", head: true })
+    .in("category_id", ids)
+    .eq("is_active", true);
+  return (count ?? 0) > 0;
+}
