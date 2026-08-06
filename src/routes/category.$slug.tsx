@@ -17,6 +17,8 @@ import {
   type CategoryFilterState,
 } from "@/hooks/useCategoryFilters";
 import { useCustomerCatalogRealtime } from "@/hooks/useCustomerProducts";
+import { useCategorySubcategories } from "@/hooks/useSubcategories";
+import { SubcategoryBar } from "@/components/customer/SubcategoryBar";
 
 export const Route = createFileRoute("/category/$slug")({
   head: ({ params }) => ({
@@ -48,7 +50,7 @@ function CategoryPage() {
       (
         await supabase
           .from("categories")
-          .select("id, slug, name, icon, color")
+          .select("id, slug, name, icon, color, image_url")
           .eq("slug", slug)
           .maybeSingle()
       ).data,
