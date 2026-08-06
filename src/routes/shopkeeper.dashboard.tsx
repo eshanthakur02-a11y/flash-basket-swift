@@ -20,7 +20,6 @@ const NAV = [
   { to: "/shopkeeper/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/shopkeeper/orders", label: "Orders", icon: ListOrdered },
   { to: "/shopkeeper/products", label: "Products", icon: Package },
-  { to: "/shopkeeper/categories", label: "Categories", icon: Tag },
   { to: "/shopkeeper/delivery", label: "Delivery", icon: Truck },
   { to: "/shopkeeper/earnings", label: "Earnings", icon: Wallet },
   { to: "/shopkeeper/notifications", label: "Alerts", icon: Bell },

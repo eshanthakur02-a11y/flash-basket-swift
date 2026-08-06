@@ -26,7 +26,6 @@ const DRAWER_NAV = [
   { to: "/shopkeeper/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/shopkeeper/orders", label: "Orders", icon: ClipboardList },
   { to: "/shopkeeper/products", label: "Products", icon: Package },
-  { to: "/shopkeeper/categories", label: "Categories", icon: Tag },
   
   { to: "/shopkeeper/delivery", label: "Delivery", icon: Truck },
   { to: "/shopkeeper/offers", label: "Offers", icon: Megaphone },
