@@ -16,7 +16,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { slugifySubcategory, type Subcategory } from "@/hooks/useSubcategories";
-import { describeError } from "@/lib/dbError";
 
 /**
  * Admin / Super Admin subcategory management for a single category.
@@ -87,7 +86,7 @@ export function SubcategoryManager({
       setFormOpen(false);
       setEditing(null);
     },
-    onError: (e: any) => toast.error(describeError(e)),
+    onError: (e: any) => toast.error(e?.message ?? "Something went wrong"),
   });
 
   const patch = useMutation({
@@ -96,7 +95,7 @@ export function SubcategoryManager({
       if (error) throw error;
     },
     onSuccess: invalidate,
-    onError: (e: any) => toast.error(describeError(e)),
+    onError: (e: any) => toast.error(e?.message ?? "Something went wrong"),
   });
 
   const del = useMutation({
@@ -108,7 +107,7 @@ export function SubcategoryManager({
       toast.success("Subcategory deleted");
       invalidate();
     },
-    onError: (e: any) => toast.error(describeError(e)),
+    onError: (e: any) => toast.error(e?.message ?? "Something went wrong"),
   });
 
   return (
