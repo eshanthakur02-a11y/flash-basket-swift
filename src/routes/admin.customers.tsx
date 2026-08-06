@@ -28,9 +28,14 @@ function CustomersPage() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_list_users");
       if (error) throw error;
-      return data ?? [];
+      // Defence in depth: the RPC already hides Super Admin accounts/roles from
+      // non-Super-Admins, but never render the protected role even if it leaks.
+      return (data ?? [])
+        .filter((u: any) => !(u.roles ?? []).includes("super_admin"))
+        .map((u: any) => ({ ...u, roles: (u.roles ?? []).filter((r: string) => r !== "super_admin") }));
     },
   });
+
 
   const assign = useMutation({
     mutationFn: async ({ user_id, role }: { user_id: string; role: AppRole }) => {
