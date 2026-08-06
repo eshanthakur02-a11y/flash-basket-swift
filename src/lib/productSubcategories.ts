@@ -48,3 +48,13 @@ export async function saveProductSubcategories(productId: string, subcategoryIds
     if (iErr) throw iErr;
   }
 }
+
+/** True when the category has at least one active subcategory (so it's required). */
+export async function categoryHasSubcategories(categoryId: string): Promise<boolean> {
+  const { count } = await (supabase as any)
+    .from("subcategories")
+    .select("id", { count: "exact", head: true })
+    .eq("category_id", categoryId)
+    .eq("is_active", true);
+  return (count ?? 0) > 0;
+}

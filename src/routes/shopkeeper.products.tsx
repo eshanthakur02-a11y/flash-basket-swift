@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MultiImageInput } from "@/components/MultiImageInput";
 import { MultiCategorySelect } from "@/components/MultiCategorySelect";
-import { loadProductSubcategories, saveProductSubcategories } from "@/lib/productSubcategories";
+import { loadProductSubcategories, saveProductSubcategories, categoryHasSubcategories } from "@/lib/productSubcategories";
 import { SubcategorySelect } from "@/components/SubcategorySelect";
 import { MAX_PRODUCT_CATEGORIES, loadProductCategories, saveProductCategories } from "@/lib/productCategories";
 import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
@@ -317,6 +317,10 @@ function EditDialog({
 
   async function save() {
     if (categoryIds.length === 0) { toast.error("Select at least one category"); return; }
+    if (subcategoryIds.length === 0 && await categoryHasSubcategories(categoryIds[0])) {
+      toast.error("Select at least one subcategory");
+      return;
+    }
     const dErr = dateRangeError(mfgDate, expDate);
     if (dErr) { toast.error(dErr); return; }
     setSaving(true);
@@ -511,6 +515,10 @@ function CreateNewProduct({
       }
     }
 
+    if (subcategoryIds.length === 0 && await categoryHasSubcategories(categoryIds[0])) {
+      toast.error("Select at least one subcategory");
+      return;
+    }
     const dErr = dateRangeError(mfgDate, expDate);
     if (dErr) { toast.error(dErr); return; }
 
