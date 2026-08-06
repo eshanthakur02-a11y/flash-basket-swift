@@ -18,6 +18,7 @@ import { openRazorpayCheckout } from "@/integrations/razorpay/checkout";
 import { createRazorpayOrder, verifyRazorpayPayment, recordPaymentFailure } from "@/lib/razorpay.functions";
 import { LocationPicker } from "@/components/maps/LocationPicker";
 import { CartShopSelector } from "@/components/CartShopSelector";
+import { useDeliveryContext } from "@/hooks/useDeliveryContext";
 import { AuthRequired } from "@/components/AuthRequired";
 
 export const Route = createFileRoute("/checkout")({
@@ -47,6 +48,7 @@ function CheckoutPage() {
     type: "home" as "home" | "work" | "other",
   });
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const { refresh: refreshDelivery } = useDeliveryContext();
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
@@ -141,6 +143,12 @@ function CheckoutPage() {
     setCoupon("");
   };
 
+  // Switching the delivery address must refresh shops, products and ETAs.
+  useEffect(() => {
+    if (selectedAddr) refreshDelivery();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAddr]);
+
   useEffect(() => {
     if (!selectedAddr && (addresses.data?.length ?? 0) > 0) {
       const def = addresses.data!.find((a) => a.is_default) ?? addresses.data![0];
@@ -175,15 +183,18 @@ function CheckoutPage() {
     }
     const { data, error } = await supabase
       .from("addresses")
-      .insert({ ...newAddr, user_id: user.id })
+      .insert({ ...newAddr, user_id: user.id, lat: coords?.lat ?? null, lng: coords?.lng ?? null } as never)
       .select()
       .single();
     if (error) return toast.error(error.message);
     setSelectedAddr(data.id);
     setShowNew(false);
     addresses.refetch();
+    // Address changed → refresh eligible shops, products and delivery estimates.
+    refreshDelivery();
     toast.success("Address saved");
   };
+
 
   const place = async () => {
     if (!selectedAddr || !addresses.data?.length) {

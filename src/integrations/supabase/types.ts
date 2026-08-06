@@ -16,13 +16,17 @@ export type Database = {
     Tables: {
       addresses: {
         Row: {
+          building: string | null
           city: string
           created_at: string
+          house_no: string | null
           id: string
           is_default: boolean
           landmark: string | null
+          lat: number | null
           line1: string
           line2: string | null
+          lng: number | null
           name: string
           phone: string
           pincode: string
@@ -32,13 +36,17 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          building?: string | null
           city: string
           created_at?: string
+          house_no?: string | null
           id?: string
           is_default?: boolean
           landmark?: string | null
+          lat?: number | null
           line1: string
           line2?: string | null
+          lng?: number | null
           name: string
           phone: string
           pincode: string
@@ -48,13 +56,17 @@ export type Database = {
           user_id: string
         }
         Update: {
+          building?: string | null
           city?: string
           created_at?: string
+          house_no?: string | null
           id?: string
           is_default?: boolean
           landmark?: string | null
+          lat?: number | null
           line1?: string
           line2?: string | null
+          lng?: number | null
           name?: string
           phone?: string
           pincode?: string
@@ -2779,6 +2791,10 @@ export type Database = {
       }
       compute_handling_fee: {
         Args: { _delivery_type: string; _pincode: string; _subtotal: number }
+        Returns: number
+      }
+      count_eligible_shops: {
+        Args: { _lat?: number; _lng?: number; _pincode?: string }
         Returns: number
       }
       create_delivery_partner: {

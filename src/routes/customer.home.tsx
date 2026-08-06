@@ -8,6 +8,8 @@ import { QuickServices } from "@/components/customer/QuickServices";
 import { CategoryGrid, type CategoryLite } from "@/components/customer/CategoryGrid";
 import { ProductRail } from "@/components/customer/ProductRail";
 import { useCustomerProducts } from "@/hooks/useCustomerProducts";
+import { useDeliveryContext, useEligibleShopCount } from "@/hooks/useDeliveryContext";
+import { NoShopsNotice } from "@/components/customer/NoShopsNotice";
 
 export const Route = createFileRoute("/customer/home")({
   head: () => ({
@@ -20,6 +22,9 @@ export const Route = createFileRoute("/customer/home")({
 });
 
 function CustomerHome() {
+  const { refresh } = useDeliveryContext();
+  const eligibleShops = useEligibleShopCount();
+
   const categories = useQuery({
     queryKey: ["app-categories"],
     queryFn: async () => {
@@ -31,6 +36,18 @@ function CustomerHome() {
   const featured = useCustomerProducts({ onlyFeatured: true, limit: 10, key: "featured" });
   const bestsellers = useCustomerProducts({ onlyBestseller: true, limit: 10, key: "best" });
   const deals = useCustomerProducts({ sort: "price_asc", limit: 10, key: "deals" });
+
+  if (eligibleShops.isSuccess && eligibleShops.data === 0) {
+    return (
+      <NoShopsNotice
+        onRefresh={() => {
+          refresh();
+          eligibleShops.refetch();
+        }}
+      />
+    );
+  }
+
 
   return (
     <motion.div

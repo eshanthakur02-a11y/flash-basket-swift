@@ -108,3 +108,29 @@ export const rankShopsByEta = createServerFn({ method: "POST" })
       .sort((a, b) => a.etaSeconds - b.etaSeconds);
     return { ranked };
   });
+
+/**
+ * Reverse geocode a coordinate into a readable address + PIN code.
+ * Uses the server-side key through the connector gateway.
+ */
+export const reverseGeocode = createServerFn({ method: "POST" })
+  .inputValidator((input: { lat: number; lng: number }) => {
+    if (!validLatLng(input)) throw new Error("Invalid coordinates");
+    return input;
+  })
+  .handler(async ({ data }) => {
+    const json = await gatewayFetch(
+      `/maps/api/geocode/json?latlng=${data.lat},${data.lng}&result_type=street_address|premise|sublocality|locality|postal_code`,
+    );
+    const result = json?.results?.[0];
+    if (!result) return { formatted: null, pincode: null, city: null, state: null, area: null };
+    const comps: Array<{ long_name: string; short_name: string; types: string[] }> = result.address_components ?? [];
+    const pick = (type: string) => comps.find((c) => c.types.includes(type))?.long_name ?? null;
+    return {
+      formatted: (result.formatted_address as string) ?? null,
+      pincode: pick("postal_code"),
+      city: pick("locality") ?? pick("administrative_area_level_3") ?? pick("administrative_area_level_2"),
+      state: pick("administrative_area_level_1"),
+      area: pick("sublocality_level_1") ?? pick("sublocality") ?? pick("route") ?? pick("neighborhood"),
+    };
+  });
