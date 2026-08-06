@@ -39,6 +39,7 @@ function CustomersPage() {
 
   const assign = useMutation({
     mutationFn: async ({ user_id, role }: { user_id: string; role: AppRole }) => {
+      if (role === "super_admin") throw new Error("Not permitted");
       const { error } = await supabase.rpc("admin_assign_role", { _user_id: user_id, _role: role });
       if (error) throw error;
     },
@@ -48,12 +49,14 @@ function CustomersPage() {
 
   const remove = useMutation({
     mutationFn: async ({ user_id, role }: { user_id: string; role: AppRole }) => {
+      if (role === "super_admin") throw new Error("Not permitted");
       const { error } = await supabase.rpc("admin_remove_role", { _user_id: user_id, _role: role });
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Role removed"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
     onError: (e: any) => toast.error(e.message),
   });
+
 
   const setStatus = useMutation({
     mutationFn: async ({ user_id, status }: { user_id: string; status: "active" | "disabled" }) => {
