@@ -15,6 +15,10 @@ export interface NumericOption {
   count: number;
 }
 
+export interface DeliveryOption extends FacetOption {
+  value: string;
+}
+
 export interface CategoryFacets {
   total: number;
   min_price: number;
@@ -24,6 +28,7 @@ export interface CategoryFacets {
   subcategories: SubcategoryOption[];
   ratings: NumericOption[];
   discounts: NumericOption[];
+  delivery: DeliveryOption[];
 }
 
 const EMPTY: CategoryFacets = {
@@ -35,7 +40,9 @@ const EMPTY: CategoryFacets = {
   subcategories: [],
   ratings: [],
   discounts: [],
+  delivery: [],
 };
+
 
 /** Live filter options derived from the products available in this category + pincode. */
 export function useCategoryFacets(categoryId?: string | null, enabled = true) {
