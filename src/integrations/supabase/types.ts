@@ -1343,6 +1343,39 @@ export type Database = {
           },
         ]
       }
+      product_subcategories: {
+        Row: {
+          created_at: string
+          product_id: string
+          subcategory_id: string
+        }
+        Insert: {
+          created_at?: string
+          product_id: string
+          subcategory_id: string
+        }
+        Update: {
+          created_at?: string
+          product_id?: string
+          subcategory_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_subcategories_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_subcategories_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_variants: {
         Row: {
           barcode: string | null
