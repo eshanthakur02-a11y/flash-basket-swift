@@ -43,6 +43,7 @@ function HomePage() {
       const { data } = await supabase
         .from("categories")
         .select("id, slug, name, icon, color, display_order")
+        .eq("is_active", true)
         .order("display_order");
       return data ?? [];
     },

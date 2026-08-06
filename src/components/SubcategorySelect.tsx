@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -24,6 +25,13 @@ export function SubcategorySelect({
   required?: boolean;
 }) {
   const { data = [], isLoading } = useSubcategories(categoryId, true);
+
+  // A subcategory always belongs to one category: drop it when the parent changes.
+  useEffect(() => {
+    if (!value) return;
+    if (!categoryId) { onChange(null); return; }
+    if (!isLoading && data.length > 0 && !data.some((s) => s.id === value)) onChange(null);
+  }, [categoryId, data, isLoading, value, onChange]);
 
   return (
     <div>
