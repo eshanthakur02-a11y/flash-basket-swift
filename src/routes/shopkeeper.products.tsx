@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MultiImageInput } from "@/components/MultiImageInput";
 import { MultiCategorySelect } from "@/components/MultiCategorySelect";
+import { loadProductSubcategories, saveProductSubcategories } from "@/lib/productSubcategories";
 import { SubcategorySelect } from "@/components/SubcategorySelect";
 import { MAX_PRODUCT_CATEGORIES, loadProductCategories, saveProductCategories } from "@/lib/productCategories";
 import { VariantsEditor, type VariantDraft } from "@/components/VariantsEditor";
@@ -290,7 +291,9 @@ function EditDialog({
   const [categoryIds, setCategoryIds] = useState<string[]>(
     item.products?.category_id ? [item.products.category_id] : [],
   );
-  const [subcategoryId, setSubcategoryId] = useState<string | null>(item.products?.subcategory_id ?? null);
+  const [subcategoryIds, setSubcategoryIds] = useState<string[]>(
+    item.products?.subcategory_id ? [item.products.subcategory_id] : [],
+  );
   const initialGallery = (item.products?.image_gallery && item.products.image_gallery.length > 0)
     ? item.products.image_gallery
     : (item.products?.cover_image ? [item.products.cover_image] : (item.products?.image_url ? [item.products.image_url] : []));
@@ -306,6 +309,9 @@ function EditDialog({
     loadVariants(item.product_id).then((rows) => setVariants(rows.map(rowToDraft))).catch(() => {});
     loadProductCategories(item.product_id, item.products?.category_id ?? null)
       .then((ids) => { if (ids.length > 0) setCategoryIds(ids); })
+      .catch(() => {});
+    loadProductSubcategories(item.product_id, item.products?.subcategory_id ?? null)
+      .then((ids) => { if (ids.length > 0) setSubcategoryIds(ids); })
       .catch(() => {});
   }, [item.product_id, item.products?.category_id]);
 
@@ -324,11 +330,12 @@ function EditDialog({
             cover_image: gallery[0] ?? null,
             image_gallery: gallery,
             category_id: categoryIds[0] ?? null,
-            subcategory_id: subcategoryId,
+            subcategory_id: subcategoryIds[0] ?? null,
           } as any)
           .eq("id", item.product_id);
         if (pErr) throw pErr;
         await saveProductCategories(item.product_id, categoryIds);
+        await saveProductSubcategories(item.product_id, subcategoryIds);
         await saveVariants(item.product_id, variants);
       }
       // Update shop_products
@@ -383,8 +390,9 @@ function EditDialog({
         </div>
         <SubcategorySelect
           categoryId={categoryIds[0] ?? null}
-          value={subcategoryId}
-          onChange={setSubcategoryId}
+          value={subcategoryIds}
+          onChange={setSubcategoryIds}
+          required
         />
         <div>
           <label className="text-xs font-bold">Description</label>
@@ -450,7 +458,7 @@ function CreateNewProduct({
   const [unit, setUnit] = useState("1 pc");
   const [description, setDescription] = useState("");
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
-  const [subcategoryId, setSubcategoryId] = useState<string | null>(null);
+  const [subcategoryIds, setSubcategoryIds] = useState<string[]>([]);
   const [gallery, setGallery] = useState<string[]>([]);
   const [price, setPrice] = useState<number>(0);
   const [mrp, setMrp] = useState<number>(0);
@@ -524,7 +532,7 @@ function CreateNewProduct({
           image_url: gallery[0] ?? null,
           cover_image: gallery[0] ?? null,
           image_gallery: gallery,
-          category_id: categoryIds[0], subcategory_id: subcategoryId, brand, unit: baseUnit,
+          category_id: categoryIds[0], subcategory_id: subcategoryIds[0] ?? null, brand, unit: baseUnit,
           price: basePrice, mrp: baseMrp, stock: 0,
           is_available: true,
         })
@@ -533,6 +541,7 @@ function CreateNewProduct({
       if (pErr) throw pErr;
 
       await saveProductCategories(prod.id, categoryIds);
+      await saveProductSubcategories(prod.id, subcategoryIds);
 
       const shopStock = isVariantMode
         ? activeVariants.reduce((s, v) => s + (Number(v.stock) || 0), 0)
@@ -652,8 +661,9 @@ function CreateNewProduct({
           </div>
           <SubcategorySelect
             categoryId={categoryIds[0] ?? null}
-            value={subcategoryId}
-            onChange={setSubcategoryId}
+            value={subcategoryIds}
+            onChange={setSubcategoryIds}
+            required
           />
           <div>
             <label className="text-xs font-bold">Description</label>
