@@ -18,6 +18,7 @@ import { openRazorpayCheckout } from "@/integrations/razorpay/checkout";
 import { createRazorpayOrder, verifyRazorpayPayment, recordPaymentFailure } from "@/lib/razorpay.functions";
 import { LocationPicker } from "@/components/maps/LocationPicker";
 import { CartShopSelector } from "@/components/CartShopSelector";
+import { useDeliveryContext } from "@/hooks/useDeliveryContext";
 import { AuthRequired } from "@/components/AuthRequired";
 
 export const Route = createFileRoute("/checkout")({
@@ -47,6 +48,7 @@ function CheckoutPage() {
     type: "home" as "home" | "work" | "other",
   });
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const { refresh: refreshDelivery } = useDeliveryContext();
   const [coupon, setCoupon] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
