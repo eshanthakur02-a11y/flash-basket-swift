@@ -670,11 +670,13 @@ function CreateNewProduct({
             />
           </div>
           <SubcategorySelect
-            categoryId={categoryIds[0] ?? null}
+            categoryIds={categoryIds}
+            categories={categories}
             value={subcategoryIds}
             onChange={setSubcategoryIds}
             required
           />
+
           <div>
             <label className="text-xs font-bold">Description</label>
             <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
