@@ -2941,6 +2941,7 @@ export type Database = {
               _search?: string
               _sizes?: string[]
               _sort?: string
+              _subcategory_id?: string
               _subcategory_ids?: string[]
             }
             Returns: {
@@ -2955,6 +2956,7 @@ export type Database = {
               rating: number
               slug: string
               stock: number
+              subcategory_id: string
               unit: string
             }[]
           }
@@ -2962,6 +2964,7 @@ export type Database = {
             Args: {
               _brands?: string[]
               _category_id?: string
+              _delivery?: string[]
               _limit?: number
               _max_price?: number
               _min_discount?: number
