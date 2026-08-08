@@ -111,11 +111,14 @@ function AddressSetupPage() {
 
   const save = async () => {
     if (!user) return;
+    const pin = normalizePincode(form.pincode);
+    const cityV = normalizePlace(form.city);
+    const stateV = normalizePlace(form.state);
     if (!form.name.trim() || !form.phone.trim()) return toast.error("Please add your name and phone number");
     if (!form.house_no.trim()) return toast.error("Please add your house / flat number");
     if (!form.line1.trim()) return toast.error("Please add your street / area");
-    if (!form.city.trim() || !form.state.trim()) return toast.error("Please add your city and state");
-    if (!/^\d{6}$/.test(form.pincode.trim())) return toast.error("Please enter a valid 6-digit PIN code");
+    if (!cityV || !stateV) return toast.error("Please add your city and state");
+    if (!isValidPincode(pin)) return toast.error("Please enter a valid 6-digit PIN code");
     if (!coords) return toast.error("Please pin your exact location on the map");
 
     setSaving(true);
@@ -128,9 +131,9 @@ function AddressSetupPage() {
       line1: [form.house_no.trim(), form.building.trim(), form.line1.trim()].filter(Boolean).join(", "),
       line2: form.building.trim() || null,
       landmark: form.landmark.trim() || null,
-      city: form.city.trim(),
-      state: form.state.trim(),
-      pincode: form.pincode.trim(),
+      city: cityV,
+      state: stateV,
+      pincode: pin,
       type: form.type,
       is_default: true,
       lat: coords.lat,
@@ -142,7 +145,7 @@ function AddressSetupPage() {
     // Keep the profile's service area in sync so fallbacks agree.
     await supabase
       .from("profiles")
-      .update({ city: form.city.trim(), state: form.state.trim(), pincode: form.pincode.trim() } as never)
+      .update({ city: cityV, state: stateV, pincode: pin } as never)
       .eq("id", user.id);
 
     await qc.invalidateQueries();
