@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LocationPicker } from "@/components/maps/LocationPicker";
+import { isValidPincode, normalizePincode, normalizePlace } from "@/lib/pincode";
 import { reverseGeocode } from "@/lib/maps.functions";
 import { cn } from "@/lib/utils";
 
