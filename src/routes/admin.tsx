@@ -103,26 +103,10 @@ function AdminShell() {
                   Admin Menu
                 </SheetTitle>
               </SheetHeader>
-              <nav className="p-2">
-                {DRAWER_NAV.map((n) => {
-                  const Icon = n.icon;
-                  const active = pathname.startsWith(n.to.split("?")[0]);
-                  return (
-                    <Link
-                      key={n.to}
-                      to={n.to as any}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition",
-                        active ? "bg-primary/10 text-primary" : "hover:bg-secondary text-foreground",
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
-                      {n.label}
-                    </Link>
-                  );
-                })}
-              </nav>
+              <div className="flex-1 overflow-y-auto overscroll-contain pb-8">
+                <AdminNavList pathname={pathname} onNavigate={() => setOpen(false)} />
+              </div>
+
             </SwipeableSheetContent>
           </Sheet>
         }
