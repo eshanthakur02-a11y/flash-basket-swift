@@ -2,14 +2,14 @@ import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
-  LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet,
-  Package, Tag, AlertTriangle, BarChart, Truck, MessageSquareWarning, Settings, Megaphone, Ticket, LifeBuoy, TrendingUp,
+  LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet, Package, Tag,
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { RoleHeader } from "@/components/RoleHeader";
+import { ADMIN_NAV_GROUPS, isAdminNavActive } from "@/lib/adminNav";
 
 const SWIPE_PAGES = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -30,21 +30,40 @@ const BOTTOM_NAV = [
   { to: "/admin/payments", label: "Payments", icon: Wallet },
 ] as const;
 
-const DRAWER_NAV = [
-  { to: "/admin/products", label: "Products", icon: Package },
-  { to: "/admin/earnings", label: "Earnings", icon: TrendingUp },
-  { to: "/admin/categories", label: "Categories", icon: Tag },
-  
-  { to: "/admin/offers", label: "Offers", icon: Megaphone },
-  { to: "/admin/coupons", label: "Coupons", icon: Ticket },
-  { to: "/admin/products?filter=low-stock", label: "Stock Alerts", icon: AlertTriangle },
-  { to: "/admin/reports", label: "Reports", icon: BarChart },
-  { to: "/admin/delivery-partners", label: "Partners", icon: Truck },
-  { to: "/admin/complaints", label: "Complaints", icon: MessageSquareWarning },
-  { to: "/admin/support", label: "Support", icon: LifeBuoy },
-  { to: "/admin/notifications", label: "Notifications", icon: Bell },
-  { to: "/admin/settings", label: "Settings", icon: Settings },
-] as const;
+function AdminNavList({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+  return (
+    <nav className="p-2 space-y-4">
+      {ADMIN_NAV_GROUPS.map((group) => (
+        <div key={group.label}>
+          <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            {group.label}
+          </div>
+          <div className="space-y-0.5">
+            {group.items.map((n) => {
+              const Icon = n.icon;
+              const active = isAdminNavActive(pathname, n.to);
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to as any}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition",
+                    active ? "bg-primary/10 text-primary" : "hover:bg-secondary text-foreground",
+                  )}
+                >
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="min-w-0 truncate">{n.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
 
 
 function AdminShell() {
