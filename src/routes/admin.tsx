@@ -239,7 +239,7 @@ function SwipeableSheetContent({ children, onClose }: { children: React.ReactNod
     startX.current = null;
   };
   return (
-    <SheetContent side="left" className="w-72 p-0" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <SheetContent side="left" className="w-72 p-0 flex flex-col h-full max-h-screen" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       {children}
     </SheetContent>
   );
