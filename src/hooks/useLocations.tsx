@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizePincode, normalizePlace } from "@/lib/pincode";
 
 export interface LocationRow {
   id: string;
@@ -13,7 +14,7 @@ export function useLocations() {
   return useQuery({
     queryKey: ["locations", "active"],
     queryFn: async (): Promise<LocationRow[]> => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("locations")
         .select("id, state, city, pincode, is_active")
         .eq("is_active", true)
@@ -21,10 +22,17 @@ export function useLocations() {
         .order("city")
         .order("pincode");
       if (error) throw error;
-      return data ?? [];
+      // Defensive normalization so UI values always match what routing compares.
+      return (data ?? []).map((r) => ({
+        ...r,
+        state: normalizePlace(r.state),
+        city: normalizePlace(r.city),
+        pincode: normalizePincode(r.pincode),
+      }));
     },
-    staleTime: 30 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
   });
 }
 
