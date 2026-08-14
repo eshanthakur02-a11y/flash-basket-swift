@@ -57,18 +57,13 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       </button>
 
       <Link to="/product/$slug" params={{ slug: product.slug }} className="block">
-        <div className="aspect-square w-full overflow-hidden rounded-xl bg-secondary">
-          {product.image_url ? (
-            <img
-              src={product.image_url}
-              alt={product.name}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform group-hover:scale-[1.03]"
-            />
-          ) : (
-            <div className="grid h-full w-full place-items-center text-4xl">🛒</div>
-          )}
-        </div>
+        <ProductImage
+          src={product.image_url}
+          alt={product.name}
+          className="aspect-square w-full rounded-xl"
+          imgClassName="transition-transform group-hover:scale-[1.03]"
+          fallbackClassName="text-4xl"
+        />
       </Link>
 
       {/* Delivery ETA pill */}
@@ -79,18 +74,22 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       <Link
         to="/product/$slug"
         params={{ slug: product.slug }}
-        className="mt-1 line-clamp-2 text-[13px] font-semibold leading-tight"
+        className="mt-1 line-clamp-2 min-h-[34px] text-[13px] font-semibold leading-tight"
       >
         {product.name}
       </Link>
       <div className="text-[11px] text-muted-foreground">{product.unit}</div>
 
-      {product.rating != null && product.rating > 0 && (
-        <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-          <Star className="h-3 w-3 fill-accent text-accent" />
-          <span className="font-semibold text-foreground">{product.rating.toFixed(1)}</span>
-        </div>
-      )}
+      {/* Rating row height is always reserved so cards stay the same size */}
+      <div className="mt-1 flex h-[14px] items-center gap-1 text-[10px] text-muted-foreground">
+        {product.rating != null && product.rating > 0 && (
+          <>
+            <Star className="h-3 w-3 fill-accent text-accent" />
+            <span className="font-semibold text-foreground">{product.rating.toFixed(1)}</span>
+          </>
+        )}
+      </div>
+
 
       <div className="mt-auto pt-2 flex items-end justify-between gap-2">
         <div className="leading-tight">
