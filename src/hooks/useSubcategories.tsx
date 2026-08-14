@@ -29,11 +29,12 @@ export interface SubcategoryWithCount {
  * plus the number of products actually deliverable to the shopper's pincode.
  */
 export function useCategorySubcategories(categoryId?: string | null) {
-  const { pincode } = useDeliveryContext();
+  const { pincode, ready } = useDeliveryContext();
   return useQuery({
     queryKey: ["category-subcategories", pincode, categoryId],
-    enabled: !!categoryId,
-    staleTime: 60 * 1000,
+    enabled: ready && !!categoryId,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: (prev) => prev,
     queryFn: async (): Promise<SubcategoryWithCount[]> => {
       const { data, error } = await (supabase as any).rpc("list_category_subcategories", {
         _category_id: categoryId,

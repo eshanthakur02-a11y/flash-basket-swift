@@ -46,11 +46,12 @@ const EMPTY: CategoryFacets = {
 
 /** Live filter options derived from the products available in this category + pincode. */
 export function useCategoryFacets(categoryId?: string | null, enabled = true) {
-  const { pincode } = useDeliveryContext();
+  const { pincode, ready } = useDeliveryContext();
   return useQuery({
     queryKey: ["category-facets", pincode, categoryId],
-    enabled: enabled && !!categoryId,
-    staleTime: 60 * 1000,
+    enabled: enabled && ready && !!categoryId,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: (prev) => prev,
     queryFn: async (): Promise<CategoryFacets> => {
       const { data, error } = await (supabase as any).rpc("category_filter_facets", {
         _pincode: pincode,
@@ -109,11 +110,15 @@ export function useFilteredCategoryProducts(
   filters: CategoryFilterState,
   opts: { limit?: number; enabled?: boolean; subcategoryId?: string | null } = {},
 ) {
-  const { pincode } = useDeliveryContext();
+  const { pincode, ready } = useDeliveryContext();
   const { limit = 60, enabled = true, subcategoryId = null } = opts;
   return useQuery({
     queryKey: ["category-products", pincode, categoryId, subcategoryId, filters, limit],
-    enabled: enabled && !!categoryId,
+    enabled: enabled && ready && !!categoryId,
+    staleTime: 60_000,
+    // Switching category / subcategory / filters keeps the current grid on
+    // screen until the new result set arrives — no blank flash.
+    placeholderData: (prev) => prev,
     queryFn: async (): Promise<FilteredProduct[]> => {
       const { data, error } = await (supabase as any).rpc("list_category_products", {
         _pincode: pincode,
