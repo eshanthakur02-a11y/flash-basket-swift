@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
@@ -24,8 +24,27 @@ export function useDeliveryContext(): DeliveryContext & {
 } {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [coordsTried, setCoordsTried] = useState(false);
+  // Browser geolocation lives in the Query cache (single shared request per
+  // session) — a per-component effect used to re-prompt and produce different
+  // lat/lng per consumer, which changed query keys and refetched the catalog.
+  const geo = useQuery({
+    queryKey: ["browser-geo"],
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: 0,
+    refetchOnMount: false,
+    queryFn: () =>
+      new Promise<{ lat: number; lng: number } | null>((resolve) => {
+        if (typeof navigator === "undefined" || !navigator.geolocation) return resolve(null);
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => resolve(null),
+          { enableHighAccuracy: false, timeout: 4000, maximumAge: 300_000 },
+        );
+      }),
+  });
+  const coords = geo.data ?? null;
+  const coordsTried = geo.isFetched;
 
   const addr = useQuery({
     queryKey: ["default-address", user?.id],
