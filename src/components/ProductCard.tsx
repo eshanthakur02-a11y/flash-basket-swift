@@ -3,6 +3,7 @@ import { Plus, Minus, Heart, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
+import { ProductImage } from "@/components/ProductImage";
 import { rupees, pct } from "@/lib/format";
 
 export interface ProductCardData {
@@ -35,7 +36,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <motion.div
       whileTap={{ scale: 0.98 }}
-      className="group relative flex flex-col rounded-2xl border border-border bg-card p-2.5 shadow-card hover:shadow-card-premium transition-shadow"
+      className="group relative flex h-full flex-col rounded-2xl border border-border bg-card p-2.5 shadow-card hover:shadow-card-premium transition-shadow"
     >
       {/* Discount chip */}
       {discount > 0 && (
