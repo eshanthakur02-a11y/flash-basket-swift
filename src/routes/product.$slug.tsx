@@ -11,6 +11,7 @@ import { ShopPicker, useEligibleShops, type EligibleShop } from "@/components/Sh
 import { Button } from "@/components/ui/button";
 import { rupees, pct } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProductImage } from "@/components/ProductImage";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
