@@ -80,9 +80,13 @@ function CategoriesBrowse() {
   });
 
 
-  const { pincode } = useDeliveryContext();
+  const { pincode, ready } = useDeliveryContext();
   const counts = useQuery({
     queryKey: ["cat-product-counts", pincode],
+    enabled: ready,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       const { data } = await (supabase as any).rpc("list_customer_products", {
         _pincode: pincode,
