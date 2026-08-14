@@ -35,7 +35,7 @@ export function useCustomerProducts(args: CustomerProductsArgs = {}) {
   } = args;
 
   const { pincode, ready } = useDeliveryContext();
-  // Sorted + joined so a caller re-creating the array每 render can't change the key.
+  // Sorted + joined so a caller re-creating the array each render can't change the key.
   const idsKey = ids === null ? null : [...ids].sort().join(",");
 
   return useQuery({
