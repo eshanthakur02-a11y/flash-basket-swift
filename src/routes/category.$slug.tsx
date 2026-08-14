@@ -162,13 +162,35 @@ function CategoryPage() {
             </select>
           </div>
 
-          {products.isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
-              ))}
+          {products.isError && products.data ? (
+            <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-border bg-secondary/60 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">Couldn’t refresh products.</span>
+              <button onClick={() => products.refetch()} className="font-bold text-primary">
+                Retry
+              </button>
             </div>
-          ) : (products.data?.length ?? 0) === 0 ? (
+          ) : null}
+
+          {!products.data ? (
+            products.isError ? (
+              <div className="text-center py-20">
+                <p className="text-muted-foreground">Couldn’t load products.</p>
+                <Button
+                  variant="outline"
+                  className="mt-4 rounded-xl font-bold"
+                  onClick={() => products.refetch()}
+                >
+                  Try again
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
+                ))}
+              </div>
+            )
+          ) : products.data.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-6xl">🔍</div>
               <p className="mt-3 text-muted-foreground">
@@ -185,12 +207,17 @@ function CategoryPage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {products.data?.map((p) => (
+            <div
+              className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 transition-opacity ${
+                products.isFetching ? "opacity-70" : "opacity-100"
+              }`}
+            >
+              {products.data.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
             </div>
           )}
+
         </div>
       </div>
     </div>
