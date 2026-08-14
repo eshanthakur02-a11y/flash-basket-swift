@@ -80,22 +80,52 @@ export function useCustomerProducts(args: CustomerProductsArgs = {}) {
 /**
  * Subscribe to shop_products / products / shops changes and invalidate
  * customer catalog queries so the UI updates without a manual refresh.
+ *
+ * The channel is ref-counted at module level: several mounted components
+ * (shell + category page) previously each opened a channel, so one inventory
+ * change fired the same invalidation multiple times. Invalidations are also
+ * debounced, and only refetch queries that are actually rendered.
  */
+let channelRefs = 0;
+let channel: ReturnType<typeof supabase.channel> | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
 export function useCustomerCatalogRealtime() {
   const qc = useQueryClient();
   useEffect(() => {
     const invalidate = () => {
-      qc.invalidateQueries({ queryKey: ["customer-products"] });
-      qc.invalidateQueries({ queryKey: ["cat-product-counts"] });
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        debounceTimer = null;
+        qc.invalidateQueries({ queryKey: ["customer-products"], refetchType: "active" });
+        qc.invalidateQueries({ queryKey: ["category-products"], refetchType: "active" });
+        qc.invalidateQueries({ queryKey: ["cat-product-counts"], refetchType: "active" });
+      }, 800);
     };
-    const ch = supabase
-      .channel("customer-catalog")
-      .on("postgres_changes", { event: "*", schema: "public", table: "shop_products" }, invalidate)
-      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, invalidate)
-      .on("postgres_changes", { event: "*", schema: "public", table: "shops" }, invalidate)
-      .subscribe();
+
+    channelRefs += 1;
+    if (!channel) {
+      channel = supabase
+        .channel("customer-catalog")
+        .on("postgres_changes", { event: "*", schema: "public", table: "shop_products" }, invalidate)
+        .on("postgres_changes", { event: "*", schema: "public", table: "products" }, invalidate)
+        .on("postgres_changes", { event: "*", schema: "public", table: "shops" }, invalidate)
+        .subscribe();
+    }
+
     return () => {
-      supabase.removeChannel(ch);
+      channelRefs -= 1;
+      if (channelRefs <= 0) {
+        channelRefs = 0;
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+          debounceTimer = null;
+        }
+        if (channel) {
+          supabase.removeChannel(channel);
+          channel = null;
+        }
+      }
     };
   }, [qc]);
 }
