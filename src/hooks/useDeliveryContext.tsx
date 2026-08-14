@@ -75,21 +75,8 @@ export function useDeliveryContext(): DeliveryContext & {
     },
   });
 
-  useEffect(() => {
-    if (coordsTried) return;
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setCoordsTried(true);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setCoordsTried(true);
-      },
-      () => setCoordsTried(true),
-      { enableHighAccuracy: false, timeout: 4000, maximumAge: 300_000 },
-    );
-  }, [coordsTried]);
+
+
 
   const pincode =
     (addr.data?.pincode as string | undefined) ??
