@@ -121,9 +121,14 @@ export function useDeliveryContext(): DeliveryContext & {
  */
 export function useEligibleShopCount() {
   const { pincode, lat, lng, ready } = useDeliveryContext();
+  // Round coordinates in the key so tiny GPS jitter can't cause refetch storms.
+  const latKey = lat == null ? null : Math.round(lat * 1000) / 1000;
+  const lngKey = lng == null ? null : Math.round(lng * 1000) / 1000;
   return useQuery({
-    queryKey: ["eligible-shops", pincode, lat, lng],
+    queryKey: ["eligible-shops", pincode, latKey, lngKey],
     enabled: ready && (!!pincode || (lat != null && lng != null)),
+    staleTime: 2 * 60_000,
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("count_eligible_shops", {
         _pincode: pincode,
