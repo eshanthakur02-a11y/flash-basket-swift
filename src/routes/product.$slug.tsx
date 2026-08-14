@@ -11,6 +11,7 @@ import { ShopPicker, useEligibleShops, type EligibleShop } from "@/components/Sh
 import { Button } from "@/components/ui/button";
 import { rupees, pct } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProductImage } from "@/components/ProductImage";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -408,7 +409,7 @@ function ProductGallery({ images, name }: { images: string[]; name: string }) {
             setTouchX(null);
           }}
         >
-          <img src={images[safeIdx]} alt={name} loading="lazy" className="w-full h-full object-cover" />
+          <ProductImage src={images[safeIdx]} alt={name} className="absolute inset-0 h-full w-full" eager />
           {images.length > 1 && (
             <>
               <button
@@ -450,7 +451,7 @@ function ProductGallery({ images, name }: { images: string[]; name: string }) {
                 onClick={() => setIdx(i)}
                 className={`shrink-0 h-14 w-14 rounded-lg overflow-hidden border-2 transition ${i === safeIdx ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"}`}
               >
-                <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                <ProductImage src={url} alt="" className="h-full w-full" fallbackClassName="text-lg" />
               </button>
             ))}
           </div>

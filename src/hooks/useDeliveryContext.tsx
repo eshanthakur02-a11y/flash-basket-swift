@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
@@ -24,8 +24,27 @@ export function useDeliveryContext(): DeliveryContext & {
 } {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [coordsTried, setCoordsTried] = useState(false);
+  // Browser geolocation lives in the Query cache (single shared request per
+  // session) — a per-component effect used to re-prompt and produce different
+  // lat/lng per consumer, which changed query keys and refetched the catalog.
+  const geo = useQuery({
+    queryKey: ["browser-geo"],
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: 0,
+    refetchOnMount: false,
+    queryFn: () =>
+      new Promise<{ lat: number; lng: number } | null>((resolve) => {
+        if (typeof navigator === "undefined" || !navigator.geolocation) return resolve(null);
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => resolve(null),
+          { enableHighAccuracy: false, timeout: 4000, maximumAge: 300_000 },
+        );
+      }),
+  });
+  const coords = geo.data ?? null;
+  const coordsTried = geo.isFetched;
 
   const addr = useQuery({
     queryKey: ["default-address", user?.id],
@@ -56,21 +75,8 @@ export function useDeliveryContext(): DeliveryContext & {
     },
   });
 
-  useEffect(() => {
-    if (coordsTried) return;
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setCoordsTried(true);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setCoordsTried(true);
-      },
-      () => setCoordsTried(true),
-      { enableHighAccuracy: false, timeout: 4000, maximumAge: 300_000 },
-    );
-  }, [coordsTried]);
+
+
 
   const pincode =
     (addr.data?.pincode as string | undefined) ??
@@ -115,9 +121,14 @@ export function useDeliveryContext(): DeliveryContext & {
  */
 export function useEligibleShopCount() {
   const { pincode, lat, lng, ready } = useDeliveryContext();
+  // Round coordinates in the key so tiny GPS jitter can't cause refetch storms.
+  const latKey = lat == null ? null : Math.round(lat * 1000) / 1000;
+  const lngKey = lng == null ? null : Math.round(lng * 1000) / 1000;
   return useQuery({
-    queryKey: ["eligible-shops", pincode, lat, lng],
+    queryKey: ["eligible-shops", pincode, latKey, lngKey],
     enabled: ready && (!!pincode || (lat != null && lng != null)),
+    staleTime: 2 * 60_000,
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("count_eligible_shops", {
         _pincode: pincode,

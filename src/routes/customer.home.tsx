@@ -78,7 +78,7 @@ function CustomerHome() {
         title="Best deals today"
         emoji="🔥"
         subtitle="Lowest prices on essentials"
-        loading={deals.isLoading}
+        loading={!deals.data}
         products={deals.data}
       />
 
@@ -100,7 +100,7 @@ function CustomerHome() {
         title="Trending near you"
         emoji="📈"
         subtitle="Most ordered this week"
-        loading={bestsellers.isLoading}
+        loading={!bestsellers.data}
         products={bestsellers.data}
       />
 
@@ -109,7 +109,7 @@ function CustomerHome() {
         title="Recommended for you"
         emoji="⭐"
         subtitle="Picked just for you"
-        loading={featured.isLoading}
+        loading={!featured.data}
         products={featured.data}
       />
 

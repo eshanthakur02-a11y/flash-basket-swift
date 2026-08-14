@@ -39,7 +39,7 @@ function WishlistPage() {
             Browse products →
           </Link>
         </div>
-      ) : products.isLoading ? (
+      ) : !products.data ? (
         <div className="grid grid-cols-2 gap-3">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />)}
         </div>
