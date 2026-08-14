@@ -34,7 +34,9 @@ export function useCustomerProducts(args: CustomerProductsArgs = {}) {
     key,
   } = args;
 
-  const { pincode } = useDeliveryContext();
+  const { pincode, ready } = useDeliveryContext();
+  // Sorted + joined so a caller re-creating the array每 render can't change the key.
+  const idsKey = ids === null ? null : [...ids].sort().join(",");
 
   return useQuery({
     queryKey: [
@@ -46,10 +48,15 @@ export function useCustomerProducts(args: CustomerProductsArgs = {}) {
       onlyBestseller,
       sort,
       limit,
-      ids,
+      idsKey,
       key,
     ],
-    enabled: enabled && (ids === null || ids.length > 0),
+    // Wait until the delivery context is resolved: firing with pincode=null and
+    // then again with the real pincode was what blanked the grid on first paint.
+    enabled: enabled && ready && (ids === null || ids.length > 0),
+    staleTime: 60_000,
+    // Keep the previous page of products on screen while a new key loads.
+    placeholderData: (prev) => prev,
     queryFn: async (): Promise<ProductCardData[]> => {
       const { data, error } = await (supabase as any).rpc(
         "list_customer_products",
