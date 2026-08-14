@@ -97,11 +97,11 @@ function ProductsPage() {
           </select>
         </div>
 
-        {products.isLoading ? (
+        {!products.data ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />)}
           </div>
-        ) : products.data?.length === 0 ? (
+        ) : products.data.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-6xl">🛒</div>
             <p className="mt-3 text-muted-foreground">No products match your search.</p>
