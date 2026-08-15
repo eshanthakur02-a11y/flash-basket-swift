@@ -1006,7 +1006,7 @@ export type Database = {
           tax: number
           total: number
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           address: Json
@@ -1052,7 +1052,7 @@ export type Database = {
           tax?: number
           total: number
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           address?: Json
@@ -1098,7 +1098,7 @@ export type Database = {
           tax?: number
           total?: number
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1169,7 +1169,7 @@ export type Database = {
           signature: string | null
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           amount: number
@@ -1188,7 +1188,7 @@ export type Database = {
           signature?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -1207,7 +1207,7 @@ export type Database = {
           signature?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2405,6 +2405,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_deletion_check: { Args: never; Returns: Json }
       actor_role_label: { Args: never; Returns: string }
       admin_approve_delivery_request: {
         Args: {
@@ -2879,6 +2880,7 @@ export type Database = {
         Args: { _partner_id: string }
         Returns: undefined
       }
+      delete_my_account_data: { Args: never; Returns: Json }
       effective_available_stock: {
         Args: { _shop_product_id: string }
         Returns: number
