@@ -15,6 +15,7 @@ import {
   User as UserIcon, Mail, ShieldCheck, LogOut, LifeBuoy, MessageCircle, ChevronRight,
   Bell, Store, Truck, Tag, Settings as SettingsIcon, ShoppingBag,
 } from "lucide-react";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 
 export const Route = createFileRoute("/admin/settings")({ component: Page });
@@ -210,6 +211,7 @@ function Page() {
             <LogOut className="h-4 w-4 mr-2" /> Sign out
           </Button>
         </div>
+        <DeleteAccountSection />
       </div>
     </RoleShell>
   );

@@ -121,13 +121,15 @@ async function handle(request: Request): Promise<Response> {
         .eq("id", row.order_id)
         .neq("payment_status", "paid");
 
-      await supabaseAdmin.from("notifications").insert({
-        user_id: row.user_id,
-        title: "Payment successful",
-        body: "Your payment was received. Your order is being processed.",
-        category: "payment",
-        data: { order_id: row.order_id },
-      });
+      if (row.user_id) {
+        await supabaseAdmin.from("notifications").insert({
+          user_id: row.user_id,
+          title: "Payment successful",
+          body: "Your payment was received. Your order is being processed.",
+          category: "payment",
+          data: { order_id: row.order_id },
+        });
+      }
       return new Response("ok");
     }
 
@@ -152,13 +154,15 @@ async function handle(request: Request): Promise<Response> {
         })
         .eq("id", row.id);
 
-      await supabaseAdmin.from("notifications").insert({
-        user_id: row.user_id,
-        title: "Payment failed",
-        body: payment?.error_description ?? "Your payment did not go through.",
-        category: "payment",
-        data: { order_id: row.order_id },
-      });
+      if (row.user_id) {
+        await supabaseAdmin.from("notifications").insert({
+          user_id: row.user_id,
+          title: "Payment failed",
+          body: payment?.error_description ?? "Your payment did not go through.",
+          category: "payment",
+          data: { order_id: row.order_id },
+        });
+      }
       return new Response("ok");
     }
 

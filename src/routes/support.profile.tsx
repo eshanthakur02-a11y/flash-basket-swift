@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LogOut, Mail, Shield, User as UserIcon, Phone } from "lucide-react";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 export const Route = createFileRoute("/support/profile")({
   head: () => ({ meta: [{ title: "Support Profile — FlashBasket" }] }),
@@ -131,6 +132,8 @@ function Page() {
           {signingOut ? "Signing out…" : "Log out"}
         </Button>
       </div>
+
+      <DeleteAccountSection />
     </div>
   );
 }

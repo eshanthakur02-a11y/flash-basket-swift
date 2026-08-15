@@ -14,6 +14,7 @@ import { DELIVERY_NAV } from "./delivery.dashboard";
 import { Truck, User as UserIcon, LogOut, Star, CheckCircle2, Clock, Mail, Power, ShieldCheck, Bike, LifeBuoy, MessageCircle, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 export const Route = createFileRoute("/delivery/profile")({ component: Page });
 
@@ -225,6 +226,7 @@ function Page() {
             <LogOut className="h-4 w-4 mr-2" /> Sign out
           </Button>
         </div>
+        <DeleteAccountSection />
       </div>
     </RoleShell>
   );

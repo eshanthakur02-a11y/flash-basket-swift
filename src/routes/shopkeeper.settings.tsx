@@ -14,6 +14,7 @@ import { SHOPKEEPER_NAV } from "./shopkeeper.dashboard";
 import { LocationPicker } from "@/components/maps/LocationPicker";
 import { Store, User as UserIcon, LogOut, Package, ClipboardList, Clock, Wallet, ShieldCheck, Mail } from "lucide-react";
 import { rupees } from "@/lib/format";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 export const Route = createFileRoute("/shopkeeper/settings")({ component: Page });
 
@@ -173,6 +174,7 @@ function Page() {
             <LogOut className="h-4 w-4 mr-2" /> Sign out
           </Button>
         </div>
+        <DeleteAccountSection />
       </div>
     </RoleShell>
   );
