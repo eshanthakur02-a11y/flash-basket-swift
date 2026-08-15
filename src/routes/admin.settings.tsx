@@ -12,10 +12,10 @@ import { Switch } from "@/components/ui/switch";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
 import { toast } from "sonner";
 import {
-import { DeleteAccountSection } from "@/components/DeleteAccountSection";
   User as UserIcon, Mail, ShieldCheck, LogOut, LifeBuoy, MessageCircle, ChevronRight,
   Bell, Store, Truck, Tag, Settings as SettingsIcon, ShoppingBag,
 } from "lucide-react";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 
 export const Route = createFileRoute("/admin/settings")({ component: Page });
