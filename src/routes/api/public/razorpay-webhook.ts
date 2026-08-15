@@ -154,13 +154,15 @@ async function handle(request: Request): Promise<Response> {
         })
         .eq("id", row.id);
 
-      await supabaseAdmin.from("notifications").insert({
-        user_id: row.user_id,
-        title: "Payment failed",
-        body: payment?.error_description ?? "Your payment did not go through.",
-        category: "payment",
-        data: { order_id: row.order_id },
-      });
+      if (row.user_id) {
+        await supabaseAdmin.from("notifications").insert({
+          user_id: row.user_id,
+          title: "Payment failed",
+          body: payment?.error_description ?? "Your payment did not go through.",
+          category: "payment",
+          data: { order_id: row.order_id },
+        });
+      }
       return new Response("ok");
     }
 
