@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 export const Route = createFileRoute("/super-admin/settings")({
   head: () => ({
@@ -179,6 +180,8 @@ function PlatformSettings() {
             </div>
           </section>
         ))}
+
+        <DeleteAccountSection />
       </div>
     </div>
   );

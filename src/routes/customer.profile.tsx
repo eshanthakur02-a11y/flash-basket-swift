@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 export const Route = createFileRoute("/customer/profile")({
   head: () => ({ meta: [{ title: "Account — FlashBasket" }] }),
@@ -105,6 +106,8 @@ function AppProfile() {
       >
         <LogOut className="h-4 w-4" /> Sign out
       </button>
+
+      <DeleteAccountSection />
 
       <div className="text-center text-[11px] text-muted-foreground pt-2">FlashBasket • v1.0</div>
     </div>

@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
 import { toast } from "sonner";
 import {
+import { DeleteAccountSection } from "@/components/DeleteAccountSection";
   User as UserIcon, Mail, ShieldCheck, LogOut, LifeBuoy, MessageCircle, ChevronRight,
   Bell, Store, Truck, Tag, Settings as SettingsIcon, ShoppingBag,
 } from "lucide-react";
@@ -210,6 +211,7 @@ function Page() {
             <LogOut className="h-4 w-4 mr-2" /> Sign out
           </Button>
         </div>
+        <DeleteAccountSection />
       </div>
     </RoleShell>
   );
