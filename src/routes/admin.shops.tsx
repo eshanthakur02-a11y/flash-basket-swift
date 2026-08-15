@@ -147,8 +147,14 @@ function Page() {
   const doDelete = async () => {
     if (!deleteShop) return;
     const { error } = await supabase.rpc("admin_delete_shop", { _shop_id: deleteShop.id });
-    if (error) toast.error(error.message);
-    else { toast.success("Shop deleted"); setDeleteShop(null); refresh(); }
+    if (error) {
+      // Surface the real reason (e.g. active orders) and keep the dialog open.
+      toast.error(error.message.replace(/^.*?:\s*/, ""));
+      return;
+    }
+    toast.success("Shop deleted successfully.");
+    setDeleteShop(null);
+    refresh();
   };
 
   return (
