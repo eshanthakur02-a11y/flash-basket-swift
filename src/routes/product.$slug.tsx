@@ -377,6 +377,33 @@ function ProductPage() {
         </div>
       </div>
 
+      <AlertDialog open={!!priceChange} onOpenChange={(v) => !v && setPriceChange(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Price updated</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-1">
+                <div>The shop updated this item's price.</div>
+                <div>Old price: <span className="line-through">{rupees(priceChange?.oldPrice ?? 0)}</span></div>
+                <div className="font-semibold text-foreground">New price: {rupees(priceChange?.newPrice ?? 0)}</div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                setPriceChange(null);
+                await doAdd();
+              }}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+
       <AlertDialog open={!!conflict} onOpenChange={(v) => !v && setConflict(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
