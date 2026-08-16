@@ -236,6 +236,13 @@ function ProductPage() {
                 {variants.map((v) => {
                   const active = selected?.id === v.id;
                   const oos = v.stock <= 0;
+                  const vp = resolvePricing({
+                    productPrice: p.price,
+                    productMrp: p.mrp,
+                    productStock: p.stock,
+                    variant: v,
+                    shop: selectedShop,
+                  });
                   return (
                     <button
                       key={v.id}
@@ -251,12 +258,16 @@ function ProductPage() {
                         {v.unit ? ` ${v.unit}` : ""}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {rupees(v.selling_price)}
-                        {v.mrp > v.selling_price && (
-                          <span className="ml-1 line-through">{rupees(v.mrp)}</span>
+                        {rupees(vp.price)}
+                        {vp.mrp > vp.price && (
+                          <span className="ml-1 line-through">{rupees(vp.mrp)}</span>
                         )}
                         {oos && <span className="ml-2 text-destructive">Out</span>}
                       </div>
+                    </button>
+                  );
+                })}
+
                     </button>
                   );
                 })}
