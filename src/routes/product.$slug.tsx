@@ -164,6 +164,16 @@ function ProductPage() {
   const discount = pricing.discount;
 
 
+  async function doAdd() {
+    try {
+      await add(p.id, 1, selected?.id ?? null, selectedShop?.shop_id ?? null);
+    } catch (e) {
+      if (e instanceof CartShopConflictError) {
+        setConflict({ productId: p.id, variantId: selected?.id ?? null, shopId: selectedShop!.shop_id });
+      }
+    }
+  }
+
   async function handleAdd() {
     if (allShopsClosed) {
       toast.error("Sorry, all shops selling this product are currently closed.");
@@ -174,14 +184,28 @@ function ProductPage() {
       return;
     }
 
-    try {
-      await add(p.id, 1, selected?.id ?? null, selectedShop?.shop_id ?? null);
-    } catch (e) {
-      if (e instanceof CartShopConflictError) {
-        setConflict({ productId: p.id, variantId: selected?.id ?? null, shopId: selectedShop!.shop_id });
+    // Re-validate the shop price at add time; never silently change it.
+    if (selectedShop) {
+      const fresh = await eligibleQ.refetch();
+      const freshShop = (fresh.data ?? []).find((s) => s.shop_id === selectedShop.shop_id);
+      if (freshShop) {
+        const freshPrice = resolvePricing({
+          productPrice: p.price,
+          productMrp: p.mrp,
+          productStock: p.stock,
+          variant: selected,
+          shop: freshShop,
+        }).price;
+        if (Math.round(freshPrice) !== Math.round(effPrice)) {
+          setPriceChange({ oldPrice: effPrice, newPrice: freshPrice });
+          return;
+        }
       }
     }
+
+    await doAdd();
   }
+
 
   async function confirmSwitchShop() {
     if (!conflict) return;
