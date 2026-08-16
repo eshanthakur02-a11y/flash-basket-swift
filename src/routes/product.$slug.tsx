@@ -169,7 +169,7 @@ function ProductPage() {
     productMrp: p.mrp,
     productStock: p.stock,
     variant: selected,
-    shop: selectedShop,
+    shop: pricingShop,
   });
   const effPrice = pricing.price;
   const effMrp = pricing.mrp;
@@ -209,7 +209,7 @@ function ProductPage() {
 
     // Re-validate the shop price at add time; never silently change it.
     if (selectedShop) {
-      const fresh = await eligibleQ.refetch();
+      const fresh = await baseShopsQ.refetch();
       const freshShop = (fresh.data ?? []).find((s) => s.shop_id === selectedShop.shop_id);
       if (freshShop) {
         const freshPrice = resolvePricing({
@@ -288,7 +288,7 @@ function ProductPage() {
                     productMrp: p.mrp,
                     productStock: p.stock,
                     variant: v,
-                    shop: selectedShop,
+                    shop: pricingShop,
                   });
                   return (
                     <button
