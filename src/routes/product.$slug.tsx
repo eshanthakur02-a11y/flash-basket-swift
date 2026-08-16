@@ -9,7 +9,9 @@ import { useCart, CartShopConflictError } from "@/hooks/useCart";
 import { useDeliveryContext } from "@/hooks/useDeliveryContext";
 import { ShopPicker, useEligibleShops, type EligibleShop } from "@/components/ShopPicker";
 import { Button } from "@/components/ui/button";
-import { rupees, pct } from "@/lib/format";
+import { rupees } from "@/lib/format";
+import { resolvePricing } from "@/lib/pricing";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductImage } from "@/components/ProductImage";
 import {
