@@ -145,8 +145,16 @@ function ProductPage() {
     return eligibleShops[0];
   }, [eligibleShops, selectedShopId, currentShop]);
 
+  // Pricing always reads the variant-independent base inventory record for the
+  // chosen shop, so a variant switch can't leak its price into other variants.
+  const pricingShop: EligibleShop | null = useMemo(() => {
+    if (!selectedShop) return null;
+    return baseShops.find((s) => s.shop_id === selectedShop.shop_id) ?? selectedShop;
+  }, [baseShops, selectedShop]);
+
   const [conflict, setConflict] = useState<{ productId: string; variantId: string | null; shopId: string } | null>(null);
   const [priceChange, setPriceChange] = useState<{ oldPrice: number; newPrice: number } | null>(null);
+
 
 
   if (product.isLoading) return <div className="mx-auto max-w-7xl px-4 py-10"><Skeleton className="h-96" /></div>;
