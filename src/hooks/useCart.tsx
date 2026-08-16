@@ -68,13 +68,31 @@ export function useCart() {
       const { data, error } = await (supabase as any)
         .from("cart_items")
         .select(
-          "id, product_id, variant_id, shop_id, quantity, products(id, name, slug, price, mrp, image_url, unit, stock), product_variants:variant_id(id, name, size, unit, selling_price, mrp, stock, images), shops:shop_id(id, name, address, pincode, latitude, longitude)"
+          "id, product_id, variant_id, shop_id, quantity, products(id, name, slug, price, mrp, image_url, unit, stock), product_variants:variant_id(id, name, size, unit, selling_price, mrp, stock, images, is_default), shops:shop_id(id, name, address, pincode, latitude, longitude)"
         )
         .eq("user_id", user.id);
       if (error) throw error;
-      return (data ?? [])
-        .filter((row: any) => row.products)
-        .map((row: any) => ({
+      const rows = (data ?? []).filter((row: any) => row.products);
+
+      // Pull the shop-specific inventory pricing so cart/checkout show exactly
+      // the price the listing and detail page showed.
+      const shopIds = [...new Set(rows.map((r: any) => r.shop_id).filter(Boolean))] as string[];
+      const productIds = [...new Set(rows.map((r: any) => r.product_id))] as string[];
+      let invMap = new Map<string, { price: number; mrp: number | null }>();
+      if (shopIds.length && productIds.length) {
+        const { data: inv } = await (supabase as any)
+          .from("shop_products")
+          .select("shop_id, product_id, price, mrp")
+          .in("shop_id", shopIds)
+          .in("product_id", productIds);
+        invMap = new Map(
+          (inv ?? []).map((r: any) => [`${r.shop_id}:${r.product_id}`, { price: Number(r.price), mrp: r.mrp == null ? null : Number(r.mrp) }]),
+        );
+      }
+
+      return rows.map((row: any) => {
+        const inv = row.shop_id ? invMap.get(`${row.shop_id}:${row.product_id}`) : undefined;
+        return {
           id: row.id,
           product_id: row.product_id,
           variant_id: row.variant_id ?? null,
@@ -83,17 +101,29 @@ export function useCart() {
           product: row.products,
           variant: row.product_variants ?? null,
           shop: row.shops ?? null,
-        }));
+          shopPrice: inv?.price ?? null,
+          shopMrp: inv?.mrp ?? null,
+        };
+      });
     },
     enabled: !!user,
   });
 
   const items = cartQuery.data ?? [];
-  const priceOf = (l: CartLine) => l.variant?.selling_price ?? l.product.price;
-  const mrpOf = (l: CartLine) => l.variant?.mrp ?? l.product.mrp;
+  const pricingOf = (l: CartLine) =>
+    resolvePricing({
+      productPrice: l.product.price,
+      productMrp: l.product.mrp,
+      productStock: l.product.stock,
+      variant: l.variant ?? null,
+      shop: l.shopPrice != null ? { price: l.shopPrice, mrp: l.shopMrp } : null,
+    });
+  const priceOf = (l: CartLine) => pricingOf(l).price;
+  const mrpOf = (l: CartLine) => pricingOf(l).mrp;
   const subtotal = items.reduce((s, l) => s + priceOf(l) * l.quantity, 0);
   const mrpTotal = items.reduce((s, l) => s + mrpOf(l) * l.quantity, 0);
   const savings = mrpTotal - subtotal;
+
   const totalQty = items.reduce((s, l) => s + l.quantity, 0);
   const currentShop = items.find((l) => l.shop)?.shop ?? null;
   const currentShopId = items.find((l) => l.shop_id)?.shop_id ?? null;
