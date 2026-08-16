@@ -9,7 +9,9 @@ import { useCart, CartShopConflictError } from "@/hooks/useCart";
 import { useDeliveryContext } from "@/hooks/useDeliveryContext";
 import { ShopPicker, useEligibleShops, type EligibleShop } from "@/components/ShopPicker";
 import { Button } from "@/components/ui/button";
-import { rupees, pct } from "@/lib/format";
+import { rupees } from "@/lib/format";
+import { resolvePricing } from "@/lib/pricing";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductImage } from "@/components/ProductImage";
 import {
@@ -131,21 +133,26 @@ function ProductPage() {
   }, [eligibleShops, selectedShopId, currentShop]);
 
   const [conflict, setConflict] = useState<{ productId: string; variantId: string | null; shopId: string } | null>(null);
+  const [priceChange, setPriceChange] = useState<{ oldPrice: number; newPrice: number } | null>(null);
+
 
   if (product.isLoading) return <div className="mx-auto max-w-7xl px-4 py-10"><Skeleton className="h-96" /></div>;
   if (!product.data) return <div className="mx-auto max-w-7xl px-4 py-20 text-center">Product not found.</div>;
 
   const p = product.data;
 
-  // Base effective values from variant (fallback: product)
-  const baseVariantPrice = selected?.selling_price ?? p.price;
-  const baseVariantMrp = selected?.mrp || (selected?.selling_price ?? p.mrp);
-  const baseVariantStock = selected?.stock ?? p.stock;
-
-  // Shop overrides variant pricing when one is selected
-  const effPrice = selectedShop?.price ?? baseVariantPrice;
-  const effMrp = selectedShop?.mrp ?? baseVariantMrp;
-  const effStock = selectedShop?.stock ?? baseVariantStock;
+  // Single pricing source shared with the product cards / cart: the selected
+  // shop's inventory record wins for the base size, variants keep their own price.
+  const pricing = resolvePricing({
+    productPrice: p.price,
+    productMrp: p.mrp,
+    productStock: p.stock,
+    variant: selected,
+    shop: selectedShop,
+  });
+  const effPrice = pricing.price;
+  const effMrp = pricing.mrp;
+  const effStock = pricing.stock;
   const effImages = selected && selected.images.length > 0 ? selected.images : buildImageList(p);
   const effUnit = selected ? `${selected.size}${selected.unit ? " " + selected.unit : ""}` : p.unit;
   const effDeliveryMinutes = selectedShop?.delivery_minutes ?? p.delivery_minutes;
@@ -156,7 +163,18 @@ function ProductPage() {
       (l.variant_id ?? null) === (selected?.id ?? null) &&
       (l.shop_id ?? null) === (selectedShop?.shop_id ?? null),
   );
-  const discount = pct(effPrice, effMrp);
+  const discount = pricing.discount;
+
+
+  async function doAdd() {
+    try {
+      await add(p.id, 1, selected?.id ?? null, selectedShop?.shop_id ?? null);
+    } catch (e) {
+      if (e instanceof CartShopConflictError) {
+        setConflict({ productId: p.id, variantId: selected?.id ?? null, shopId: selectedShop!.shop_id });
+      }
+    }
+  }
 
   async function handleAdd() {
     if (allShopsClosed) {
@@ -168,14 +186,28 @@ function ProductPage() {
       return;
     }
 
-    try {
-      await add(p.id, 1, selected?.id ?? null, selectedShop?.shop_id ?? null);
-    } catch (e) {
-      if (e instanceof CartShopConflictError) {
-        setConflict({ productId: p.id, variantId: selected?.id ?? null, shopId: selectedShop!.shop_id });
+    // Re-validate the shop price at add time; never silently change it.
+    if (selectedShop) {
+      const fresh = await eligibleQ.refetch();
+      const freshShop = (fresh.data ?? []).find((s) => s.shop_id === selectedShop.shop_id);
+      if (freshShop) {
+        const freshPrice = resolvePricing({
+          productPrice: p.price,
+          productMrp: p.mrp,
+          productStock: p.stock,
+          variant: selected,
+          shop: freshShop,
+        }).price;
+        if (Math.round(freshPrice) !== Math.round(effPrice)) {
+          setPriceChange({ oldPrice: effPrice, newPrice: freshPrice });
+          return;
+        }
       }
     }
+
+    await doAdd();
   }
+
 
   async function confirmSwitchShop() {
     if (!conflict) return;
@@ -230,6 +262,13 @@ function ProductPage() {
                 {variants.map((v) => {
                   const active = selected?.id === v.id;
                   const oos = v.stock <= 0;
+                  const vp = resolvePricing({
+                    productPrice: p.price,
+                    productMrp: p.mrp,
+                    productStock: p.stock,
+                    variant: v,
+                    shop: selectedShop,
+                  });
                   return (
                     <button
                       key={v.id}
@@ -245,9 +284,9 @@ function ProductPage() {
                         {v.unit ? ` ${v.unit}` : ""}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {rupees(v.selling_price)}
-                        {v.mrp > v.selling_price && (
-                          <span className="ml-1 line-through">{rupees(v.mrp)}</span>
+                        {rupees(vp.price)}
+                        {vp.mrp > vp.price && (
+                          <span className="ml-1 line-through">{rupees(vp.mrp)}</span>
                         )}
                         {oos && <span className="ml-2 text-destructive">Out</span>}
                       </div>
@@ -337,6 +376,33 @@ function ProductPage() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={!!priceChange} onOpenChange={(v) => !v && setPriceChange(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Price updated</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-1">
+                <div>The shop updated this item's price.</div>
+                <div>Old price: <span className="line-through">{rupees(priceChange?.oldPrice ?? 0)}</span></div>
+                <div className="font-semibold text-foreground">New price: {rupees(priceChange?.newPrice ?? 0)}</div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                setPriceChange(null);
+                await doAdd();
+              }}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       <AlertDialog open={!!conflict} onOpenChange={(v) => !v && setConflict(null)}>
         <AlertDialogContent>

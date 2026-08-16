@@ -12,7 +12,7 @@ export const Route = createFileRoute("/customer/cart")({
 });
 
 function AppCart() {
-  const { items, subtotal, savings, setQty, loading } = useCart();
+  const { items, subtotal, savings, setQty, loading, priceOf, mrpOf } = useCart();
   const navigate = useNavigate();
 
 
@@ -63,11 +63,12 @@ function AppCart() {
                   {l.variant ? `${l.variant.size}${l.variant.unit ? " " + l.variant.unit : ""}` : l.product.unit}
                 </div>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="font-bold text-sm">{rupees(l.variant?.selling_price ?? l.product.price)}</span>
-                  {(l.variant?.mrp ?? l.product.mrp) > (l.variant?.selling_price ?? l.product.price) && (
-                    <span className="text-[11px] text-muted-foreground line-through">{rupees(l.variant?.mrp ?? l.product.mrp)}</span>
+                  <span className="font-bold text-sm">{rupees(priceOf(l))}</span>
+                  {mrpOf(l) > priceOf(l) && (
+                    <span className="text-[11px] text-muted-foreground line-through">{rupees(mrpOf(l))}</span>
                   )}
                 </div>
+
               </div>
               <div className="flex items-center gap-1 rounded-xl gradient-primary text-primary-foreground">
                 <button onClick={() => setQty(l.id, l.quantity - 1)} className="h-9 w-9 grid place-items-center">
