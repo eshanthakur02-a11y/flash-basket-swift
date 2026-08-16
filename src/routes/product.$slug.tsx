@@ -95,6 +95,19 @@ function ProductPage() {
   });
   const eligibleShops = eligibleQ.data ?? [];
 
+  // Base (default-size) shop inventory — variant-independent, so switching the
+  // selected variant never rewrites the price shown on the other variant chips.
+  const baseShopsQ = useEligibleShops({
+    productId: product.data?.id,
+    variantId: null,
+    pincode: delivery.pincode,
+    lat: delivery.lat,
+    lng: delivery.lng,
+    enabled: !!product.data?.id,
+  });
+  const baseShops = baseShopsQ.data ?? [];
+
+
   // Open vs closed shops carrying this item — drives the "Currently Unavailable" state
   const availabilityQ = useQuery({
     queryKey: ["product-availability", product.data?.id, selected?.id ?? null, delivery.pincode, delivery.lat, delivery.lng],
@@ -132,8 +145,16 @@ function ProductPage() {
     return eligibleShops[0];
   }, [eligibleShops, selectedShopId, currentShop]);
 
+  // Pricing always reads the variant-independent base inventory record for the
+  // chosen shop, so a variant switch can't leak its price into other variants.
+  const pricingShop: EligibleShop | null = useMemo(() => {
+    if (!selectedShop) return null;
+    return baseShops.find((s) => s.shop_id === selectedShop.shop_id) ?? selectedShop;
+  }, [baseShops, selectedShop]);
+
   const [conflict, setConflict] = useState<{ productId: string; variantId: string | null; shopId: string } | null>(null);
   const [priceChange, setPriceChange] = useState<{ oldPrice: number; newPrice: number } | null>(null);
+
 
 
   if (product.isLoading) return <div className="mx-auto max-w-7xl px-4 py-10"><Skeleton className="h-96" /></div>;
@@ -148,7 +169,7 @@ function ProductPage() {
     productMrp: p.mrp,
     productStock: p.stock,
     variant: selected,
-    shop: selectedShop,
+    shop: pricingShop,
   });
   const effPrice = pricing.price;
   const effMrp = pricing.mrp;
@@ -188,7 +209,7 @@ function ProductPage() {
 
     // Re-validate the shop price at add time; never silently change it.
     if (selectedShop) {
-      const fresh = await eligibleQ.refetch();
+      const fresh = await baseShopsQ.refetch();
       const freshShop = (fresh.data ?? []).find((s) => s.shop_id === selectedShop.shop_id);
       if (freshShop) {
         const freshPrice = resolvePricing({
@@ -267,7 +288,7 @@ function ProductPage() {
                     productMrp: p.mrp,
                     productStock: p.stock,
                     variant: v,
-                    shop: selectedShop,
+                    shop: pricingShop,
                   });
                   return (
                     <button
