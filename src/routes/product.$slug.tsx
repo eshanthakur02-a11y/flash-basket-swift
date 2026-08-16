@@ -267,10 +267,6 @@ function ProductPage() {
                     </button>
                   );
                 })}
-
-                    </button>
-                  );
-                })}
               </div>
             </div>
           )}
