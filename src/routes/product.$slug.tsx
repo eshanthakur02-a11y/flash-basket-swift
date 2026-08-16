@@ -283,13 +283,17 @@ function ProductPage() {
                         {v.size}
                         {v.unit ? ` ${v.unit}` : ""}
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {rupees(vp.price)}
+                      <div className="mt-0.5 flex items-center gap-1 text-xs">
+                        <span className="font-extrabold text-foreground">{rupees(vp.price)}</span>
                         {vp.mrp > vp.price && (
-                          <span className="ml-1 line-through">{rupees(vp.mrp)}</span>
+                          <span className="text-muted-foreground line-through">{rupees(vp.mrp)}</span>
                         )}
-                        {oos && <span className="ml-2 text-destructive">Out</span>}
+                        {vp.discount > 0 && (
+                          <span className="font-bold text-success">{vp.discount}% off</span>
+                        )}
+                        {oos && <span className="ml-1 text-destructive">Out</span>}
                       </div>
+
                     </button>
                   );
                 })}
