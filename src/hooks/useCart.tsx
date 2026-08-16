@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
+import { resolvePricing } from "@/lib/pricing";
 
 export interface CartLine {
   id: string;
@@ -28,6 +29,7 @@ export interface CartLine {
     mrp: number;
     stock: number;
     images: string[];
+    is_default?: boolean | null;
   } | null;
   shop?: {
     id: string;
@@ -37,7 +39,11 @@ export interface CartLine {
     latitude: number | null;
     longitude: number | null;
   } | null;
+  /** Shop-specific inventory pricing (authoritative for the base size). */
+  shopPrice?: number | null;
+  shopMrp?: number | null;
 }
+
 
 export class CartShopConflictError extends Error {
   constructor(
