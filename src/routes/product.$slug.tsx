@@ -137,15 +137,18 @@ function ProductPage() {
 
   const p = product.data;
 
-  // Base effective values from variant (fallback: product)
-  const baseVariantPrice = selected?.selling_price ?? p.price;
-  const baseVariantMrp = selected?.mrp || (selected?.selling_price ?? p.mrp);
-  const baseVariantStock = selected?.stock ?? p.stock;
-
-  // Shop overrides variant pricing when one is selected
-  const effPrice = selectedShop?.price ?? baseVariantPrice;
-  const effMrp = selectedShop?.mrp ?? baseVariantMrp;
-  const effStock = selectedShop?.stock ?? baseVariantStock;
+  // Single pricing source shared with the product cards / cart: the selected
+  // shop's inventory record wins for the base size, variants keep their own price.
+  const pricing = resolvePricing({
+    productPrice: p.price,
+    productMrp: p.mrp,
+    productStock: p.stock,
+    variant: selected,
+    shop: selectedShop,
+  });
+  const effPrice = pricing.price;
+  const effMrp = pricing.mrp;
+  const effStock = pricing.stock;
   const effImages = selected && selected.images.length > 0 ? selected.images : buildImageList(p);
   const effUnit = selected ? `${selected.size}${selected.unit ? " " + selected.unit : ""}` : p.unit;
   const effDeliveryMinutes = selectedShop?.delivery_minutes ?? p.delivery_minutes;
@@ -156,7 +159,8 @@ function ProductPage() {
       (l.variant_id ?? null) === (selected?.id ?? null) &&
       (l.shop_id ?? null) === (selectedShop?.shop_id ?? null),
   );
-  const discount = pct(effPrice, effMrp);
+  const discount = pricing.discount;
+
 
   async function handleAdd() {
     if (allShopsClosed) {
