@@ -95,6 +95,19 @@ function ProductPage() {
   });
   const eligibleShops = eligibleQ.data ?? [];
 
+  // Base (default-size) shop inventory — variant-independent, so switching the
+  // selected variant never rewrites the price shown on the other variant chips.
+  const baseShopsQ = useEligibleShops({
+    productId: product.data?.id,
+    variantId: null,
+    pincode: delivery.pincode,
+    lat: delivery.lat,
+    lng: delivery.lng,
+    enabled: !!product.data?.id,
+  });
+  const baseShops = baseShopsQ.data ?? [];
+
+
   // Open vs closed shops carrying this item — drives the "Currently Unavailable" state
   const availabilityQ = useQuery({
     queryKey: ["product-availability", product.data?.id, selected?.id ?? null, delivery.pincode, delivery.lat, delivery.lng],
