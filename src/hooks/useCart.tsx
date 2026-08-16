@@ -282,7 +282,10 @@ export function useCart() {
     totalQty,
     currentShop,
     currentShopId,
+    priceOf,
+    mrpOf,
     loading: cartQuery.isLoading,
+
     add: (productId: string, qty = 1, variantId: string | null = null, shopId: string | null = null) =>
       addMutation.mutateAsync({ productId, variantId, shopId, qty }),
     addForce: (productId: string, qty = 1, variantId: string | null = null, shopId: string | null = null) =>
