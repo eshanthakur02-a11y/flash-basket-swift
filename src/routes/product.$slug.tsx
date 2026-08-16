@@ -133,6 +133,8 @@ function ProductPage() {
   }, [eligibleShops, selectedShopId, currentShop]);
 
   const [conflict, setConflict] = useState<{ productId: string; variantId: string | null; shopId: string } | null>(null);
+  const [priceChange, setPriceChange] = useState<{ oldPrice: number; newPrice: number } | null>(null);
+
 
   if (product.isLoading) return <div className="mx-auto max-w-7xl px-4 py-10"><Skeleton className="h-96" /></div>;
   if (!product.data) return <div className="mx-auto max-w-7xl px-4 py-20 text-center">Product not found.</div>;
