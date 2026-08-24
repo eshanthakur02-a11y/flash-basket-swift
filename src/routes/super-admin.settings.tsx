@@ -12,9 +12,9 @@ import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 export const Route = createFileRoute("/super-admin/settings")({
   head: () => ({
     meta: [
-      { title: "Platform Settings — FlashBasket" },
+      { title: "Platform Settings — AP Mart" },
       { name: "description", content: "Global platform, payment, delivery, AI, notification settings, feature flags and maintenance mode." },
-      { property: "og:title", content: "Platform Settings — FlashBasket" },
+      { property: "og:title", content: "Platform Settings — AP Mart" },
       { property: "og:description", content: "Global platform configuration and feature flags." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

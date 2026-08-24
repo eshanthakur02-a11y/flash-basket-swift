@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AuthRequired } from "@/components/AuthRequired";
 
 export const Route = createFileRoute("/orders/")({
-  head: () => ({ meta: [{ title: "My orders — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "My orders — AP Mart" }] }),
   component: OrdersPage,
 });
 

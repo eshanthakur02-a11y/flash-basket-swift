@@ -27,7 +27,7 @@ type SortKey = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FlashBasket — Groceries in 10 minutes" },
+      { title: "AP Mart — Groceries in 10 minutes" },
       { name: "description", content: "Order groceries, snacks, fruits and household essentials delivered in 10 minutes." },
     ],
   }),

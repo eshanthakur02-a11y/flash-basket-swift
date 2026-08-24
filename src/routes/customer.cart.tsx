@@ -7,7 +7,7 @@ import { rupees } from "@/lib/format";
 import { CartShopSelector } from "@/components/CartShopSelector";
 
 export const Route = createFileRoute("/customer/cart")({
-  head: () => ({ meta: [{ title: "Cart — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Cart — AP Mart" }] }),
   component: AppCart,
 });
 

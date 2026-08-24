@@ -18,7 +18,7 @@ import { Truck, Plus, Pencil, Trash2, Copy, Eye, MoreVertical, Search, ArrowLeft
 import { rupees } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/delivery-pricing")({
-  head: () => ({ meta: [{ title: "Delivery Pricing — FlashBasket Admin" }] }),
+  head: () => ({ meta: [{ title: "Delivery Pricing — AP Mart Admin" }] }),
   component: Page,
 });
 

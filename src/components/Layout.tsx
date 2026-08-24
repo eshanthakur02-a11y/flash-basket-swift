@@ -29,7 +29,7 @@ export function Layout() {
       <footer className="mt-16 border-t border-border bg-secondary/30">
         <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>© {new Date().getFullYear()} FlashBasket. Groceries delivered at lightning speed.</div>
+            <div>© {new Date().getFullYear()} AP Mart. Groceries delivered at lightning speed.</div>
             <div className="flex gap-4">
               <span className="cursor-default">About</span>
               <span className="cursor-default">Help</span>

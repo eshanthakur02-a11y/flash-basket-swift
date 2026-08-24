@@ -14,7 +14,7 @@ import { SupportTicketForm } from "@/components/SupportTicketForm";
 import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 export const Route = createFileRoute("/customer/profile")({
-  head: () => ({ meta: [{ title: "Account — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Account — AP Mart" }] }),
   component: AppProfile,
 });
 
@@ -109,7 +109,7 @@ function AppProfile() {
 
       <DeleteAccountSection />
 
-      <div className="text-center text-[11px] text-muted-foreground pt-2">FlashBasket • v1.0</div>
+      <div className="text-center text-[11px] text-muted-foreground pt-2">AP Mart • v1.0</div>
     </div>
   );
 }

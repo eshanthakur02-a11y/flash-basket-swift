@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/admin/role-requests")({
-  head: () => ({ meta: [{ title: "Role requests — FlashBasket Admin" }] }),
+  head: () => ({ meta: [{ title: "Role requests — AP Mart Admin" }] }),
   component: () => (
     <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}>
       <RoleRequestsPage />

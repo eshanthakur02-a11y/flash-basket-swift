@@ -10,7 +10,7 @@ import { LogOut, Mail, Shield, User as UserIcon, Phone } from "lucide-react";
 import { DeleteAccountSection } from "@/components/DeleteAccountSection";
 
 export const Route = createFileRoute("/support/profile")({
-  head: () => ({ meta: [{ title: "Support Profile — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Support Profile — AP Mart" }] }),
   component: Page,
 });
 

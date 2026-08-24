@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/staff-login")({
-  head: () => ({ meta: [{ title: "Management Portal — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Management Portal — AP Mart" }] }),
   component: StaffLoginPage,
 });
 

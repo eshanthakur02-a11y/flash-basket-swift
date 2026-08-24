@@ -37,7 +37,7 @@ export async function openRazorpayCheckout(opts: OpenCheckoutOpts) {
     amount: opts.amount,
     currency: opts.currency,
     order_id: opts.razorpayOrderId,
-    name: "FlashBasket",
+    name: "AP Mart",
     description: `Order ${opts.orderNumber}`,
     prefill: opts.prefill,
     theme: { color: "#A3E635" },

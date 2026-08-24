@@ -6,7 +6,7 @@ import { ADMIN_NAV } from "./admin.dashboard";
 import { Route as RouteIcon, CheckCircle2, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/admin/routing")({
-  head: () => ({ meta: [{ title: "Routing logs — FlashBasket Admin" }] }),
+  head: () => ({ meta: [{ title: "Routing logs — AP Mart Admin" }] }),
   component: Page,
 });
 

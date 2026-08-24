@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/shopkeeper")({
-  head: () => ({ meta: [{ title: "Shopkeeper — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Shopkeeper — AP Mart" }] }),
   component: ShopkeeperShell,
 });
 

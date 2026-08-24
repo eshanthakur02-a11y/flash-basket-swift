@@ -6,10 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/super-admin/dashboard")({
   head: () => ({
     meta: [
-      { title: "Super Admin Overview — FlashBasket" },
+      { title: "Super Admin Overview — AP Mart" },
       { name: "description", content: "Platform-wide control centre: role tiers, shops, and the security audit trail." },
-      { property: "og:title", content: "Super Admin Overview — FlashBasket" },
-      { property: "og:description", content: "Platform-wide control centre for FlashBasket system owners." },
+      { property: "og:title", content: "Super Admin Overview — AP Mart" },
+      { property: "og:description", content: "Platform-wide control centre for AP Mart system owners." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

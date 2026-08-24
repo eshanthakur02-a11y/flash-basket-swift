@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth, homeForRoles } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — AP Mart" }] }),
   component: DashboardRedirect,
 });
 

@@ -120,10 +120,10 @@ export function CatalogDialogContent({
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Library className="h-5 w-5 text-primary" />
-          FlashBasket Catalog
+          AP Mart Catalog
         </DialogTitle>
         <DialogDescription>
-          Pick a product that already exists on FlashBasket and add it to your shop with your own price and stock.
+          Pick a product that already exists on AP Mart and add it to your shop with your own price and stock.
         </DialogDescription>
       </DialogHeader>
 

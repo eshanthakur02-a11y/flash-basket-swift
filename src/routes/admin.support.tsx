@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/support")({
-  head: () => ({ meta: [{ title: "Support Admin — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Support Admin — AP Mart" }] }),
   component: () => (
     <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}>
       <Page />

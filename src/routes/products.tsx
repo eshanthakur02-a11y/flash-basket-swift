@@ -12,7 +12,7 @@ const search = z.object({ q: z.string().optional(), cat: z.string().optional() }
 
 export const Route = createFileRoute("/products")({
   validateSearch: search,
-  head: () => ({ meta: [{ title: "All products — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "All products — AP Mart" }] }),
   component: ProductsPage,
 });
 

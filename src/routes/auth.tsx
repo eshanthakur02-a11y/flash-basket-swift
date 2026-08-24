@@ -22,7 +22,7 @@ async function redirectByRole(navigate: ReturnType<typeof useNavigate>, userId: 
 }
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign in — FlashBasket" }, { name: "description", content: "Sign in or create your FlashBasket account with mobile OTP." }] }),
+  head: () => ({ meta: [{ title: "Sign in — AP Mart" }, { name: "description", content: "Sign in or create your AP Mart account with mobile OTP." }] }),
   component: AuthPage,
 });
 
@@ -68,7 +68,7 @@ function AuthPage() {
             Lightning-fast groceries, right at your door.
           </h1>
           <p className="mt-4 text-lg opacity-80">
-            Join FlashBasket and get fresh essentials delivered in 10 minutes.
+            Join AP Mart and get fresh essentials delivered in 10 minutes.
           </p>
           <div className="mt-8 grid grid-cols-3 gap-3 text-center">
             {["10 min", "Free above ₹199", "100% authentic"].map((t) => (
@@ -87,7 +87,7 @@ function AuthPage() {
           <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-card">
             <div className="flex items-center gap-2 mb-2">
               <Zap className="h-5 w-5 text-primary fill-primary" />
-              <span className="text-sm font-bold">Welcome to FlashBasket</span>
+              <span className="text-sm font-bold">Welcome to AP Mart</span>
             </div>
             <Tabs defaultValue="phone" className="mt-4">
               <TabsList className="grid w-full grid-cols-3 rounded-xl">
@@ -123,7 +123,7 @@ function AuthPage() {
             </Tabs>
           </div>
           <p className="mt-4 text-center text-xs text-muted-foreground">
-            By continuing you agree to FlashBasket's terms of service.
+            By continuing you agree to AP Mart's terms of service.
           </p>
         </div>
       </div>

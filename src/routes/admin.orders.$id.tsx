@@ -12,10 +12,10 @@ import { AdminOrderActions } from "@/components/order/AdminOrderActions";
 export const Route = createFileRoute("/admin/orders/$id")({
   head: () => ({
     meta: [
-      { title: "Order details — FlashBasket Admin" },
+      { title: "Order details — AP Mart Admin" },
       { name: "description", content: "Full order breakdown: products, shops, rider, inventory impact, payments and timeline." },
-      { property: "og:title", content: "Order details — FlashBasket Admin" },
-      { property: "og:description", content: "Full order breakdown for FlashBasket admins." },
+      { property: "og:title", content: "Order details — AP Mart Admin" },
+      { property: "og:description", content: "Full order breakdown for AP Mart admins." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

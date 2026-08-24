@@ -23,15 +23,15 @@ import { SubcategoryBar } from "@/components/customer/SubcategoryBar";
 export const Route = createFileRoute("/category/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `${params.slug} — FlashBasket` },
+      { title: `${params.slug} — AP Mart` },
       {
         name: "description",
         content: `Shop ${params.slug} online with lightning-fast delivery. Filter by brand, size, price and rating.`,
       },
-      { property: "og:title", content: `${params.slug} — FlashBasket` },
+      { property: "og:title", content: `${params.slug} — AP Mart` },
       {
         property: "og:description",
-        content: `Shop ${params.slug} with lightning-fast delivery from FlashBasket.`,
+        content: `Shop ${params.slug} with lightning-fast delivery from AP Mart.`,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

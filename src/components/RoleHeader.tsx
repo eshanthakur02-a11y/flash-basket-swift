@@ -40,7 +40,7 @@ export function RoleHeader({ homeTo, accountTo, searchTo = "/products", showSear
           <span className="grid h-8 w-8 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
             <Zap className="h-4 w-4 fill-current" />
           </span>
-          Flash<span className="text-primary">Basket</span>
+          AP <span className="text-primary">Mart</span>
         </Link>
         <div className="flex-1" />
         {trailing}

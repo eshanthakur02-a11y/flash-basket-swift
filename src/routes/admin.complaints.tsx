@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/complaints")({
-  head: () => ({ meta: [{ title: "Complaints — FlashBasket Admin" }] }),
+  head: () => ({ meta: [{ title: "Complaints — AP Mart Admin" }] }),
   component: () => (
     <RoleShell role="admin" nav={ADMIN_NAV} requireRoles={["admin"]}>
       <Page />

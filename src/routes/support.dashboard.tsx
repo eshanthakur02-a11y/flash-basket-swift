@@ -9,7 +9,7 @@ import { Inbox, AlertCircle, CheckCircle2, Timer, Phone, MapPin, Store, User, Lo
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/support/dashboard")({
-  head: () => ({ meta: [{ title: "Support Dashboard — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Support Dashboard — AP Mart" }] }),
   component: Page,
 });
 

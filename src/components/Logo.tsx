@@ -10,7 +10,7 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
       </div>
       <div className="leading-none">
         <div className={`font-display font-bold ${t} text-foreground`}>
-          Flash<span className="text-primary">Basket</span>
+          AP <span className="text-primary">Mart</span>
         </div>
       </div>
     </div>
