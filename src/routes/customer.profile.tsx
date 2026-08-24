@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import {
   User as UserIcon, MapPin, Package, Heart, Bell, Headphones, LogOut, ChevronRight, Shield, Briefcase,
+  ShieldCheck, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
