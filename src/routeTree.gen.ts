@@ -63,6 +63,7 @@ import { Route as DeliveryAvailableOrdersRouteImport } from './routes/delivery.a
 import { Route as CustomerWishlistRouteImport } from './routes/customer.wishlist'
 import { Route as CustomerShopRouteImport } from './routes/customer.shop'
 import { Route as CustomerProfileRouteImport } from './routes/customer.profile'
+import { Route as CustomerPrivacyRouteImport } from './routes/customer.privacy'
 import { Route as CustomerNotificationsRouteImport } from './routes/customer.notifications'
 import { Route as CustomerHomeRouteImport } from './routes/customer.home'
 import { Route as CustomerDashboardRouteImport } from './routes/customer.dashboard'
@@ -377,6 +378,11 @@ const CustomerProfileRoute = CustomerProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => CustomerRoute,
 } as any)
+const CustomerPrivacyRoute = CustomerPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => CustomerRoute,
+} as any)
 const CustomerNotificationsRoute = CustomerNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -642,6 +648,7 @@ export interface FileRoutesByFullPath {
   '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
+  '/customer/privacy': typeof CustomerPrivacyRoute
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
   '/customer/wishlist': typeof CustomerWishlistRoute
@@ -740,6 +747,7 @@ export interface FileRoutesByTo {
   '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
+  '/customer/privacy': typeof CustomerPrivacyRoute
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
   '/customer/wishlist': typeof CustomerWishlistRoute
@@ -839,6 +847,7 @@ export interface FileRoutesById {
   '/customer/dashboard': typeof CustomerDashboardRoute
   '/customer/home': typeof CustomerHomeRoute
   '/customer/notifications': typeof CustomerNotificationsRoute
+  '/customer/privacy': typeof CustomerPrivacyRoute
   '/customer/profile': typeof CustomerProfileRoute
   '/customer/shop': typeof CustomerShopRoute
   '/customer/wishlist': typeof CustomerWishlistRoute
@@ -939,6 +948,7 @@ export interface FileRouteTypes {
     | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
+    | '/customer/privacy'
     | '/customer/profile'
     | '/customer/shop'
     | '/customer/wishlist'
@@ -1037,6 +1047,7 @@ export interface FileRouteTypes {
     | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
+    | '/customer/privacy'
     | '/customer/profile'
     | '/customer/shop'
     | '/customer/wishlist'
@@ -1135,6 +1146,7 @@ export interface FileRouteTypes {
     | '/customer/dashboard'
     | '/customer/home'
     | '/customer/notifications'
+    | '/customer/privacy'
     | '/customer/profile'
     | '/customer/shop'
     | '/customer/wishlist'
@@ -1595,6 +1607,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerProfileRouteImport
       parentRoute: typeof CustomerRoute
     }
+    '/customer/privacy': {
+      id: '/customer/privacy'
+      path: '/privacy'
+      fullPath: '/customer/privacy'
+      preLoaderRoute: typeof CustomerPrivacyRouteImport
+      parentRoute: typeof CustomerRoute
+    }
     '/customer/notifications': {
       id: '/customer/notifications'
       path: '/notifications'
@@ -1961,6 +1980,7 @@ interface CustomerRouteChildren {
   CustomerDashboardRoute: typeof CustomerDashboardRoute
   CustomerHomeRoute: typeof CustomerHomeRoute
   CustomerNotificationsRoute: typeof CustomerNotificationsRoute
+  CustomerPrivacyRoute: typeof CustomerPrivacyRoute
   CustomerProfileRoute: typeof CustomerProfileRoute
   CustomerShopRoute: typeof CustomerShopRoute
   CustomerWishlistRoute: typeof CustomerWishlistRoute
@@ -1978,6 +1998,7 @@ const CustomerRouteChildren: CustomerRouteChildren = {
   CustomerDashboardRoute: CustomerDashboardRoute,
   CustomerHomeRoute: CustomerHomeRoute,
   CustomerNotificationsRoute: CustomerNotificationsRoute,
+  CustomerPrivacyRoute: CustomerPrivacyRoute,
   CustomerProfileRoute: CustomerProfileRoute,
   CustomerShopRoute: CustomerShopRoute,
   CustomerWishlistRoute: CustomerWishlistRoute,
