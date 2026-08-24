@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Megaphone, Menu, Truck, Star, Settings, Zap, Ticket, LifeBuoy } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Megaphone, Menu, Truck, Star, Settings, Ticket, LifeBuoy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { RoleHeader } from "@/components/RoleHeader";

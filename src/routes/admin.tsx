@@ -2,7 +2,7 @@ import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
-  LayoutDashboard, ClipboardList, Store, Users, Bell, Zap, Menu, Wallet, Package, Tag,
+  LayoutDashboard, ClipboardList, Store, Users, Bell, Menu, Wallet, Package, Tag,
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
