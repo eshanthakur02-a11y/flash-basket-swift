@@ -9,6 +9,7 @@ import { PhoneOtpForm } from "@/components/PhoneOtpForm";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
+import { LogoMark } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
@@ -133,6 +134,7 @@ function LoginPage() {
 
         <div className="p-6 md:p-8 -mt-3 bg-card rounded-t-3xl relative">
           <div className="text-center">
+            <div className="flex justify-center mb-3"><LogoMark size="lg" className="rounded-2xl" /></div>
             <h1 className="font-display text-2xl font-extrabold text-foreground">Welcome to AP Mart</h1>
             <p className="mt-1 text-sm text-muted-foreground">Groceries delivered at lightning speed</p>
           </div>
