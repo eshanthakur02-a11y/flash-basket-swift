@@ -96,7 +96,10 @@ function AppProfile() {
         <Row to="/customer/apply" icon={<Briefcase className="h-5 w-5" />} label="Become a partner" />
         {isAdmin && <Row to="/admin/dashboard" icon={<Shield className="h-5 w-5" />} label="Admin panel" />}
         <RowButton onClick={() => setSupportOpen(true)} icon={<Headphones className="h-5 w-5" />} label="Help & support" />
+        <Row to="/customer/privacy" icon={<ShieldCheck className="h-5 w-5" />} label="Privacy Policy" />
+        <Row to="/customer/about" icon={<Info className="h-5 w-5" />} label="About AP Mart" />
       </div>
+
 
       <SupportTicketForm open={supportOpen} onOpenChange={setSupportOpen} />
 

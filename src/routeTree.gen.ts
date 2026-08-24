@@ -72,6 +72,7 @@ import { Route as CustomerCategoriesRouteImport } from './routes/customer.catego
 import { Route as CustomerCartRouteImport } from './routes/customer.cart'
 import { Route as CustomerApplyRouteImport } from './routes/customer.apply'
 import { Route as CustomerAddressSetupRouteImport } from './routes/customer.address-setup'
+import { Route as CustomerAboutRouteImport } from './routes/customer.about'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminShopsRouteImport } from './routes/admin.shops'
@@ -423,6 +424,11 @@ const CustomerAddressSetupRoute = CustomerAddressSetupRouteImport.update({
   path: '/address-setup',
   getParentRoute: () => CustomerRoute,
 } as any)
+const CustomerAboutRoute = CustomerAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => CustomerRoute,
+} as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
   id: '/category/$slug',
   path: '/category/$slug',
@@ -640,6 +646,7 @@ export interface FileRoutesByFullPath {
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/customer/about': typeof CustomerAboutRoute
   '/customer/address-setup': typeof CustomerAddressSetupRoute
   '/customer/apply': typeof CustomerApplyRoute
   '/customer/cart': typeof CustomerCartRoute
@@ -739,6 +746,7 @@ export interface FileRoutesByTo {
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/customer/about': typeof CustomerAboutRoute
   '/customer/address-setup': typeof CustomerAddressSetupRoute
   '/customer/apply': typeof CustomerApplyRoute
   '/customer/cart': typeof CustomerCartRoute
@@ -839,6 +847,7 @@ export interface FileRoutesById {
   '/admin/shops': typeof AdminShopsRoute
   '/admin/support': typeof AdminSupportRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/customer/about': typeof CustomerAboutRoute
   '/customer/address-setup': typeof CustomerAddressSetupRoute
   '/customer/apply': typeof CustomerApplyRoute
   '/customer/cart': typeof CustomerCartRoute
@@ -940,6 +949,7 @@ export interface FileRouteTypes {
     | '/admin/shops'
     | '/admin/support'
     | '/category/$slug'
+    | '/customer/about'
     | '/customer/address-setup'
     | '/customer/apply'
     | '/customer/cart'
@@ -1039,6 +1049,7 @@ export interface FileRouteTypes {
     | '/admin/shops'
     | '/admin/support'
     | '/category/$slug'
+    | '/customer/about'
     | '/customer/address-setup'
     | '/customer/apply'
     | '/customer/cart'
@@ -1138,6 +1149,7 @@ export interface FileRouteTypes {
     | '/admin/shops'
     | '/admin/support'
     | '/category/$slug'
+    | '/customer/about'
     | '/customer/address-setup'
     | '/customer/apply'
     | '/customer/cart'
@@ -1670,6 +1682,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerAddressSetupRouteImport
       parentRoute: typeof CustomerRoute
     }
+    '/customer/about': {
+      id: '/customer/about'
+      path: '/about'
+      fullPath: '/customer/about'
+      preLoaderRoute: typeof CustomerAboutRouteImport
+      parentRoute: typeof CustomerRoute
+    }
     '/category/$slug': {
       id: '/category/$slug'
       path: '/category/$slug'
@@ -1972,6 +1991,7 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface CustomerRouteChildren {
+  CustomerAboutRoute: typeof CustomerAboutRoute
   CustomerAddressSetupRoute: typeof CustomerAddressSetupRoute
   CustomerApplyRoute: typeof CustomerApplyRoute
   CustomerCartRoute: typeof CustomerCartRoute
@@ -1990,6 +2010,7 @@ interface CustomerRouteChildren {
 }
 
 const CustomerRouteChildren: CustomerRouteChildren = {
+  CustomerAboutRoute: CustomerAboutRoute,
   CustomerAddressSetupRoute: CustomerAddressSetupRoute,
   CustomerApplyRoute: CustomerApplyRoute,
   CustomerCartRoute: CustomerCartRoute,
