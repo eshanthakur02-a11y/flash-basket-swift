@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import {
   User as UserIcon, MapPin, Package, Heart, Bell, Headphones, LogOut, ChevronRight, Shield, Briefcase,
+  ShieldCheck, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -96,7 +97,10 @@ function AppProfile() {
         <Row to="/customer/apply" icon={<Briefcase className="h-5 w-5" />} label="Become a partner" />
         {isAdmin && <Row to="/admin/dashboard" icon={<Shield className="h-5 w-5" />} label="Admin panel" />}
         <RowButton onClick={() => setSupportOpen(true)} icon={<Headphones className="h-5 w-5" />} label="Help & support" />
+        <Row to="/customer/privacy" icon={<ShieldCheck className="h-5 w-5" />} label="Privacy Policy" />
+        <Row to="/customer/about" icon={<Info className="h-5 w-5" />} label="About AP Mart" />
       </div>
+
 
       <SupportTicketForm open={supportOpen} onOpenChange={setSupportOpen} />
 
