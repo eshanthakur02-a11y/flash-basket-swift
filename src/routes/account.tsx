@@ -13,7 +13,7 @@ import { MapPin, Trash2 } from "lucide-react";
 import { AuthRequired } from "@/components/AuthRequired";
 
 export const Route = createFileRoute("/account")({
-  head: () => ({ meta: [{ title: "My account — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "My account — AP Mart" }] }),
   component: AccountPage,
 });
 

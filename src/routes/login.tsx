@@ -17,7 +17,7 @@ export const Route = createFileRoute("/login")({
       ? { next: search.next }
       : {},
 
-  head: () => ({ meta: [{ title: "Sign in — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Sign in — AP Mart" }] }),
   component: LoginPage,
 });
 
@@ -133,7 +133,7 @@ function LoginPage() {
 
         <div className="p-6 md:p-8 -mt-3 bg-card rounded-t-3xl relative">
           <div className="text-center">
-            <h1 className="font-display text-2xl font-extrabold text-foreground">Welcome to FlashBasket</h1>
+            <h1 className="font-display text-2xl font-extrabold text-foreground">Welcome to AP Mart</h1>
             <p className="mt-1 text-sm text-muted-foreground">Groceries delivered at lightning speed</p>
           </div>
 

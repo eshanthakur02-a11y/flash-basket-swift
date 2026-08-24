@@ -12,10 +12,10 @@ import { useAuth } from "@/hooks/useAuth";
 export const Route = createFileRoute("/super-admin/access")({
   head: () => ({
     meta: [
-      { title: "Roles & Access — FlashBasket Super Admin" },
-      { name: "description", content: "Promote, demote, suspend and restore any FlashBasket account across every role tier." },
-      { property: "og:title", content: "Roles & Access — FlashBasket Super Admin" },
-      { property: "og:description", content: "Manage every role tier on the FlashBasket platform." },
+      { title: "Roles & Access — AP Mart Super Admin" },
+      { name: "description", content: "Promote, demote, suspend and restore any AP Mart account across every role tier." },
+      { property: "og:title", content: "Roles & Access — AP Mart Super Admin" },
+      { property: "og:description", content: "Manage every role tier on the AP Mart platform." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

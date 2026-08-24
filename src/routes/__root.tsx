@@ -30,7 +30,7 @@ function NotFoundComponent() {
             to="/"
             className="inline-flex items-center justify-center rounded-xl gradient-primary px-4 py-2 text-sm font-bold text-primary-foreground"
           >
-            Back to FlashBasket
+            Back to AP Mart
           </Link>
         </div>
       </div>
@@ -65,10 +65,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FlashBasket — Groceries delivered at lightning speed" },
-      { name: "description", content: "FlashBasket delivers groceries, snacks and essentials to your door in 10 minutes." },
+      { title: "AP Mart — Groceries delivered at lightning speed" },
+      { name: "description", content: "AP Mart delivers groceries, snacks and essentials to your door in 10 minutes." },
       { name: "theme-color", content: "#A3E635" },
-      { property: "og:title", content: "FlashBasket — Groceries in 10 minutes" },
+      { property: "og:title", content: "AP Mart — Groceries in 10 minutes" },
       { property: "og:description", content: "Fresh groceries, snacks and household essentials at your door in minutes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

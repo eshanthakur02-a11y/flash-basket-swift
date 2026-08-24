@@ -16,7 +16,7 @@ import { partnerStatusMeta, timeAgo } from "@/lib/partnerStatus";
 
 
 export const Route = createFileRoute("/admin/delivery-partners")({
-  head: () => ({ meta: [{ title: "Delivery — FlashBasket Admin" }] }),
+  head: () => ({ meta: [{ title: "Delivery — AP Mart Admin" }] }),
   component: Page,
 });
 

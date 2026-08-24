@@ -27,7 +27,7 @@ const NAV = [
 ];
 
 export const Route = createFileRoute("/delivery/dashboard")({
-  head: () => ({ meta: [{ title: "Delivery Dashboard — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Delivery Dashboard — AP Mart" }] }),
   component: Page,
 });
 

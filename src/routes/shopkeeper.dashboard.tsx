@@ -28,7 +28,7 @@ const NAV = [
 ];
 
 export const Route = createFileRoute("/shopkeeper/dashboard")({
-  head: () => ({ meta: [{ title: "Shopkeeper Dashboard — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Shopkeeper Dashboard — AP Mart" }] }),
   component: Page,
 });
 

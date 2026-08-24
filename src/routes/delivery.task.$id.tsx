@@ -23,7 +23,7 @@ const NAV = [
 ];
 
 export const Route = createFileRoute("/delivery/task/$id")({
-  head: () => ({ meta: [{ title: "Delivery Task — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Delivery Task — AP Mart" }] }),
   component: Page,
 });
 

@@ -156,7 +156,7 @@ function Page() {
                           </Button>
                         </DialogTrigger>
                       </TooltipTrigger>
-                      <TooltipContent>Add an existing FlashBasket product to your shop.</TooltipContent>
+                      <TooltipContent>Add an existing AP Mart product to your shop.</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                   <CatalogDialogContent
@@ -474,7 +474,7 @@ function CreateNewProduct({
   const [expDate, setExpDate] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
-  // ---- Smart duplicate detection against the FlashBasket master catalog ----
+  // ---- Smart duplicate detection against the AP Mart master catalog ----
   const debouncedName = useDebouncedValue(name.trim(), 300);
   const dup = useQuery({
     queryKey: ["catalog-duplicate", debouncedName, shopId],
@@ -493,7 +493,7 @@ function CreateNewProduct({
   const duplicate = debouncedName.length >= 2 ? (dup.data ?? null) : null;
 
   async function save() {
-    if (duplicate) return toast.error("This product already exists in FlashBasket. Use \"Add from Catalog\" instead.");
+    if (duplicate) return toast.error("This product already exists in AP Mart. Use \"Add from Catalog\" instead.");
     if (!name.trim()) return toast.error("Product name is required");
     if (categoryIds.length === 0) return toast.error("Select at least one category");
 
@@ -639,7 +639,7 @@ function CreateNewProduct({
                   <AlertCircle className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   {duplicate.already_added
                     ? `${duplicate.name} has already been added to your shop.`
-                    : `This product already exists in FlashBasket. Please use "Add from Catalog" instead.`}
+                    : `This product already exists in AP Mart. Please use "Add from Catalog" instead.`}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1 ml-6">
                   Match: {duplicate.name}{duplicate.unit ? ` · ${duplicate.unit}` : ""}{duplicate.brand ? ` · ${duplicate.brand}` : ""}

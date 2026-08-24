@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/support/ticket/$id")({
-  head: () => ({ meta: [{ title: "Ticket — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Ticket — AP Mart" }] }),
   component: Page,
 });
 

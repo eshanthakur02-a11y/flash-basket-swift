@@ -19,10 +19,10 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/customer/address-setup")({
   head: () => ({
     meta: [
-      { title: "Add your delivery address — FlashBasket" },
+      { title: "Add your delivery address — AP Mart" },
       {
         name: "description",
-        content: "Add your delivery location so FlashBasket can show products available in your area.",
+        content: "Add your delivery location so AP Mart can show products available in your area.",
       },
     ],
   }),

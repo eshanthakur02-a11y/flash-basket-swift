@@ -6,10 +6,10 @@ import { AuthRequired } from "@/components/AuthRequired";
 export const Route = createFileRoute("/cart")({
   head: () => ({
     meta: [
-      { title: "Your cart — FlashBasket" },
-      { name: "description", content: "Review the groceries in your FlashBasket cart and check out in minutes." },
-      { property: "og:title", content: "Your cart — FlashBasket" },
-      { property: "og:description", content: "Review the groceries in your FlashBasket cart and check out in minutes." },
+      { title: "Your cart — AP Mart" },
+      { name: "description", content: "Review the groceries in your AP Mart cart and check out in minutes." },
+      { property: "og:title", content: "Your cart — AP Mart" },
+      { property: "og:description", content: "Review the groceries in your AP Mart cart and check out in minutes." },
     ],
   }),
   component: CartGate,

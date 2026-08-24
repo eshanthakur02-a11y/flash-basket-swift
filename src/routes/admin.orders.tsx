@@ -13,10 +13,10 @@ import { ImageOff, MapPin, Phone, Search, Store, Truck, User } from "lucide-reac
 export const Route = createFileRoute("/admin/orders")({
   head: () => ({
     meta: [
-      { title: "All orders — FlashBasket Admin" },
+      { title: "All orders — AP Mart Admin" },
       { name: "description", content: "Complete marketplace order visibility: customers, shops, riders, products and payments." },
-      { property: "og:title", content: "All orders — FlashBasket Admin" },
-      { property: "og:description", content: "Complete marketplace order visibility for FlashBasket admins." },
+      { property: "og:title", content: "All orders — AP Mart Admin" },
+      { property: "og:description", content: "Complete marketplace order visibility for AP Mart admins." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

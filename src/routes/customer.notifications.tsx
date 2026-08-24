@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/customer/notifications")({
-  head: () => ({ meta: [{ title: "Notifications — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Notifications — AP Mart" }] }),
   component: NotificationsPage,
 });
 

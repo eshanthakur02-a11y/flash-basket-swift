@@ -6,7 +6,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useCustomerProducts } from "@/hooks/useCustomerProducts";
 
 export const Route = createFileRoute("/customer/wishlist")({
-  head: () => ({ meta: [{ title: "Favourites — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Favourites — AP Mart" }] }),
   component: WishlistPage,
 });
 

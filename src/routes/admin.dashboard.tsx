@@ -9,7 +9,7 @@ import { ADMIN_NAV as NAV } from "@/lib/adminNav";
 
 
 export const Route = createFileRoute("/admin/dashboard")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Admin Dashboard — AP Mart" }] }),
   component: Page,
 });
 

@@ -6,9 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/super-admin/health")({
   head: () => ({
     meta: [
-      { title: "Database Health & Backups — FlashBasket" },
-      { name: "description", content: "Table volumes, recent write activity and backup guidance for the FlashBasket platform." },
-      { property: "og:title", content: "Database Health & Backups — FlashBasket" },
+      { title: "Database Health & Backups — AP Mart" },
+      { name: "description", content: "Table volumes, recent write activity and backup guidance for the AP Mart platform." },
+      { property: "og:title", content: "Database Health & Backups — AP Mart" },
       { property: "og:description", content: "Database health and backup overview." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -13,7 +13,7 @@ import { TICKET_CATEGORIES } from "@/components/SupportTicketForm";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/support/tickets")({
-  head: () => ({ meta: [{ title: "Support Tickets — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Support Tickets — AP Mart" }] }),
   component: Page,
 });
 

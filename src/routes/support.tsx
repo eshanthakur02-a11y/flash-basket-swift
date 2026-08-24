@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { RoleHeader } from "@/components/RoleHeader";
 
 export const Route = createFileRoute("/support")({
-  head: () => ({ meta: [{ title: "Support — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Support — AP Mart" }] }),
   component: SupportShell,
 });
 

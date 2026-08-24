@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/customer/apply")({
-  head: () => ({ meta: [{ title: "Become a partner — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Become a partner — AP Mart" }] }),
   component: ApplyPage,
 });
 
@@ -61,7 +61,7 @@ function ApplyPage() {
       <Link to="/customer/profile" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4"/> Back</Link>
       <div>
         <h1 className="font-display text-2xl font-extrabold">Become a partner</h1>
-        <p className="text-sm text-muted-foreground mt-1">Apply to operate a shop or deliver orders on FlashBasket. An admin will review your request.</p>
+        <p className="text-sm text-muted-foreground mt-1">Apply to operate a shop or deliver orders on AP Mart. An admin will review your request.</p>
       </div>
 
       {/* Status of existing requests */}

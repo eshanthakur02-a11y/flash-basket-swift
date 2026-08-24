@@ -8,7 +8,7 @@ import { Plus } from "lucide-react";
 import { SupportTicketForm } from "@/components/SupportTicketForm";
 
 export const Route = createFileRoute("/support/my-tickets")({
-  head: () => ({ meta: [{ title: "My Tickets — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "My Tickets — AP Mart" }] }),
   component: Page,
 });
 

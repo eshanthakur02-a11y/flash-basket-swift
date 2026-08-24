@@ -14,7 +14,7 @@ import { NoShopsNotice } from "@/components/customer/NoShopsNotice";
 export const Route = createFileRoute("/customer/home")({
   head: () => ({
     meta: [
-      { title: "FlashBasket — 10-min grocery delivery" },
+      { title: "AP Mart — 10-min grocery delivery" },
       { name: "description", content: "Fresh groceries, snacks and daily essentials delivered to your door in 10 minutes." },
     ],
   }),
@@ -115,7 +115,7 @@ function CustomerHome() {
 
       {/* Bottom safe area is handled by parent pb-32 + floating cart */}
       <div className="px-4 pt-2 text-center text-[11px] text-muted-foreground">
-        FlashBasket · Delivered with ⚡
+        AP Mart · Delivered with ⚡
       </div>
     </motion.div>
   );

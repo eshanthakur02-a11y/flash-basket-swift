@@ -6,9 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/super-admin/audit")({
   head: () => ({
     meta: [
-      { title: "Security Audit Log — FlashBasket Super Admin" },
-      { name: "description", content: "Immutable record of every role change, suspension and privileged action on FlashBasket." },
-      { property: "og:title", content: "Security Audit Log — FlashBasket Super Admin" },
+      { title: "Security Audit Log — AP Mart Super Admin" },
+      { name: "description", content: "Immutable record of every role change, suspension and privileged action on AP Mart." },
+      { property: "og:title", content: "Security Audit Log — AP Mart Super Admin" },
       { property: "og:description", content: "Immutable record of every privileged action on the platform." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

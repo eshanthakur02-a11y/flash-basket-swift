@@ -7,7 +7,7 @@ import { rupees } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/customer/orders/")({
-  head: () => ({ meta: [{ title: "Orders — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Orders — AP Mart" }] }),
   component: AppOrders,
 });
 

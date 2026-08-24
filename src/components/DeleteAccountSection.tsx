@@ -76,7 +76,7 @@ export function DeleteAccountSection({ className = "" }: { className?: string })
         <AlertTriangle className="h-5 w-5" /> Danger zone
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Permanently delete your FlashBasket account and personal data. This cannot be undone.
+        Permanently delete your AP Mart account and personal data. This cannot be undone.
       </p>
       <Button variant="destructive" className="mt-4 rounded-xl" onClick={openDialog}>
         <Trash2 className="h-4 w-4 mr-2" /> Delete Account

@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/super-admin")({
-  head: () => ({ meta: [{ title: "Super Admin — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Super Admin — AP Mart" }] }),
   component: SuperAdminShell,
 });
 

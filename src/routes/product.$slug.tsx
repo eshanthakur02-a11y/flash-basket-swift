@@ -21,7 +21,7 @@ import {
 
 
 export const Route = createFileRoute("/product/$slug")({
-  head: ({ params }) => ({ meta: [{ title: `${params.slug} — FlashBasket` }] }),
+  head: ({ params }) => ({ meta: [{ title: `${params.slug} — AP Mart` }] }),
   component: ProductPage,
 });
 

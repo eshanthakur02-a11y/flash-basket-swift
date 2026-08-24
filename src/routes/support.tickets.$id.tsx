@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { rupees } from "@/lib/format";
 
 export const Route = createFileRoute("/support/tickets/$id")({
-  head: () => ({ meta: [{ title: "Ticket — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Ticket — AP Mart" }] }),
   component: Page,
 });
 

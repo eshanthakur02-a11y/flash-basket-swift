@@ -17,7 +17,7 @@ export const Route = createFileRoute("/signup")({
       ? { next: search.next }
       : {},
 
-  head: () => ({ meta: [{ title: "Create account — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Create account — AP Mart" }] }),
   component: SignupPage,
 });
 
@@ -85,7 +85,7 @@ function SignupPage() {
       <div className="w-full max-w-md">
         <Link to="/" className="flex justify-center mb-6"><Logo /></Link>
         <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-card">
-          <h1 className="font-display text-3xl font-extrabold">Join FlashBasket</h1>
+          <h1 className="font-display text-3xl font-extrabold">Join AP Mart</h1>
           <p className="text-sm text-muted-foreground mt-1">Create your account to start ordering.</p>
 
           <Button type="button" variant="outline" onClick={handleGoogle} className="w-full h-11 rounded-xl font-bold gap-2 mt-5">

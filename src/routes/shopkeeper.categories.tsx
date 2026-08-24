@@ -28,7 +28,7 @@ function AccessDenied() {
         </div>
         <h1 className="font-display text-2xl font-extrabold">403 — Access Denied</h1>
         <p className="text-sm text-muted-foreground">
-          Category management is handled by the FlashBasket admin team. You can select existing
+          Category management is handled by the AP Mart admin team. You can select existing
           categories while adding or editing products.
         </p>
         <Button

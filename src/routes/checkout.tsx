@@ -22,7 +22,7 @@ import { useDeliveryContext } from "@/hooks/useDeliveryContext";
 import { AuthRequired } from "@/components/AuthRequired";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Checkout — AP Mart" }] }),
   component: CheckoutPage,
 });
 

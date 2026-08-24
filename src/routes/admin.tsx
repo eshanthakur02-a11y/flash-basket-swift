@@ -18,7 +18,7 @@ const SWIPE_PAGES = [
 ] as const;
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Admin — AP Mart" }] }),
   component: AdminShell,
 });
 

@@ -14,7 +14,7 @@ import { Truck, Activity, BarChart3, Users, Star, UserCog, X, Clock } from "luci
 import { partnerStatusMeta, timeAgo } from "@/lib/partnerStatus";
 
 export const Route = createFileRoute("/shopkeeper/delivery")({
-  head: () => ({ meta: [{ title: "Delivery — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Delivery — AP Mart" }] }),
   component: Page,
 });
 

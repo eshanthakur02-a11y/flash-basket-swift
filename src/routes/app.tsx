@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
-  head: () => ({ meta: [{ title: "Open App — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Open App — AP Mart" }] }),
   component: AppEntry,
 });
 

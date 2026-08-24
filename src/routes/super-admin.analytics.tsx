@@ -6,9 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/super-admin/analytics")({
   head: () => ({
     meta: [
-      { title: "Revenue & Global Analytics — FlashBasket" },
-      { name: "description", content: "Platform-wide revenue, order volume and growth analytics for FlashBasket system owners." },
-      { property: "og:title", content: "Revenue & Global Analytics — FlashBasket" },
+      { title: "Revenue & Global Analytics — AP Mart" },
+      { name: "description", content: "Platform-wide revenue, order volume and growth analytics for AP Mart system owners." },
+      { property: "og:title", content: "Revenue & Global Analytics — AP Mart" },
       { property: "og:description", content: "Platform-wide revenue and order analytics." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

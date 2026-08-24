@@ -7,10 +7,10 @@ import { getIntegrationStatus } from "@/lib/superadmin.functions";
 export const Route = createFileRoute("/super-admin/integrations")({
   head: () => ({
     meta: [
-      { title: "API Keys & Integrations — FlashBasket" },
+      { title: "API Keys & Integrations — AP Mart" },
       { name: "description", content: "Configuration status for payments, maps, messaging and AI integrations." },
-      { property: "og:title", content: "API Keys & Integrations — FlashBasket" },
-      { property: "og:description", content: "Integration credential status for FlashBasket." },
+      { property: "og:title", content: "API Keys & Integrations — AP Mart" },
+      { property: "og:description", content: "Integration credential status for AP Mart." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

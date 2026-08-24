@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCustomerProducts } from "@/hooks/useCustomerProducts";
 
 export const Route = createFileRoute("/favourites")({
-  head: () => ({ meta: [{ title: "Favourites — FlashBasket" }] }),
+  head: () => ({ meta: [{ title: "Favourites — AP Mart" }] }),
   component: FavouritesPage,
 });
 

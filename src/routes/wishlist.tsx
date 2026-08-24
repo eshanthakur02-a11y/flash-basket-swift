@@ -6,10 +6,10 @@ import { AuthRequired } from "@/components/AuthRequired";
 export const Route = createFileRoute("/wishlist")({
   head: () => ({
     meta: [
-      { title: "Your favourites — FlashBasket" },
-      { name: "description", content: "All the FlashBasket products you saved for later, in one place." },
-      { property: "og:title", content: "Your favourites — FlashBasket" },
-      { property: "og:description", content: "All the FlashBasket products you saved for later, in one place." },
+      { title: "Your favourites — AP Mart" },
+      { name: "description", content: "All the AP Mart products you saved for later, in one place." },
+      { property: "og:title", content: "Your favourites — AP Mart" },
+      { property: "og:description", content: "All the AP Mart products you saved for later, in one place." },
     ],
   }),
   component: WishlistGate,

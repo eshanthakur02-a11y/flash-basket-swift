@@ -16,16 +16,16 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export const Route = createFileRoute("/admin/categories")({
   head: () => ({
     meta: [
-      { title: "Categories & Subcategories — FlashBasket Admin" },
+      { title: "Categories & Subcategories — AP Mart Admin" },
       {
         name: "description",
         content:
-          "Admin control for the FlashBasket category hierarchy: categories, subcategories, images, display order and visibility.",
+          "Admin control for the AP Mart category hierarchy: categories, subcategories, images, display order and visibility.",
       },
-      { property: "og:title", content: "Categories & Subcategories — FlashBasket Admin" },
+      { property: "og:title", content: "Categories & Subcategories — AP Mart Admin" },
       {
         property: "og:description",
-        content: "Manage the FlashBasket category and subcategory hierarchy.",
+        content: "Manage the AP Mart category and subcategory hierarchy.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

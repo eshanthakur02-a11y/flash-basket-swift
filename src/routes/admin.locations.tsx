@@ -16,9 +16,9 @@ import { isValidPincode, normalizePincode, normalizePlace } from "@/lib/pincode"
 export const Route = createFileRoute("/admin/locations")({
   head: () => ({
     meta: [
-      { title: "Serviceable Locations — FlashBasket Admin" },
-      { name: "description", content: "Manage the states, cities and PIN codes FlashBasket delivers to." },
-      { property: "og:title", content: "Serviceable Locations — FlashBasket Admin" },
+      { title: "Serviceable Locations — AP Mart Admin" },
+      { name: "description", content: "Manage the states, cities and PIN codes AP Mart delivers to." },
+      { property: "og:title", content: "Serviceable Locations — AP Mart Admin" },
       { property: "og:description", content: "Add, deactivate or remove delivery locations by state, city and PIN code." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
