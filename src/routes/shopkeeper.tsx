@@ -1,12 +1,13 @@
 import { createFileRoute, Link, Navigate, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Megaphone, Menu, Truck, Star, Settings, Zap, Ticket, LifeBuoy } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Package, Wallet, User, Bell, Megaphone, Menu, Truck, Star, Settings, Ticket, LifeBuoy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { RoleHeader } from "@/components/RoleHeader";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { LogoMark } from "@/components/Logo";
 
 export const Route = createFileRoute("/shopkeeper")({
   head: () => ({ meta: [{ title: "Shopkeeper — AP Mart" }] }),
@@ -72,9 +73,7 @@ function ShopkeeperShell() {
             <SwipeableSheetContent onClose={() => setOpen(false)}>
               <SheetHeader className="p-4 border-b border-border">
                 <SheetTitle className="flex items-center gap-2 font-display font-extrabold">
-                  <span className="grid h-7 w-7 place-items-center rounded-full gradient-primary text-primary-foreground">
-                    <Zap className="h-3.5 w-3.5 fill-current" />
-                  </span>
+                  <LogoMark size="xs" className="h-7 w-7 rounded-full" />
                   Shop Menu
                 </SheetTitle>
               </SheetHeader>

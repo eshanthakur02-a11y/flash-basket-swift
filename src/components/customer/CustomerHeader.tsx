@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { LogoMark } from "@/components/Logo";
 
 export function CustomerHeader() {
   const { user } = useAuth();
@@ -32,6 +33,9 @@ export function CustomerHeader() {
       {/* Top bar — location + actions */}
       <div className="gradient-location text-primary-foreground">
         <div className="px-4 pt-3 pb-3 flex items-center gap-3">
+          <Link to="/customer/home" aria-label="AP Mart home" className="shrink-0">
+            <LogoMark size="xs" className="h-8 w-8 rounded-lg bg-white/90 p-0.5 shadow-none" />
+          </Link>
           <Link to="/customer/profile" className="flex-1 min-w-0 flex items-start gap-2">
             <MapPin className="h-5 w-5 mt-0.5 shrink-0 fill-white/30" />
             <div className="min-w-0">
