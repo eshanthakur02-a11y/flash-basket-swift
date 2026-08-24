@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Search, Shield, User, Zap } from "lucide-react";
+import { LogOut, Search, Shield, User } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
-import {
 import { LogoMark } from "@/components/Logo";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
