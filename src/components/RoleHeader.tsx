@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import {
+import { LogoMark } from "@/components/Logo";
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -37,9 +38,7 @@ export function RoleHeader({ homeTo, accountTo, searchTo = "/products", showSear
       <div className="flex items-center gap-3 px-4 py-3">
         {leading}
         <Link to={homeTo as any} className="flex items-center gap-2 font-display font-extrabold text-lg">
-          <span className="grid h-8 w-8 place-items-center rounded-full gradient-primary text-primary-foreground shadow-glow">
-            <Zap className="h-4 w-4 fill-current" />
-          </span>
+          <LogoMark size="sm" className="h-8 w-8 rounded-full" />
           AP <span className="text-primary">Mart</span>
         </Link>
         <div className="flex-1" />

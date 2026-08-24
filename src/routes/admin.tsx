@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { RoleHeader } from "@/components/RoleHeader";
 import { ADMIN_NAV_GROUPS, isAdminNavActive } from "@/lib/adminNav";
+import { LogoMark } from "@/components/Logo";
 
 const SWIPE_PAGES = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -97,9 +98,7 @@ function AdminShell() {
             <SwipeableSheetContent onClose={() => setOpen(false)}>
               <SheetHeader className="p-4 border-b border-border">
                 <SheetTitle className="flex items-center gap-2 font-display font-extrabold">
-                  <span className="grid h-7 w-7 place-items-center rounded-full gradient-primary text-primary-foreground">
-                    <Zap className="h-3.5 w-3.5 fill-current" />
-                  </span>
+                  <LogoMark size="xs" className="h-7 w-7 rounded-full" />
                   Admin Menu
                 </SheetTitle>
               </SheetHeader>
