@@ -46,8 +46,6 @@ const TECH = [
   "PostgreSQL",
   "Supabase Authentication",
   "Supabase Storage",
-  "AI services",
-  "n8n automation where configured",
 ];
 
 function AboutPage() {
