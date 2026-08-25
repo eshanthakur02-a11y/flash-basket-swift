@@ -127,32 +127,46 @@ function Page() {
   });
 
 
+  // Multi-shop child orders must use the child-aware RPCs so the parent order
+  // (the one the customer tracks) gets its status rolled up correctly.
+  const isChildOrder = (id: string) =>
+    !!(orders.data ?? []).find((o: any) => o.id === id)?.parent_order_id;
+
   const accept = async (id: string) => {
+    const child = isChildOrder(id);
     await runOptimistic({
       qc,
       keys: [["shop-orders", shopId]],
       updater: patchRow(id, { status: "accepted_by_shop" }),
-      request: () => supabase.rpc("shop_accept_order", { _order_id: id }),
+      request: () =>
+        (supabase.rpc as any)(child ? "shop_accept_child" : "shop_accept_order",
+          child ? { _child_id: id, _prep_minutes: 15 } : { _order_id: id }),
       success: "Order accepted",
     });
   };
   const reject = async (id: string) => {
     const reason = window.prompt("Reason for rejecting this order? (optional)") ?? null;
+    const child = isChildOrder(id);
     await runOptimistic({
       qc,
       keys: [["shop-orders", shopId]],
       // rejected orders leave this shop's queue immediately
       updater: removeRow(id),
-      request: () => (supabase.rpc as any)("shop_reject_order", { _order_id: id, _reason: reason }),
+      request: () =>
+        (supabase.rpc as any)(child ? "shop_reject_child" : "shop_reject_order",
+          child ? { _child_id: id, _reason: reason } : { _order_id: id, _reason: reason }),
       success: "Order rejected — re-routing to next shop",
     });
   };
   const pack = async (id: string) => {
+    const child = isChildOrder(id);
     await runOptimistic({
       qc,
       keys: [["shop-orders", shopId]],
       updater: patchRow(id, { status: "packed" }),
-      request: () => supabase.rpc("shop_mark_packed", { _order_id: id }),
+      request: () =>
+        (supabase.rpc as any)(child ? "shop_mark_child_ready" : "shop_mark_packed",
+          child ? { _child_id: id } : { _order_id: id }),
       success: "Marked packed",
     });
   };
