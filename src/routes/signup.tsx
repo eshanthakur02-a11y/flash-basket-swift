@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocations, deriveLocationOptions } from "@/hooks/useLocations";
-import { lovable } from "@/integrations/lovable";
+import { signInWithGoogle } from "@/lib/googleAuth";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 
