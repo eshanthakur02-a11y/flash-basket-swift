@@ -2407,6 +2407,30 @@ export type Database = {
     Functions: {
       account_deletion_check: { Args: never; Returns: Json }
       actor_role_label: { Args: never; Returns: string }
+      add_to_cart: {
+        Args: {
+          p_product_id: string
+          p_qty?: number
+          p_shop_id?: string
+          p_variant_id?: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+          shop_id: string | null
+          updated_at: string
+          user_id: string
+          variant_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cart_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_approve_delivery_request: {
         Args: {
           _name?: string
