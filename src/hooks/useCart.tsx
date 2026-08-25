@@ -166,30 +166,16 @@ export function useCart() {
       }
 
       const effectiveShopId = shopId ?? currentShopId;
-      const existing = force
-        ? undefined
-        : items.find(
-            (l) =>
-              l.product_id === productId &&
-              (l.variant_id ?? null) === (variantId ?? null) &&
-              (l.shop_id ?? null) === (effectiveShopId ?? null),
-          );
-      if (existing) {
-        const { error } = await supabase
-          .from("cart_items")
-          .update({ quantity: existing.quantity + qty })
-          .eq("id", existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await (supabase as any).from("cart_items").insert({
-          user_id: user.id,
-          product_id: productId,
-          variant_id: variantId,
-          shop_id: effectiveShopId,
-          quantity: qty,
-        });
-        if (error) throw error;
-      }
+      // Atomic server-side upsert: one row per (user, product). Concurrent
+      // clicks or a stale local cache can never produce duplicate rows or
+      // lost increments — the database resolves the conflict itself.
+      const { error } = await (supabase as any).rpc("add_to_cart", {
+        p_product_id: productId,
+        p_qty: qty,
+        p_variant_id: variantId ?? null,
+        p_shop_id: effectiveShopId ?? null,
+      });
+      if (error) throw error;
     },
     // Optimistic: bump the quantity of an existing line right away so the
     // quantity stepper / cart badge react instantly.
