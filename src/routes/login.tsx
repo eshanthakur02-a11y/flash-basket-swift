@@ -7,7 +7,7 @@ import { Eye, EyeOff, Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { PhoneOtpForm } from "@/components/PhoneOtpForm";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { signInWithGoogle } from "@/lib/googleAuth";
 import { toast } from "sonner";
 import { LogoMark } from "@/components/Logo";
 import { cn } from "@/lib/utils";
